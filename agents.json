@@ -1,0 +1,5 @@
+{"paths": ["."],
+ "agents": {"agent_1": "navigator.agents.agent_1_2:handle", "agent_2": "navigator.agents.agent_1_2:handle",
+            "agent_3": "navigator.agents.agent_3_4_5.agent_3:handle", "agent_4": "navigator.agents.agent_3_4_5.agent_4:handle", "agent_5": "navigator.agents.agent_3_4_5.agent_5:handle",
+            "agent_6": "navigator.agents.agent_6_7_8_10.agent_6_7_8_10:handle", "agent_7": "navigator.agents.agent_6_7_8_10.agent_6_7_8_10:handle",
+            "agent_8": "navigator.agents.agent_6_7_8_10.agent_6_7_8_10:handle", "agent_10": "navigator.agents.agent_6_7_8_10.agent_6_7_8_10:handle"}}

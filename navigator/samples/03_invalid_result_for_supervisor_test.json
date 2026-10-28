@@ -1,0 +1,28 @@
+{
+  "_comment": "Deliberately broken result for the Supervisor demo on Oct 23. Expected: rejected with UNKNOWN_ENUM (category 'housing') and IDENTITY_MISMATCH (request_id), never treated as success.",
+  "request_id": "req-9999",
+  "run_id": "run-0001",
+  "case_id": "case-demo-001",
+  "case_version": 1,
+  "correlation_id": "corr-0001",
+  "agent_id": "agent_1",
+  "schema_version": "1.0",
+  "status": "completed",
+  "is_mock": true,
+  "generated_at": "2026-10-21T12:00:00-06:00",
+  "result": {
+    "proposed_needs": [
+      {
+        "need_id": "need_001",
+        "category": "housing",
+        "description": "Rent",
+        "confirmation_status": "proposed",
+        "user_reported": true,
+        "urgency": "high"
+      }
+    ]
+  },
+  "issues": [],
+  "clarification_requests": [],
+  "evidence_refs": []
+}
