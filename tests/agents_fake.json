@@ -1,0 +1,5 @@
+{"paths": [".."],
+ "agents": {"agent_1": "tests.fake_agents:agent_1", "agent_3": "tests.fake_agents:agent_3",
+            "agent_4": "tests.fake_agents:agent_4", "agent_5": "tests.fake_agents:agent_5",
+            "agent_6": "tests.fake_agents:agent_6", "agent_8": "tests.fake_agents:agent_8",
+            "agent_10": "tests.fake_agents:agent_10_pass"}}

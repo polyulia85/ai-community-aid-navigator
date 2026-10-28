@@ -1,0 +1,422 @@
+{
+  "fixture_id": "FX-A6-SAC-001",
+  "contract_version": "1.0",
+  "is_mock": true,
+  "description": "Mock input for Agent 6 (Action Planning & Prioritization) built from the shared Sacramento case (SHARED_CONTRACTS v0.1, Section 6). Upstream results of Agents 4, 5 and 7 are mocks. All programs are placeholders (MOCK-*), not real Sacramento programs; all URLs are example.org; all dates except the user's rent date are synthetic.",
+  "covers_tests": [
+    {
+      "test_id": "H1",
+      "name": "Unknown income",
+      "setup": "Current income was never stated. MOCK-FOOD-01 match_status = insufficient_information, missing_case_facts = [current_monthly_income].",
+      "expected_agent6": "Keeps the food action (does not drop it, does not treat unknown income as a mismatch); uncertainty_notes says income must be confirmed with the provider; no eligibility wording.",
+      "expected_agent10": "PASS for the food card if it contains a provider-check step and no 'you qualify' wording."
+    },
+    {
+      "test_id": "H2",
+      "name": "Conflicting official deadline",
+      "setup": "MOCK-RENT-01 has two official sources with different application deadlines (2026-10-30 vs 2026-11-06), both verification_status = conflicting; Agent 7 finding Q2 (critical).",
+      "expected_agent6": "official_deadline = null for the rent action (no silent choice of one date); both dates and 'confirm with the provider' in uncertainty_notes; the user's rent date 2026-11-01 stays user_target_date, never official_deadline.",
+      "expected_agent10": "PASS for the rent card only if both dates are visible with a provider-confirmation step; FLAG V5 if one date is chosen silently; FLAG V9 if 2026-11-01 is shown as an official deadline."
+    },
+    {
+      "test_id": "H3",
+      "name": "Unsupported guarantee in one card",
+      "setup": "Not part of the Agent 6 input. Covered by 05_agent10_fixture_mixed_plan.json (Agent 10 stage).",
+      "expected_agent6": "n/a",
+      "expected_agent10": "FLAG V1 on that card only; other valid cards listed in passed_card_ids."
+    }
+  ],
+  "agent6_request": {
+    "request_id": "req_a6_001",
+    "run_id": "run_sac_001",
+    "case_id": "case_sac_001",
+    "case_version": 2,
+    "schema_version": "1.0",
+    "role_id": "agent_6",
+    "task_type": "prioritize_actions",
+    "task_scope": "all_needs",
+    "correlation_id": "corr_sac_001",
+    "upstream_result_refs": [
+      "req_a4_001",
+      "req_a5_001",
+      "req_a7_verification_001"
+    ],
+    "source_policy": "verified_kb_only",
+    "allowed_case_facts": [
+      {
+        "fact_id": "fact_001",
+        "field": "zip_code",
+        "value": "95823",
+        "confirmation_status": "confirmed",
+        "source": "user_confirmed",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_002",
+        "field": "household_size",
+        "value": 3,
+        "confirmation_status": "confirmed",
+        "source": "user_confirmed",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_003",
+        "field": "children_ages",
+        "value": [
+          6,
+          9
+        ],
+        "confirmation_status": "confirmed",
+        "source": "user_confirmed",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_004",
+        "field": "employment_status",
+        "value": "laid_off",
+        "confirmation_status": "confirmed",
+        "source": "user_confirmed",
+        "time_context": "last day: last Friday"
+      },
+      {
+        "fact_id": "fact_005",
+        "field": "rent_amount_monthly",
+        "value": 1450,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_006",
+        "field": "rent_due_date",
+        "value": "2026-11-01",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "user-stated date, not an official deadline"
+      },
+      {
+        "fact_id": "fact_007",
+        "field": "cash_on_hand_approx",
+        "value": 300,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "approximate, at time of story"
+      }
+    ],
+    "payload": {
+      "needs": [
+        {
+          "need_id": "need_001",
+          "category": "income_assistance",
+          "subcategory": "unemployment_insurance",
+          "description": "Lost warehouse job last Friday; needs income replacement",
+          "original_quote": "I was laid off from my warehouse job last Friday.",
+          "confirmation_status": "confirmed",
+          "user_reported": true,
+          "urgency": "high",
+          "urgency_reason": "No income since job loss",
+          "user_priority": null
+        },
+        {
+          "need_id": "need_002",
+          "category": "housing_assistance",
+          "subcategory": "rental_assistance",
+          "description": "Cannot pay rent due November 1",
+          "original_quote": "Rent of $1,450 is due on November 1 and I only have about $300 left.",
+          "confirmation_status": "confirmed",
+          "user_reported": true,
+          "urgency": "immediate",
+          "urgency_reason": "User-stated rent date is close and cash on hand is far below rent",
+          "user_priority": null
+        },
+        {
+          "need_id": "need_003",
+          "category": "food_assistance",
+          "subcategory": "calfresh_benefits",
+          "description": "Running low on food this week",
+          "original_quote": "We're also running low on food this week.",
+          "confirmation_status": "confirmed",
+          "user_reported": true,
+          "urgency": "immediate",
+          "urgency_reason": "User says food runs low this week",
+          "user_priority": null
+        }
+      ],
+      "candidate_programs": [
+        {
+          "program_id": "MOCK-UI-01",
+          "matched_need_ids": [
+            "need_001"
+          ],
+          "retrieval_reason": "Mock: income replacement after job loss",
+          "source_refs": [
+            "EV-MOCK-001"
+          ],
+          "missing_fields": [
+            "processing_time"
+          ]
+        },
+        {
+          "program_id": "MOCK-RENT-01",
+          "matched_need_ids": [
+            "need_002"
+          ],
+          "retrieval_reason": "Mock: rental assistance in the county",
+          "source_refs": [
+            "EV-MOCK-002",
+            "EV-MOCK-003",
+            "EV-MOCK-004"
+          ],
+          "missing_fields": []
+        },
+        {
+          "program_id": "MOCK-FOOD-01",
+          "matched_need_ids": [
+            "need_003"
+          ],
+          "retrieval_reason": "Mock: food benefits for households with children",
+          "source_refs": [
+            "EV-MOCK-005"
+          ],
+          "missing_fields": [
+            "processing_time"
+          ]
+        }
+      ],
+      "matches": [
+        {
+          "program_id": "MOCK-UI-01",
+          "need_ids": [
+            "need_001"
+          ],
+          "match_status": "supported_match",
+          "matched_criteria": [
+            "recent job loss through no fault of own (user-stated)"
+          ],
+          "missing_case_facts": [],
+          "mismatch_criteria": [],
+          "evidence_refs": [
+            "EV-MOCK-001"
+          ],
+          "explanation": "Mock: job loss criterion supported by the user's statement; final decision is made by the agency."
+        },
+        {
+          "program_id": "MOCK-RENT-01",
+          "need_ids": [
+            "need_002"
+          ],
+          "match_status": "potential_match",
+          "matched_criteria": [
+            "county of residence by ZIP"
+          ],
+          "missing_case_facts": [
+            "landlord_notice_exists"
+          ],
+          "mismatch_criteria": [],
+          "evidence_refs": [
+            "EV-MOCK-002"
+          ],
+          "explanation": "Mock: geography fits; whether a landlord notice exists is unknown."
+        },
+        {
+          "program_id": "MOCK-FOOD-01",
+          "need_ids": [
+            "need_003"
+          ],
+          "match_status": "insufficient_information",
+          "matched_criteria": [
+            "household with children (user-stated)"
+          ],
+          "missing_case_facts": [
+            "current_monthly_income"
+          ],
+          "mismatch_criteria": [],
+          "evidence_refs": [
+            "EV-MOCK-005"
+          ],
+          "explanation": "Mock: income limit applies; current income unknown, so no match or mismatch can be stated. Test H1."
+        }
+      ],
+      "checked_claims": [
+        {
+          "program_id": "MOCK-UI-01",
+          "field_path": "application_method[0]",
+          "claim_value": "online application (mock)",
+          "verification_status": "verified",
+          "evidence_refs": [
+            "EV-MOCK-001"
+          ],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": null
+        },
+        {
+          "program_id": "MOCK-UI-01",
+          "field_path": "processing_time",
+          "claim_value": null,
+          "verification_status": "unverified",
+          "evidence_refs": [],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": "No published processing time found in mock evidence"
+        },
+        {
+          "program_id": "MOCK-RENT-01",
+          "field_path": "deadlines[0]",
+          "claim_value": "2026-10-30",
+          "verification_status": "conflicting",
+          "evidence_refs": [
+            "EV-MOCK-003"
+          ],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": "Conflicts with EV-MOCK-004. Test H2."
+        },
+        {
+          "program_id": "MOCK-RENT-01",
+          "field_path": "deadlines[0]",
+          "claim_value": "2026-11-06",
+          "verification_status": "conflicting",
+          "evidence_refs": [
+            "EV-MOCK-004"
+          ],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": "Conflicts with EV-MOCK-003. Test H2."
+        },
+        {
+          "program_id": "MOCK-FOOD-01",
+          "field_path": "eligibility_criteria[0]",
+          "claim_value": "gross income limit applies (mock value withheld)",
+          "verification_status": "verified",
+          "evidence_refs": [
+            "EV-MOCK-005"
+          ],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": null
+        }
+      ],
+      "program_availability": [
+        {
+          "program_id": "MOCK-UI-01",
+          "availability": "confirmed_open",
+          "evidence_refs": [
+            "EV-MOCK-001"
+          ]
+        },
+        {
+          "program_id": "MOCK-RENT-01",
+          "availability": "unknown",
+          "evidence_refs": []
+        },
+        {
+          "program_id": "MOCK-FOOD-01",
+          "availability": "confirmed_open",
+          "evidence_refs": [
+            "EV-MOCK-005"
+          ]
+        }
+      ],
+      "timing": [
+        {
+          "need_id": "need_001",
+          "program_id": "MOCK-UI-01",
+          "official_deadline": null,
+          "user_target_date": null,
+          "estimated_processing_time": null
+        },
+        {
+          "need_id": "need_002",
+          "program_id": "MOCK-RENT-01",
+          "official_deadline": null,
+          "user_target_date": "2026-11-01",
+          "estimated_processing_time": null
+        },
+        {
+          "need_id": "need_003",
+          "program_id": "MOCK-FOOD-01",
+          "official_deadline": null,
+          "user_target_date": null,
+          "estimated_processing_time": null
+        }
+      ],
+      "evidence_records": [
+        {
+          "evidence_id": "EV-MOCK-001",
+          "program_id": "MOCK-UI-01",
+          "field_path": "application_method[0]",
+          "claim_value": "online application (mock)",
+          "source_url": "https://example.org/mock/ui-01",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "verified"
+        },
+        {
+          "evidence_id": "EV-MOCK-002",
+          "program_id": "MOCK-RENT-01",
+          "field_path": "geography[0]",
+          "claim_value": "Sacramento County (mock)",
+          "source_url": "https://example.org/mock/rent-01",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "verified"
+        },
+        {
+          "evidence_id": "EV-MOCK-003",
+          "program_id": "MOCK-RENT-01",
+          "field_path": "deadlines[0]",
+          "claim_value": "2026-10-30",
+          "source_url": "https://example.org/mock/rent-01/program-page",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "conflicting"
+        },
+        {
+          "evidence_id": "EV-MOCK-004",
+          "program_id": "MOCK-RENT-01",
+          "field_path": "deadlines[0]",
+          "claim_value": "2026-11-06",
+          "source_url": "https://example.org/mock/rent-01/faq",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "conflicting"
+        },
+        {
+          "evidence_id": "EV-MOCK-005",
+          "program_id": "MOCK-FOOD-01",
+          "field_path": "eligibility_criteria[0]",
+          "claim_value": "gross income limit applies (mock value withheld)",
+          "source_url": "https://example.org/mock/food-01",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "verified"
+        }
+      ],
+      "agent7_findings": [
+        {
+          "finding_id": "F7-001",
+          "rule_id": "Q2",
+          "severity": "critical",
+          "program_id": "MOCK-RENT-01",
+          "need_id": "need_002",
+          "field_path": "deadlines[0]",
+          "evidence_refs": [
+            "EV-MOCK-003",
+            "EV-MOCK-004"
+          ],
+          "description": "Two official sources give different application deadlines.",
+          "recommended_action": "show_conflict_and_add_provider_confirmation"
+        }
+      ],
+      "issues": []
+    }
+  },
+  "expected_agent6_result_checks": {
+    "status": "completed",
+    "must": [
+      "one or more proposed_actions for each of need_001, need_002, need_003 (no need dropped)",
+      "every action has user_override_allowed = true",
+      "rent action: official_deadline = null; user_target_date = 2026-11-01; uncertainty_notes mention both 2026-10-30 and 2026-11-06",
+      "rent action: rationale or uncertainty_notes say the deadline must be confirmed with the provider before applying (the separate 'confirm, then apply' step is checked on the Agent 8 card, fixture 05 CARD-002)",
+      "food action: uncertainty_notes say income must be confirmed with the provider",
+      "every program_id and evidence_ref used exists in this input"
+    ],
+    "must_not": [
+      "any eligibility wording (you qualify / you are eligible / you will receive)",
+      "a new program, phone number or URL not present in evidence_records",
+      "2026-11-01 placed in official_deadline",
+      "an invented processing time (UI processing_time is unverified)"
+    ]
+  }
+}
