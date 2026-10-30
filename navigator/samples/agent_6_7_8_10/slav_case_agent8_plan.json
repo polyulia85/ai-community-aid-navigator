@@ -1,0 +1,161 @@
+{
+  "request_id": "req_h08",
+  "run_id": "run_sac_001",
+  "case_id": "case_sac_001",
+  "case_version": 2,
+  "correlation_id": "corr_sac_001",
+  "agent_id": "agent_8",
+  "schema_version": "1.0",
+  "status": "completed",
+  "result": {
+    "plan_version": "plan_v1",
+    "action_cards": [
+      {
+        "card_id": "card_01",
+        "source_action_ids": [
+          "act_02"
+        ],
+        "related_need_ids": [
+          "need_002"
+        ],
+        "program_id": "MOCK-RENT-01",
+        "action_title": "Confirm the application deadline",
+        "reason": "The program's published deadline is not clear.",
+        "next_step": "Call or check with the provider which deadline applies.",
+        "priority_reason": "Official sources disagree on the application deadline (October 30, 2026 and November 6, 2026). Confirm which one applies before applying.",
+        "order_group": "first",
+        "dependency_card_ids": [],
+        "source_refs": [
+          "EV-MOCK-003",
+          "EV-MOCK-004"
+        ],
+        "uncertainty_notes": [
+          "Official sources give different deadlines: October 30, 2026 and November 6, 2026. Confirm with the provider which one applies."
+        ],
+        "official_deadline": null,
+        "user_target_date": null,
+        "processing_estimate": null,
+        "progress_status": "not_started"
+      },
+      {
+        "card_id": "card_02",
+        "source_action_ids": [
+          "act_03"
+        ],
+        "related_need_ids": [
+          "need_002"
+        ],
+        "program_id": "MOCK-RENT-01",
+        "action_title": "Ask about rent help",
+        "reason": "This program may be relevant to your situation because it offers help with rent in Sacramento.",
+        "next_step": "Contact the provider to confirm requirements and whether assistance is currently available.",
+        "priority_reason": "Your rent date is close, so contacting this program early gives the most time. You told us your date is November 1, 2026 (your date, not a program deadline).",
+        "order_group": "first",
+        "dependency_card_ids": [
+          "card_01"
+        ],
+        "source_refs": [
+          "EV-MOCK-002"
+        ],
+        "uncertainty_notes": [
+          "Whether you have received a written notice from your landlord is not known yet. Please confirm with the provider; they decide eligibility.",
+          "Current availability of this program is unknown. Confirm with the provider.",
+          "Official sources give different deadlines: October 30, 2026 and November 6, 2026. Confirm with the provider before relying on either."
+        ],
+        "official_deadline": null,
+        "user_target_date": "2026-11-01",
+        "processing_estimate": null,
+        "progress_status": "not_started"
+      },
+      {
+        "card_id": "card_03",
+        "source_action_ids": [
+          "act_04"
+        ],
+        "related_need_ids": [
+          "need_003"
+        ],
+        "program_id": "MOCK-FOOD-01",
+        "action_title": "Check food benefits",
+        "reason": "This program may be relevant to your situation because it provides ongoing help buying food.",
+        "next_step": "Contact the provider or apply through the official site. They decide eligibility based on your household.",
+        "priority_reason": "Food is running low this week, and benefits take time, so starting now helps.",
+        "order_group": "first",
+        "dependency_card_ids": [],
+        "source_refs": [
+          "EV-MOCK-005"
+        ],
+        "uncertainty_notes": [
+          "Your current monthly income is not known yet. Please confirm with the provider; they decide eligibility."
+        ],
+        "official_deadline": null,
+        "user_target_date": null,
+        "processing_estimate": null,
+        "progress_status": "not_started"
+      },
+      {
+        "card_id": "card_04",
+        "source_action_ids": [
+          "act_01"
+        ],
+        "related_need_ids": [
+          "need_001"
+        ],
+        "program_id": "MOCK-UI-01",
+        "action_title": "Apply for unemployment benefits",
+        "reason": "This program may be relevant to your situation because it can replace part of lost wages after a layoff.",
+        "next_step": "Start the online application. Have your last employer's details and last day worked ready.",
+        "priority_reason": "Income replacement supports your other needs, and payments take time to start, so file early.",
+        "order_group": "parallel",
+        "dependency_card_ids": [],
+        "source_refs": [
+          "EV-MOCK-001"
+        ],
+        "uncertainty_notes": [],
+        "official_deadline": null,
+        "user_target_date": null,
+        "processing_estimate": null,
+        "progress_status": "not_started"
+      },
+      {
+        "card_id": "card_05",
+        "source_action_ids": [
+          "act_05"
+        ],
+        "related_need_ids": [
+          "need_001",
+          "need_003"
+        ],
+        "program_id": null,
+        "action_title": "Follow up on your applications",
+        "reason": "Checking in helps you catch any requests for more information.",
+        "next_step": "After applying, watch for letters or messages and respond to any requests for documents.",
+        "priority_reason": "This depends on the applications above being submitted first.",
+        "order_group": "later",
+        "dependency_card_ids": [
+          "card_04",
+          "card_03"
+        ],
+        "source_refs": [],
+        "uncertainty_notes": [],
+        "official_deadline": null,
+        "user_target_date": null,
+        "processing_estimate": null,
+        "progress_status": "not_started"
+      }
+    ],
+    "potential_options": [],
+    "coverage_gaps": []
+  },
+  "issues": [],
+  "clarification_requests": [],
+  "evidence_refs": [
+    "EV-MOCK-001",
+    "EV-MOCK-002",
+    "EV-MOCK-003",
+    "EV-MOCK-004",
+    "EV-MOCK-005"
+  ],
+  "generated_at": "2026-10-30T07:03:50.983953+00:00",
+  "is_mock": true
+}

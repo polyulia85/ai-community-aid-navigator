@@ -1,0 +1,370 @@
+{
+  "fixture_id": "FX-A10-SAC-001",
+  "contract_version": "1.0",
+  "is_mock": true,
+  "description": "Mock Agent 8 plan sent to Agent 10 (copied from Slav's DM, Oct 21). CARD-001 contains an unsupported guarantee and must be flagged alone; CARD-002 and CARD-003 must pass.",
+  "agent10_request": {
+    "request_id": "req_a10_001",
+    "run_id": "run_sac_001",
+    "case_id": "case_sac_001",
+    "case_version": 2,
+    "schema_version": "1.0",
+    "role_id": "agent_10",
+    "task_type": "validate_plan",
+    "correlation_id": "corr_sac_001",
+    "upstream_result_refs": [
+      "req_a8_001",
+      "req_a4_001",
+      "req_a5_001",
+      "req_a7_verification_001"
+    ],
+    "allowed_case_facts": [
+      {
+        "fact_id": "fact_006",
+        "field": "rent_due_date",
+        "value": "2026-11-01",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "user-stated date, not an official deadline"
+      }
+    ],
+    "payload": {
+      "plan_version": "plan_sac_001_v1",
+      "repair_round": 0,
+      "action_cards": [
+        {
+          "card_id": "CARD-001",
+          "related_need_ids": [
+            "need_001"
+          ],
+          "program_id": "MOCK-UI-01",
+          "action_title": "Apply for unemployment benefits",
+          "reason": "You told us you lost your job last Friday.",
+          "next_step": "Start the online application.",
+          "priority_reason": "Income replacement supports the rent and food needs.",
+          "order_group": "first",
+          "dependency_card_ids": [],
+          "source_refs": [
+            "EV-MOCK-001"
+          ],
+          "uncertainty_notes": [],
+          "official_deadline": null,
+          "user_target_date": null,
+          "processing_estimate": "You will get your first payment within one week.",
+          "progress_status": "not_started",
+          "source_action_ids": [
+            "ACT-001"
+          ]
+        },
+        {
+          "card_id": "CARD-002",
+          "related_need_ids": [
+            "need_002"
+          ],
+          "program_id": "MOCK-RENT-01",
+          "action_title": "Confirm the application deadline, then ask about rent help",
+          "reason": "Your rent of $1,450 is due on November 1 (your date).",
+          "next_step": "Call or check with the provider which deadline applies, then apply.",
+          "priority_reason": "Your rent date is close.",
+          "order_group": "first",
+          "dependency_card_ids": [],
+          "source_refs": [
+            "EV-MOCK-002",
+            "EV-MOCK-003",
+            "EV-MOCK-004"
+          ],
+          "uncertainty_notes": [
+            "Two official pages give different deadlines: October 30, 2026 and November 6, 2026. Confirm with the provider.",
+            "Program availability is unknown."
+          ],
+          "official_deadline": null,
+          "user_target_date": "2026-11-01",
+          "processing_estimate": null,
+          "progress_status": "not_started",
+          "source_action_ids": [
+            "ACT-002"
+          ]
+        },
+        {
+          "card_id": "CARD-003",
+          "related_need_ids": [
+            "need_003"
+          ],
+          "program_id": "MOCK-FOOD-01",
+          "action_title": "Check food benefits",
+          "reason": "You said food is running low this week.",
+          "next_step": "Contact the provider; they will ask about your current income to decide.",
+          "priority_reason": "Food need this week.",
+          "order_group": "parallel",
+          "dependency_card_ids": [],
+          "source_refs": [
+            "EV-MOCK-005"
+          ],
+          "uncertainty_notes": [
+            "Your current income is not known yet; the provider decides eligibility."
+          ],
+          "official_deadline": null,
+          "user_target_date": null,
+          "processing_estimate": null,
+          "progress_status": "not_started",
+          "source_action_ids": [
+            "ACT-003"
+          ]
+        }
+      ],
+      "potential_options": [],
+      "coverage_gaps": [],
+      "open_agent7_findings": [
+        {
+          "finding_id": "F7-001",
+          "rule_id": "Q2",
+          "severity": "critical",
+          "program_id": "MOCK-RENT-01",
+          "need_id": "need_002",
+          "field_path": "deadlines[0]",
+          "evidence_refs": [
+            "EV-MOCK-003",
+            "EV-MOCK-004"
+          ],
+          "description": "Two official sources give different application deadlines.",
+          "recommended_action": "show_conflict_and_add_provider_confirmation"
+        }
+      ],
+      "needs": [
+        {
+          "need_id": "need_001",
+          "category": "income_assistance",
+          "subcategory": "unemployment_insurance",
+          "description": "Lost warehouse job last Friday; needs income replacement",
+          "original_quote": "I was laid off from my warehouse job last Friday.",
+          "confirmation_status": "confirmed",
+          "user_reported": true,
+          "urgency": "high",
+          "urgency_reason": "No income since job loss",
+          "user_priority": null
+        },
+        {
+          "need_id": "need_002",
+          "category": "housing_assistance",
+          "subcategory": "rental_assistance",
+          "description": "Cannot pay rent due November 1",
+          "original_quote": "Rent of $1,450 is due on November 1 and I only have about $300 left.",
+          "confirmation_status": "confirmed",
+          "user_reported": true,
+          "urgency": "immediate",
+          "urgency_reason": "User-stated rent date is close and cash on hand is far below rent",
+          "user_priority": null
+        },
+        {
+          "need_id": "need_003",
+          "category": "food_assistance",
+          "subcategory": "calfresh_benefits",
+          "description": "Running low on food this week",
+          "original_quote": "We're also running low on food this week.",
+          "confirmation_status": "confirmed",
+          "user_reported": true,
+          "urgency": "immediate",
+          "urgency_reason": "User says food runs low this week",
+          "user_priority": null
+        }
+      ],
+      "matches": [
+        {
+          "program_id": "MOCK-UI-01",
+          "need_ids": [
+            "need_001"
+          ],
+          "match_status": "supported_match",
+          "matched_criteria": [
+            "recent job loss through no fault of own (user-stated)"
+          ],
+          "missing_case_facts": [],
+          "mismatch_criteria": [],
+          "evidence_refs": [
+            "EV-MOCK-001"
+          ],
+          "explanation": "Mock: job loss criterion supported by the user's statement; final decision is made by the agency."
+        },
+        {
+          "program_id": "MOCK-RENT-01",
+          "need_ids": [
+            "need_002"
+          ],
+          "match_status": "potential_match",
+          "matched_criteria": [
+            "county of residence by ZIP"
+          ],
+          "missing_case_facts": [
+            "landlord_notice_exists"
+          ],
+          "mismatch_criteria": [],
+          "evidence_refs": [
+            "EV-MOCK-002"
+          ],
+          "explanation": "Mock: geography fits; whether a landlord notice exists is unknown."
+        },
+        {
+          "program_id": "MOCK-FOOD-01",
+          "need_ids": [
+            "need_003"
+          ],
+          "match_status": "insufficient_information",
+          "matched_criteria": [
+            "household with children (user-stated)"
+          ],
+          "missing_case_facts": [
+            "current_monthly_income"
+          ],
+          "mismatch_criteria": [],
+          "evidence_refs": [
+            "EV-MOCK-005"
+          ],
+          "explanation": "Mock: income limit applies; current income unknown, so no match or mismatch can be stated. Test H1."
+        }
+      ],
+      "checked_claims": [
+        {
+          "program_id": "MOCK-UI-01",
+          "field_path": "application_method[0]",
+          "claim_value": "online application (mock)",
+          "verification_status": "verified",
+          "evidence_refs": [
+            "EV-MOCK-001"
+          ],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": null
+        },
+        {
+          "program_id": "MOCK-UI-01",
+          "field_path": "processing_time",
+          "claim_value": null,
+          "verification_status": "unverified",
+          "evidence_refs": [],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": "No published processing time found in mock evidence"
+        },
+        {
+          "program_id": "MOCK-RENT-01",
+          "field_path": "deadlines[0]",
+          "claim_value": "2026-10-30",
+          "verification_status": "conflicting",
+          "evidence_refs": [
+            "EV-MOCK-003"
+          ],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": "Conflicts with EV-MOCK-004. Test H2."
+        },
+        {
+          "program_id": "MOCK-RENT-01",
+          "field_path": "deadlines[0]",
+          "claim_value": "2026-11-06",
+          "verification_status": "conflicting",
+          "evidence_refs": [
+            "EV-MOCK-004"
+          ],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": "Conflicts with EV-MOCK-003. Test H2."
+        },
+        {
+          "program_id": "MOCK-FOOD-01",
+          "field_path": "eligibility_criteria[0]",
+          "claim_value": "gross income limit applies (mock value withheld)",
+          "verification_status": "verified",
+          "evidence_refs": [
+            "EV-MOCK-005"
+          ],
+          "checked_at": "2026-10-21T15:00:00Z",
+          "issue": null
+        }
+      ],
+      "program_availability": [
+        {
+          "program_id": "MOCK-UI-01",
+          "availability": "confirmed_open",
+          "evidence_refs": [
+            "EV-MOCK-001"
+          ]
+        },
+        {
+          "program_id": "MOCK-RENT-01",
+          "availability": "unknown",
+          "evidence_refs": []
+        },
+        {
+          "program_id": "MOCK-FOOD-01",
+          "availability": "confirmed_open",
+          "evidence_refs": [
+            "EV-MOCK-005"
+          ]
+        }
+      ],
+      "evidence_records": [
+        {
+          "evidence_id": "EV-MOCK-001",
+          "program_id": "MOCK-UI-01",
+          "field_path": "application_method[0]",
+          "claim_value": "online application (mock)",
+          "source_url": "https://example.org/mock/ui-01",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "verified"
+        },
+        {
+          "evidence_id": "EV-MOCK-002",
+          "program_id": "MOCK-RENT-01",
+          "field_path": "geography[0]",
+          "claim_value": "Sacramento County (mock)",
+          "source_url": "https://example.org/mock/rent-01",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "verified"
+        },
+        {
+          "evidence_id": "EV-MOCK-003",
+          "program_id": "MOCK-RENT-01",
+          "field_path": "deadlines[0]",
+          "claim_value": "2026-10-30",
+          "source_url": "https://example.org/mock/rent-01/program-page",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "conflicting"
+        },
+        {
+          "evidence_id": "EV-MOCK-004",
+          "program_id": "MOCK-RENT-01",
+          "field_path": "deadlines[0]",
+          "claim_value": "2026-11-06",
+          "source_url": "https://example.org/mock/rent-01/faq",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "conflicting"
+        },
+        {
+          "evidence_id": "EV-MOCK-005",
+          "program_id": "MOCK-FOOD-01",
+          "field_path": "eligibility_criteria[0]",
+          "claim_value": "gross income limit applies (mock value withheld)",
+          "source_url": "https://example.org/mock/food-01",
+          "checked_at": "2026-10-21T15:00:00Z",
+          "verification_status": "verified"
+        }
+      ]
+    }
+  },
+  "expected_agent10_result": {
+    "result": {
+      "verdict": "FLAG",
+      "repair_round": 0,
+      "flags": [
+        {
+          "flag_id": "FLAG-001",
+          "card_id": "CARD-001",
+          "rule_id": "V1",
+          "severity": "critical",
+          "claim_text": "You will get your first payment within one week.",
+          "blocks_release": true
+        }
+      ],
+      "passed_card_ids": [
+        "CARD-002",
+        "CARD-003"
+      ]
+    }
+  }
+}

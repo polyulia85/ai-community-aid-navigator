@@ -1,0 +1,93 @@
+{
+  "request_id": "req_h07",
+  "run_id": "run_sac_001",
+  "case_id": "case_sac_001",
+  "case_version": 2,
+  "correlation_id": "corr_sac_001",
+  "agent_id": "agent_7",
+  "schema_version": "1.0",
+  "status": "completed",
+  "result": {
+    "stage": "verification",
+    "stage_assessment": "issues_found",
+    "findings": [
+      {
+        "finding_id": "F7-001",
+        "rule_id": "Q2",
+        "severity": "critical",
+        "program_id": "MOCK-RENT-01",
+        "need_id": "need_002",
+        "field_path": "deadlines[0]",
+        "evidence_refs": [
+          "EV-MOCK-003",
+          "EV-MOCK-004"
+        ],
+        "description": "Sources give different values for deadlines[0]",
+        "recommended_action": "show_conflict_and_add_provider_confirmation"
+      },
+      {
+        "finding_id": "F7-002",
+        "rule_id": "Q7",
+        "severity": "info",
+        "program_id": "MOCK-UI-01",
+        "need_id": null,
+        "field_path": "application_method[0]",
+        "evidence_refs": [],
+        "description": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+        "recommended_action": "no_action"
+      },
+      {
+        "finding_id": "F7-003",
+        "rule_id": "Q7",
+        "severity": "info",
+        "program_id": "MOCK-RENT-01",
+        "need_id": null,
+        "field_path": "deadlines[0]",
+        "evidence_refs": [],
+        "description": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+        "recommended_action": "no_action"
+      },
+      {
+        "finding_id": "F7-004",
+        "rule_id": "Q7",
+        "severity": "info",
+        "program_id": "MOCK-FOOD-01",
+        "need_id": null,
+        "field_path": "eligibility_criteria[0]",
+        "evidence_refs": [],
+        "description": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+        "recommended_action": "no_action"
+      }
+    ]
+  },
+  "issues": [
+    {
+      "code": "Q2",
+      "severity": "critical",
+      "message": "Sources give different values for deadlines[0]",
+      "related_ref": "MOCK-RENT-01"
+    },
+    {
+      "code": "Q7",
+      "severity": "info",
+      "message": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+      "related_ref": "MOCK-UI-01"
+    },
+    {
+      "code": "Q7",
+      "severity": "info",
+      "message": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+      "related_ref": "MOCK-RENT-01"
+    },
+    {
+      "code": "Q7",
+      "severity": "info",
+      "message": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+      "related_ref": "MOCK-FOOD-01"
+    }
+  ],
+  "clarification_requests": [],
+  "evidence_refs": [],
+  "generated_at": "2026-10-30T07:03:50.985480+00:00",
+  "is_mock": true
+}

@@ -1,0 +1,110 @@
+{
+  "request_id": "req_h21",
+  "run_id": "run-0001",
+  "case_id": "case-demo-001",
+  "case_version": 1,
+  "correlation_id": "corr-0001",
+  "agent_id": "agent_7",
+  "schema_version": "1.0",
+  "status": "completed",
+  "result": {
+    "stage": "verification",
+    "stage_assessment": "issues_found",
+    "findings": [
+      {
+        "finding_id": "F7-001",
+        "rule_id": "Q2",
+        "severity": "critical",
+        "program_id": "MOCK-RENT-ASSIST-01",
+        "need_id": "need_002",
+        "field_path": "deadlines",
+        "evidence_refs": [
+          "ev_ra_deadline_a",
+          "ev_ra_deadline_b"
+        ],
+        "description": "Sources give different values for deadlines",
+        "recommended_action": "show_conflict_and_add_provider_confirmation"
+      },
+      {
+        "finding_id": "F7-002",
+        "rule_id": "Q7",
+        "severity": "info",
+        "program_id": "MOCK-FOOD-PANTRY-01",
+        "need_id": null,
+        "field_path": "operating_hours",
+        "evidence_refs": [],
+        "description": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+        "recommended_action": "no_action"
+      },
+      {
+        "finding_id": "F7-003",
+        "rule_id": "Q7",
+        "severity": "info",
+        "program_id": "MOCK-CALFRESH-01",
+        "need_id": null,
+        "field_path": "program_exists",
+        "evidence_refs": [],
+        "description": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+        "recommended_action": "no_action"
+      },
+      {
+        "finding_id": "F7-004",
+        "rule_id": "Q7",
+        "severity": "info",
+        "program_id": "MOCK-EDD-UI-01",
+        "need_id": null,
+        "field_path": "application_method",
+        "evidence_refs": [],
+        "description": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+        "recommended_action": "no_action"
+      },
+      {
+        "finding_id": "F7-005",
+        "rule_id": "Q7",
+        "severity": "info",
+        "program_id": "MOCK-RENT-ASSIST-01",
+        "need_id": null,
+        "field_path": "deadlines",
+        "evidence_refs": [],
+        "description": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+        "recommended_action": "no_action"
+      }
+    ]
+  },
+  "issues": [
+    {
+      "code": "Q2",
+      "severity": "critical",
+      "message": "Sources give different values for deadlines",
+      "related_ref": "MOCK-RENT-ASSIST-01"
+    },
+    {
+      "code": "Q7",
+      "severity": "info",
+      "message": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+      "related_ref": "MOCK-FOOD-PANTRY-01"
+    },
+    {
+      "code": "Q7",
+      "severity": "info",
+      "message": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+      "related_ref": "MOCK-CALFRESH-01"
+    },
+    {
+      "code": "Q7",
+      "severity": "info",
+      "message": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+      "related_ref": "MOCK-EDD-UI-01"
+    },
+    {
+      "code": "Q7",
+      "severity": "info",
+      "message": "Oldest evidence checked 8 day(s) ago (2026-10-21T15:00:00Z); freshness window not agreed yet",
+      "related_ref": "MOCK-RENT-ASSIST-01"
+    }
+  ],
+  "clarification_requests": [],
+  "evidence_refs": [],
+  "generated_at": "2026-10-30T07:03:50.985982+00:00",
+  "is_mock": true
+}

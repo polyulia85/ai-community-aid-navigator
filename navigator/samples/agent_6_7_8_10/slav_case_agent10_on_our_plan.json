@@ -1,0 +1,27 @@
+{
+  "request_id": "req_h10",
+  "run_id": "run_sac_001",
+  "case_id": "case_sac_001",
+  "case_version": 2,
+  "correlation_id": "corr_sac_001",
+  "agent_id": "agent_10",
+  "schema_version": "1.0",
+  "status": "completed",
+  "result": {
+    "verdict": "PASS",
+    "repair_round": 0,
+    "flags": [],
+    "passed_card_ids": [
+      "card_01",
+      "card_02",
+      "card_03",
+      "card_04",
+      "card_05"
+    ]
+  },
+  "issues": [],
+  "clarification_requests": [],
+  "evidence_refs": [],
+  "generated_at": "2026-10-30T07:03:50.984759+00:00",
+  "is_mock": true
+}

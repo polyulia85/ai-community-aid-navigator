@@ -218,3 +218,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Team additions (AI Community Aid Navigator) ---
+.qodo/
+run_report*.json
+reports/
+*.bak
+.DS_Store
+# Never commit secrets or real user data
+*.pem
+*.key
+secrets*
+credentials*
