@@ -1,0 +1,116 @@
+{
+  "request_id": "req_a6_001",
+  "run_id": "run_sac_001",
+  "case_id": "case_sac_001",
+  "case_version": 2,
+  "correlation_id": "corr_sac_001",
+  "agent_id": "agent_6",
+  "schema_version": "1.0",
+  "status": "completed",
+  "result": {
+    "proposed_actions": [
+      {
+        "action_id": "act_02",
+        "need_id": "need_002",
+        "program_id": "MOCK-RENT-01",
+        "suggested_priority": 1,
+        "order_group": "first",
+        "rationale": "Official sources disagree on the application deadline (October 30, 2026 and November 6, 2026). Confirm which one applies before applying.",
+        "dependency_ids": [],
+        "official_deadline": null,
+        "user_target_date": null,
+        "estimated_processing_time": null,
+        "evidence_refs": [
+          "EV-MOCK-003",
+          "EV-MOCK-004"
+        ],
+        "uncertainty_notes": [
+          "Official sources give different deadlines: October 30, 2026 and November 6, 2026. Confirm with the provider which one applies."
+        ],
+        "user_override_allowed": true
+      },
+      {
+        "action_id": "act_03",
+        "need_id": "need_002",
+        "program_id": "MOCK-RENT-01",
+        "suggested_priority": 2,
+        "order_group": "first",
+        "rationale": "Your rent date is close, so contacting this program early gives the most time. You told us your date is November 1, 2026 (your date, not a program deadline).",
+        "dependency_ids": [
+          "act_02"
+        ],
+        "official_deadline": null,
+        "user_target_date": "2026-11-01",
+        "estimated_processing_time": null,
+        "evidence_refs": [
+          "EV-MOCK-002"
+        ],
+        "uncertainty_notes": [
+          "Whether you have received a written notice from your landlord is not known yet. Please confirm with the provider; they decide eligibility.",
+          "Current availability of this program is unknown. Confirm with the provider.",
+          "Official sources give different deadlines: October 30, 2026 and November 6, 2026. Confirm with the provider before relying on either."
+        ],
+        "user_override_allowed": true
+      },
+      {
+        "action_id": "act_04",
+        "need_id": "need_003",
+        "program_id": "MOCK-FOOD-01",
+        "suggested_priority": 3,
+        "order_group": "first",
+        "rationale": "Food is running low this week, and benefits take time, so starting now helps.",
+        "dependency_ids": [],
+        "official_deadline": null,
+        "user_target_date": null,
+        "estimated_processing_time": null,
+        "evidence_refs": [
+          "EV-MOCK-005"
+        ],
+        "uncertainty_notes": [
+          "Your current monthly income is not known yet. Please confirm with the provider; they decide eligibility."
+        ],
+        "user_override_allowed": true
+      },
+      {
+        "action_id": "act_01",
+        "need_id": "need_001",
+        "program_id": "MOCK-UI-01",
+        "suggested_priority": 1,
+        "order_group": "parallel",
+        "rationale": "Income replacement supports your other needs, and payments take time to start, so file early.",
+        "dependency_ids": [],
+        "official_deadline": null,
+        "user_target_date": null,
+        "estimated_processing_time": null,
+        "evidence_refs": [
+          "EV-MOCK-001"
+        ],
+        "uncertainty_notes": [],
+        "user_override_allowed": true
+      },
+      {
+        "action_id": "act_05",
+        "need_id": null,
+        "program_id": null,
+        "suggested_priority": 1,
+        "order_group": "later",
+        "rationale": "This depends on the applications above being submitted first.",
+        "dependency_ids": [
+          "act_01",
+          "act_04"
+        ],
+        "official_deadline": null,
+        "user_target_date": null,
+        "estimated_processing_time": null,
+        "evidence_refs": [],
+        "uncertainty_notes": [],
+        "user_override_allowed": true
+      }
+    ]
+  },
+  "issues": [],
+  "clarification_requests": [],
+  "evidence_refs": [],
+  "generated_at": "2026-10-30T07:03:50.983326+00:00",
+  "is_mock": true
+}

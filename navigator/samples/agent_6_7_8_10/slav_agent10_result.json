@@ -1,0 +1,36 @@
+{
+  "request_id": "req_a10_001",
+  "run_id": "run_sac_001",
+  "case_id": "case_sac_001",
+  "case_version": 2,
+  "correlation_id": "corr_sac_001",
+  "agent_id": "agent_10",
+  "schema_version": "1.0",
+  "status": "completed",
+  "result": {
+    "verdict": "FLAG",
+    "repair_round": 0,
+    "flags": [
+      {
+        "flag_id": "FLAG-001",
+        "card_id": "CARD-001",
+        "rule_id": "V1",
+        "severity": "critical",
+        "claim_text": "You will get your first payment within one week.",
+        "reason": "Unsupported guarantee: 'you will get'",
+        "evidence_refs": [],
+        "required_correction": "Remove the guarantee; describe the program as possibly relevant and say the provider decides.",
+        "blocks_release": true
+      }
+    ],
+    "passed_card_ids": [
+      "CARD-002",
+      "CARD-003"
+    ]
+  },
+  "issues": [],
+  "clarification_requests": [],
+  "evidence_refs": [],
+  "generated_at": "2026-10-30T07:03:50.985234+00:00",
+  "is_mock": true
+}

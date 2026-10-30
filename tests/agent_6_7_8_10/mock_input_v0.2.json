@@ -1,0 +1,240 @@
+{
+  "_note": "MOCK upstream data (Agents 1-5) for Slav's common test case: Sacramento family, income loss. Program details are placeholders, not real program facts. Replace with Silver's verified records. Needs and facts match Slav's 02_agent1_result_expected.json (confirmed after the user reviews the summary). Current income is not stated, so it stays unknown.",
+  "case_id": "case-demo-001",
+  "case_version": 1,
+  "needs": [
+    {
+      "need_id": "need_001",
+      "category": "income_assistance",
+      "subcategory": null,
+      "description": "Laid off from warehouse job last Friday",
+      "original_quote": "I was laid off from my warehouse job last Friday.",
+      "confirmation_status": "confirmed",
+      "user_reported": true,
+      "urgency": "high",
+      "urgency_reason": "No income since last Friday",
+      "user_priority": null
+    },
+    {
+      "need_id": "need_002",
+      "category": "housing_assistance",
+      "subcategory": "rental_assistance",
+      "description": "Cannot pay rent of $1,450 due November 1",
+      "original_quote": "Rent of $1,450 is due on November 1 and I only have about $300 left.",
+      "confirmation_status": "confirmed",
+      "user_reported": true,
+      "urgency": "high",
+      "urgency_reason": "User-stated rent due date Nov 1",
+      "user_priority": null
+    },
+    {
+      "need_id": "need_003",
+      "category": "food_assistance",
+      "subcategory": null,
+      "description": "Running low on food this week",
+      "original_quote": "We're also running low on food this week.",
+      "confirmation_status": "confirmed",
+      "user_reported": true,
+      "urgency": "immediate",
+      "urgency_reason": "Food runs low this week",
+      "user_priority": null
+    }
+  ],
+  "case_facts": [
+    {
+      "fact_id": "fact_001",
+      "field": "zip_code",
+      "value": "95823",
+      "confirmation_status": "confirmed",
+      "source": "user_statement",
+      "time_context": null
+    },
+    {
+      "fact_id": "fact_002",
+      "field": "household_size",
+      "value": 3,
+      "confirmation_status": "confirmed",
+      "source": "user_statement",
+      "time_context": null
+    },
+    {
+      "fact_id": "fact_003",
+      "field": "children_ages",
+      "value": [
+        6,
+        9
+      ],
+      "confirmation_status": "confirmed",
+      "source": "user_statement",
+      "time_context": null
+    },
+    {
+      "fact_id": "fact_004",
+      "field": "employment_status",
+      "value": "laid_off",
+      "confirmation_status": "confirmed",
+      "source": "user_statement",
+      "time_context": "last Friday"
+    },
+    {
+      "fact_id": "fact_005",
+      "field": "rent_amount_monthly",
+      "value": 1450,
+      "confirmation_status": "confirmed",
+      "source": "user_statement",
+      "time_context": null
+    },
+    {
+      "fact_id": "fact_006",
+      "field": "rent_due_date",
+      "value": "2026-11-01",
+      "confirmation_status": "confirmed",
+      "source": "user_statement",
+      "time_context": "user-stated date, not an official deadline"
+    },
+    {
+      "fact_id": "fact_007",
+      "field": "cash_on_hand_approx",
+      "value": 300,
+      "confirmation_status": "confirmed",
+      "source": "user_statement",
+      "time_context": "now"
+    }
+  ],
+  "matches": [
+    {
+      "program_id": "MOCK-FOOD-PANTRY-01",
+      "need_ids": [
+        "need_003"
+      ],
+      "match_status": "supported_match",
+      "matched_criteria": [
+        "service area includes ZIP 95823 (mock)"
+      ],
+      "missing_case_facts": [],
+      "mismatch_criteria": [],
+      "evidence_refs": [
+        "ev_fp_hours"
+      ],
+      "explanation": "Serves the user's ZIP area; no income test published (mock).",
+      "subcategory": "food_pantry",
+      "program_name": "Neighborhood Food Pantry (mock)",
+      "official_link": "https://example.org/mock-food-pantry"
+    },
+    {
+      "program_id": "MOCK-CALFRESH-01",
+      "need_ids": [
+        "need_003"
+      ],
+      "match_status": "potential_match",
+      "matched_criteria": [
+        "household with children (mock)"
+      ],
+      "missing_case_facts": [
+        "current_household_monthly_income"
+      ],
+      "mismatch_criteria": [],
+      "evidence_refs": [
+        "ev_cf_program"
+      ],
+      "explanation": "Lost income, household of 3; current income unknown (mock).",
+      "subcategory": "calfresh_benefits",
+      "program_name": "CalFresh (mock record)",
+      "official_link": "https://example.org/mock-calfresh"
+    },
+    {
+      "program_id": "MOCK-EDD-UI-01",
+      "need_ids": [
+        "need_001"
+      ],
+      "match_status": "supported_match",
+      "matched_criteria": [
+        "recent job loss (mock)"
+      ],
+      "missing_case_facts": [],
+      "mismatch_criteria": [],
+      "evidence_refs": [
+        "ev_ui_program"
+      ],
+      "explanation": "Recent layoff; final decision by the agency (mock).",
+      "subcategory": "unemployment_insurance",
+      "program_name": "Unemployment Insurance (mock record)",
+      "official_link": "https://example.org/mock-ui"
+    },
+    {
+      "program_id": "MOCK-RENT-ASSIST-01",
+      "need_ids": [
+        "need_002"
+      ],
+      "match_status": "potential_match",
+      "matched_criteria": [
+        "Sacramento renter (mock)"
+      ],
+      "missing_case_facts": [
+        "current_household_monthly_income"
+      ],
+      "mismatch_criteria": [],
+      "evidence_refs": [
+        "ev_ra_deadline_a",
+        "ev_ra_deadline_b"
+      ],
+      "explanation": "Rental help in Sacramento; income limit not yet assessed (mock).",
+      "subcategory": "rental_assistance",
+      "program_name": "Emergency Rental Assistance (mock record)",
+      "official_link": "https://example.org/mock-rental"
+    }
+  ],
+  "checked_claims": [
+    {
+      "program_id": "MOCK-FOOD-PANTRY-01",
+      "field_path": "operating_hours",
+      "claim_value": "Mon-Fri 9am-1pm (mock)",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "ev_fp_hours"
+      ],
+      "checked_at": "2026-10-21T15:00:00Z",
+      "issue": null
+    },
+    {
+      "program_id": "MOCK-CALFRESH-01",
+      "field_path": "program_exists",
+      "claim_value": "Official program page (mock)",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "ev_cf_program"
+      ],
+      "checked_at": "2026-10-21T15:00:00Z",
+      "issue": null
+    },
+    {
+      "program_id": "MOCK-EDD-UI-01",
+      "field_path": "application_method",
+      "claim_value": "Apply online (mock)",
+      "verification_status": "verified",
+      "evidence_refs": [
+        "ev_ui_program"
+      ],
+      "checked_at": "2026-10-21T15:00:00Z",
+      "issue": null
+    },
+    {
+      "program_id": "MOCK-RENT-ASSIST-01",
+      "field_path": "deadlines",
+      "claim_value": "2026-10-31 (source A) vs 2026-11-15 (source B)",
+      "verification_status": "conflicting",
+      "evidence_refs": [
+        "ev_ra_deadline_a",
+        "ev_ra_deadline_b"
+      ],
+      "checked_at": "2026-10-21T15:00:00Z",
+      "issue": "Two sources give different application deadlines"
+    }
+  ],
+  "availability": {
+    "MOCK-FOOD-PANTRY-01": "confirmed_open",
+    "MOCK-CALFRESH-01": "confirmed_open",
+    "MOCK-EDD-UI-01": "confirmed_open",
+    "MOCK-RENT-ASSIST-01": "unknown"
+  }
+}
