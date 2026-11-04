@@ -70,7 +70,8 @@ def _reopen_date(p, program_id):
 
 def _short_date(iso):
     try:
-        return datetime.strptime(iso, "%Y-%m-%d").strftime("%b %-d")
+        d = datetime.strptime(iso, "%Y-%m-%d")
+        return f"{d:%b} {d.day}"  # portable day without leading zero (works on Windows too)
     except (ValueError, TypeError):
         return str(iso)
 
@@ -125,7 +126,8 @@ def _verified_contacts(claims, program_id):
                 and str(c.get("field_path", "")).split("[")[0] in CONTACT_FIELDS and c.get("claim_value")):
             when = str(c.get("checked_at") or "")[:10]
             try:
-                when = datetime.strptime(when, "%Y-%m-%d").strftime("%b %-d")
+                d = datetime.strptime(when, "%Y-%m-%d")
+                when = f"{d:%b} {d.day}"  # portable day without leading zero (works on Windows too)
             except ValueError:
                 continue  # no check date, so it cannot be shown
             out.append((f"{str(c['claim_value']).strip()} (checked {when}).", c.get("evidence_refs", [])))
@@ -167,7 +169,8 @@ GROUP_ORDER = {"first": 0, "parallel": 1, "later": 2}
 
 def _fmt_date(iso):
     try:
-        return datetime.strptime(iso, "%Y-%m-%d").strftime("%B %-d, %Y")
+        d = datetime.strptime(iso, "%Y-%m-%d")
+        return f"{d:%B} {d.day}, {d.year}"  # portable day without leading zero (works on Windows too)
     except (ValueError, TypeError):
         return str(iso)
 

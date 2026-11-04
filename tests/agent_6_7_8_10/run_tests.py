@@ -9,9 +9,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from navigator.agents.agent_6_7_8_10.agent_6_7_8_10 import handle, TASK_TYPES
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SAMPLES = os.path.join(HERE, "..", "..", "navigator", "samples", "agent_6_7_8_10"); os.makedirs(SAMPLES, exist_ok=True)
+# Sample outputs are written only with --save, so a normal test run never changes tracked files.
+SAVE = "--save" in sys.argv
+SAMPLES = os.path.join(HERE, "..", "..", "navigator", "samples", "agent_6_7_8_10")
 load = lambda *p: json.load(open(os.path.join(HERE, *p)))
-save = lambda name, obj: json.dump(obj, open(os.path.join(SAMPLES, name), "w"), indent=2)
+save = lambda name, obj: json.dump(obj, open(os.path.join(SAMPLES, name), "w"), indent=2) if SAVE else None
 results = []
 
 def check(name, expected, actual):
@@ -289,5 +291,9 @@ closed_ns = [c["next_step"] for c in r8v["action_cards"] if c["program_id"] == "
 r10v = handle(req_like(cl, "agent_10", dict(r8v, needs=vc["needs"], matches=vc["matches"], checked_claims=vc["checked_claims"],
               program_availability=vc["program_availability"], evidence_records=vc["evidence_records"], repair_round=0), 47))["result"]
 check("C-CON3 Plan with verified contacts passes Agent 10 (no V8)", [], [f["rule_id"] for f in r10v["flags"] if f["rule_id"] == "V8"])
+
+# Windows portability (Slav, Nov 2): no platform-specific strftime day codes in the agent
+SRC = open(os.path.join(HERE, "..", "..", "navigator", "agents", "agent_6_7_8_10", "agent_6_7_8_10.py")).read()
+check("C-WIN No platform-specific day codes in date formatting (Windows, Mac, Linux)", False, ("%" + "-d" in SRC) or ("%" + "#d" in SRC))
 
 print(f"\n{sum(results)} of {len(results)} checks passed")
