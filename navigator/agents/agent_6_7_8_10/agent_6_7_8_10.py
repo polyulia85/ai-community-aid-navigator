@@ -70,7 +70,8 @@ def _reopen_date(p, program_id):
 
 def _short_date(iso):
     try:
-        return datetime.strptime(iso, "%Y-%m-%d").strftime("%b %-d")
+        d = datetime.strptime(iso, "%Y-%m-%d")
+        return f"{d:%b} {d.day}"  # portable day without leading zero (works on Windows too)
     except (ValueError, TypeError):
         return str(iso)
 
@@ -114,22 +115,71 @@ def _program_label(match):
     return name or org
 
 
-CONTACT_FIELDS = ("contact", "hours", "opening_hours")
+_HOURS_RE = re.compile(r"\d{1,2}:\d{2}\s*(?:am|pm|a\.m\.|p\.m\.)", re.I)
 
 
-def _verified_contacts(claims, program_id):
-    """Contacts and hours for next_step: only verified claims, each with its check date (v1.1 4.8, accepted Oct 26)."""
+def _extract_hours(text):
+    """Return the hours substring if the text contains a time expression, else None."""
+    m = _HOURS_RE.search(str(text))
+    if not m:
+        return None
+    # grab from the first time token to end of sentence / value
+    return str(text)[m.start():].strip()
+
+
+def _build_contacts(claims, program_id):
+    """
+    Build contacts[] for an Agent 8 card (v0.7).
+    Only verified claims with a valid checked_at and field_path starting with
+    'contact' or 'application_method' are included.
+    Returns a list of dicts: {label, value, hours, checked_at, evidence_refs}.
+    """
     out = []
     for c in claims:
-        if (c.get("program_id") == program_id and c.get("verification_status") == "verified"
-                and str(c.get("field_path", "")).split("[")[0] in CONTACT_FIELDS and c.get("claim_value")):
-            when = str(c.get("checked_at") or "")[:10]
-            try:
-                when = datetime.strptime(when, "%Y-%m-%d").strftime("%b %-d")
-            except ValueError:
-                continue  # no check date, so it cannot be shown
-            out.append((f"{str(c['claim_value']).strip()} (checked {when}).", c.get("evidence_refs", [])))
+        if c.get("program_id") != program_id:
+            continue
+        if c.get("verification_status") != "verified":
+            continue
+        fp = str(c.get("field_path", ""))
+        if not (fp.startswith("contact") or fp.startswith("application_method")):
+            continue
+        val = c.get("claim_value")
+        if not val:
+            continue
+        when = str(c.get("checked_at") or "")[:10]
+        try:
+            datetime.strptime(when, "%Y-%m-%d")
+        except ValueError:
+            continue  # no valid check date — never appears
+        label = "How to apply" if fp.startswith("application_method") else "Contact"
+        out.append({
+            "label": label,
+            "value": str(val).strip(),
+            "hours": _extract_hours(val),
+            "checked_at": when,
+            "evidence_refs": list(c.get("evidence_refs") or []),
+        })
     return out
+
+
+def _next_step_contacts(contacts):
+    """
+    Return at most 2 contact snippets for next_step (v0.7):
+    1. first online application method (URL or "online" in value)
+    2. first phone contact (phone pattern in value)
+    Each is "(value) (checked Mon D)."
+    """
+    _phone_re = re.compile(r"\(?\d{3}\)?[\s.\-]\d{3}[\s.\-]\d{4}|\b2-1-1\b|\b211\b", re.I)
+    _online_re = re.compile(r"https?://|online", re.I)
+    online = next((c for c in contacts if c["label"] == "How to apply" and _online_re.search(c["value"])), None)
+    phone = next((c for c in contacts if c["label"] == "Contact" and _phone_re.search(c["value"])), None)
+    snippets = []
+    for item in [online, phone]:
+        if item is None:
+            continue
+        d = datetime.strptime(item["checked_at"], "%Y-%m-%d")
+        snippets.append(f"{item['value']} (checked {d:%b} {d.day}).")
+    return snippets
 
 
 def _subcat(match, needs):
@@ -167,7 +217,8 @@ GROUP_ORDER = {"first": 0, "parallel": 1, "later": 2}
 
 def _fmt_date(iso):
     try:
-        return datetime.strptime(iso, "%Y-%m-%d").strftime("%B %-d, %Y")
+        d = datetime.strptime(iso, "%Y-%m-%d")
+        return f"{d:%B} {d.day}, {d.year}"  # portable day without leading zero (works on Windows too)
     except (ValueError, TypeError):
         return str(iso)
 
@@ -295,13 +346,21 @@ def agent_8(request):
                 title = f"{title} (reopens {reopen.group(1)})" if reopen else f"{title} (closed for now)"
                 reason = f"This program is temporarily closed right now. It may be relevant later because it {offers}."
                 next_step = "Use the open option above first. Check back with this program when it reopens."
-        if m and not a["rationale"].startswith("Temporarily closed"):
-            for text, refs in _verified_contacts(p.get("checked_claims", []), a["program_id"]):
-                next_step = f"{next_step} {text}"
-                a = dict(a, evidence_refs=list(dict.fromkeys(a["evidence_refs"] + refs)))
+        is_closed = a["rationale"].startswith("Temporarily closed")
+        claims = p.get("checked_claims", [])
+        if m and not is_closed:
+            contacts = _build_contacts(claims, a["program_id"])
+            snippets = _next_step_contacts(contacts)
+            if snippets:
+                next_step = next_step + " " + " ".join(snippets)
+                all_refs = [r for item in contacts for r in item["evidence_refs"]]
+                a = dict(a, evidence_refs=list(dict.fromkeys(a["evidence_refs"] + all_refs)))
+        else:
+            contacts = []
         if not m:
             title, reason = "Follow up on your applications", "Checking in helps you catch any requests for more information."
             next_step = "After applying, watch for letters or messages and respond to any requests for documents."
+            contacts = []
         related = m["need_ids"] if m else sorted({x["need_id"] for x in acts if x["action_id"] in a["dependency_ids"]})
         cards.append({
             "card_id": id_map[a["action_id"]], "source_action_ids": [a["action_id"]], "related_need_ids": related, "program_id": a["program_id"],
@@ -310,6 +369,7 @@ def agent_8(request):
             "source_refs": a["evidence_refs"], "uncertainty_notes": a["uncertainty_notes"],
             "official_deadline": a["official_deadline"], "user_target_date": a["user_target_date"],
             "processing_estimate": a["estimated_processing_time"], "progress_status": "not_started",
+            "contacts": contacts,
         })
     repair = p.get("repair_flags")
     if repair:
