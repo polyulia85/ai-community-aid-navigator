@@ -83,6 +83,68 @@ def agent_10_always_flags_card_02(req):
                       "flags": [flag], "passed_card_ids": [i for i in ids if i != "card_02"]})
 
 
+def agent_10_flags_card02_once(req):
+    """Flags card_02 on repair_round 0 only; passes on every subsequent round."""
+    if req["payload"]["repair_round"] == 0:
+        return agent_10_always_flags_card_02(req)
+    return agent_10_pass(req)
+
+
+def agent_8_repair_card02(req):
+    """Repair-round Agent 8: returns only card_02 with new text + repaired_card_ids.
+
+    On a normal (non-repair) call it behaves like agent_8.
+    """
+    if "repair_flags" not in req["payload"]:
+        return agent_8(req)
+    # Find the original card_02 action from the payload to copy required fields
+    actions = req["payload"].get("proposed_actions", [])
+    card02_action = next((a for a in actions if a["action_id"] == "act_02"), None)
+    if card02_action is None:
+        # fallback: no action for card_02 known; just return minimal
+        return _env(req, {"plan_version": "1r", "potential_options": [], "coverage_gaps": [],
+                          "action_cards": [], "repaired_card_ids": ["card_02"]})
+    repaired_card = {
+        "card_id": "card_02", "source_action_ids": [card02_action["action_id"]],
+        "related_need_ids": [card02_action["need_id"]], "program_id": card02_action["program_id"],
+        "action_title": "Contact the program (repaired)", "reason": "repaired",
+        "next_step": "Call the program (repaired).", "priority_reason": "repaired",
+        "order_group": card02_action["order_group"], "dependency_card_ids": [],
+        "source_refs": [], "uncertainty_notes": [], "official_deadline": None,
+        "user_target_date": None, "processing_estimate": None, "progress_status": "not_started",
+    }
+    return _env(req, {"plan_version": "1r", "potential_options": [], "coverage_gaps": [],
+                      "action_cards": [repaired_card], "repaired_card_ids": ["card_02"]})
+
+
+def agent_8_repair_unknown_card(req):
+    """Repair-round Agent 8: returns a card whose card_id is not in the current plan."""
+    if "repair_flags" not in req["payload"]:
+        return agent_8(req)
+    actions = req["payload"].get("proposed_actions", [])
+    card02_action = next((a for a in actions if a["action_id"] == "act_02"), actions[0] if actions else None)
+    unknown_card = {
+        "card_id": "card_99", "source_action_ids": [],
+        "related_need_ids": [card02_action["need_id"]] if card02_action else [],
+        "program_id": card02_action["program_id"] if card02_action else None,
+        "action_title": "Unknown card", "reason": "unknown", "next_step": "n/a",
+        "priority_reason": "unknown", "order_group": "parallel", "dependency_card_ids": [],
+        "source_refs": [], "uncertainty_notes": [], "official_deadline": None,
+        "user_target_date": None, "processing_estimate": None, "progress_status": "not_started",
+    }
+    return _env(req, {"plan_version": "1r", "potential_options": [], "coverage_gaps": [],
+                      "action_cards": [unknown_card], "repaired_card_ids": ["card_02"]})
+
+
+def agent_8_repair_missing_listed_card(req):
+    """Repair-round Agent 8: lists card_02 in repaired_card_ids but does not return it."""
+    if "repair_flags" not in req["payload"]:
+        return agent_8(req)
+    # Returns an empty action_cards list but claims card_02 was repaired
+    return _env(req, {"plan_version": "1r", "potential_options": [], "coverage_gaps": [],
+                      "action_cards": [], "repaired_card_ids": ["card_02"]})
+
+
 def crashing_agent(req):
     raise ValueError("something broke inside the agent")
 

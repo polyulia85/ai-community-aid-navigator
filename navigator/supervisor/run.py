@@ -8,6 +8,7 @@ Options: --kb PATH  --story-file PATH  --correct field=value  --out run_report.j
 import argparse
 import concurrent.futures
 import copy
+import datetime
 import difflib
 import importlib
 import json
@@ -27,6 +28,71 @@ DEFAULT_KB = os.path.join(HERE, "..", "kb", "kb_sacramento.json")
 SAMPLES = os.path.join(HERE, "..", "samples")
 MAX_RETRIES = 1          # contract 5.3: 1 retry per agent call
 MAX_REPAIR_ROUNDS = 2    # contract 5.3: 2 repair rounds after an Agent 10 FLAG
+
+
+def merge_repaired_plan(current_plan, repair_result):
+    """Merge a repair-round Agent 8 result into the current plan.
+
+    If repair_result contains repaired_card_ids (a list), replace only those
+    cards in the current plan (keeping original order); leave all other cards,
+    potential_options and coverage_gaps unchanged.  Take plan_version from the
+    new result.
+
+    If repaired_card_ids is absent, treat the result as a full replacement
+    (backward compatible with agents that always return the full plan).
+
+    Returns (new_plan, issues).  Issues use codes REPAIR_UNKNOWN_CARD and
+    REPAIR_CARD_MISSING (both severity warning).
+    """
+    from navigator.supervisor import checks  # avoid circular at module level
+    res = repair_result.get("result", {})
+    repaired_ids = res.get("repaired_card_ids")
+
+    # No repaired_card_ids → full replacement (backward compat)
+    if repaired_ids is None:
+        return {
+            "plan_version": res.get("plan_version"),
+            "action_cards": res.get("action_cards", []),
+            "potential_options": res.get("potential_options", []),
+            "coverage_gaps": res.get("coverage_gaps", []),
+        }, []
+
+    issues = []
+    returned_by_id = {c["card_id"]: c for c in res.get("action_cards", [])}
+    current_by_id = {c["card_id"]: c for c in current_plan.get("action_cards", [])}
+
+    # Check for cards returned that are not in the current plan
+    for cid in returned_by_id:
+        if cid not in current_by_id:
+            issues.append(checks.issue(
+                "REPAIR_UNKNOWN_CARD", "warning",
+                f"Repair result returned unknown card_id {cid!r}; not added to plan",
+                cid))
+
+    # Build the new card list: replace listed cards, keep others in order
+    new_cards = []
+    for card in current_plan.get("action_cards", []):
+        cid = card["card_id"]
+        if cid in repaired_ids:
+            if cid in returned_by_id:
+                new_cards.append(returned_by_id[cid])   # replaced with repaired version
+            else:
+                # Listed in repaired_card_ids but missing from returned cards
+                issues.append(checks.issue(
+                    "REPAIR_CARD_MISSING", "warning",
+                    f"Card {cid!r} listed in repaired_card_ids but missing from repair result; keeping old card",
+                    cid))
+                new_cards.append(card)                  # keep old card
+        else:
+            new_cards.append(card)                      # untouched
+
+    new_plan = {
+        "plan_version": res.get("plan_version"),
+        "action_cards": new_cards,
+        "potential_options": current_plan.get("potential_options", []),
+        "coverage_gaps": current_plan.get("coverage_gaps", []),
+    }
+    return new_plan, issues
 
 
 # ---------------------------------------------------------------- loading team components
@@ -163,10 +229,12 @@ def _call_in_thread(fn, request, timeout):
 
 # ---------------------------------------------------------------- one checked call
 class Run:
-    def __init__(self, agents, kb_path, ids=None, isolate=False):
+    def __init__(self, agents, kb_path, ids=None, isolate=False, ref_date=None):
         """agents: role -> AgentRef (from agents.json) or a plain function (tests).
 
         isolate=True runs every AgentRef in its own process (a timeout really stops it).
+        ref_date: a datetime.date used as the reference date for Agent 1.  Defaults
+        to today's date at the moment the run starts.
         """
         self.agents = agents
         self.isolate = isolate
@@ -178,6 +246,8 @@ class Run:
         self.supervisor_issues = []
         self.agent7_findings = []
         self._loaded = {}
+        # Use the supplied date or today; fixed for the whole run (Fix 2)
+        self.ref_date = ref_date if ref_date is not None else datetime.date.today()
 
     def known_refs(self):
         known = {"program_id": set(self.programs), "evidence_id": set(self.evidence)}
@@ -243,7 +313,7 @@ class Run:
     # ---------------------------------------------------------------- the cycle
     def execute(self, story_text, corrections=None):
         st = self.state
-        q1, s0 = B.agent1_request(st, story_text)
+        q1, s0 = B.agent1_request(st, story_text, ref_date=self.ref_date)
         self.supervisor_issues += s0
         r1 = self.call(q1)
         if r1 is None:
@@ -289,9 +359,17 @@ class Run:
             return self.report("stopped_at_agent_8")
 
         # Agent 10 + repair rounds (contract 5.3)
+        # Keep the "current plan" so a repair round that returns only the fixed
+        # cards does not erase the rest (Fix 1 / contracts v1.2 proposal).
+        current_plan = {
+            "plan_version": r8["result"].get("plan_version"),
+            "action_cards": r8["result"].get("action_cards", []),
+            "potential_options": r8["result"].get("potential_options", []),
+            "coverage_gaps": r8["result"].get("coverage_gaps", []),
+        }
         withheld = []
         for repair_round in range(MAX_REPAIR_ROUNDS + 1):
-            q10 = B.agent10_request(st, pkg, q8, r8, repair_round)
+            q10 = B.agent10_request(st, pkg, q8, current_plan, repair_round)
             r10 = self.call(q10)
             if r10 is None:
                 return self.report("stopped_at_agent_10")
@@ -301,17 +379,22 @@ class Run:
             if repair_round == MAX_REPAIR_ROUNDS:
                 withheld = sorted({f["card_id"] for f in flags})
                 break
-            # PROPOSED for v1.1: Agent 8 receives the blocking flags to repair those cards only
-            q8 = B.agent8_request(st, pkg, q6, r6)
-            q8["payload"]["repair_flags"] = flags
-            r8 = self.call(q8)
-            if r8 is None:
+            # Send blocking flags to Agent 8 so it can repair those cards only
+            q8_repair = B.agent8_request(st, pkg, q6, r6)
+            q8_repair["payload"]["repair_flags"] = flags
+            r8_repair = self.call(q8_repair)
+            if r8_repair is None:
                 return self.report("stopped_at_agent_8_repair")
+            # Merge repair result into the current plan (Fix 1)
+            current_plan, merge_issues = merge_repaired_plan(current_plan, r8_repair)
+            self.supervisor_issues += merge_issues
+            # Update q8 so the next Agent 10 request references the repair call
+            q8 = q8_repair
 
-        cards = [c for c in r8["result"].get("action_cards", []) if c["card_id"] not in withheld]
-        plan = {"plan_version": r8["result"].get("plan_version"), "action_cards": cards,
-                "potential_options": r8["result"].get("potential_options", []),
-                "coverage_gaps": r8["result"].get("coverage_gaps", []),
+        cards = [c for c in current_plan["action_cards"] if c["card_id"] not in withheld]
+        plan = {"plan_version": current_plan["plan_version"], "action_cards": cards,
+                "potential_options": current_plan["potential_options"],
+                "coverage_gaps": current_plan["coverage_gaps"],
                 "withheld_card_ids": withheld}
         return self.report("completed", plan)
 
@@ -319,6 +402,7 @@ class Run:
         return {
             "run_id": self.state.run_id, "case_id": self.state.case_id,
             "case_version": self.state.case_version, "outcome": outcome,
+            "ref_date": self.ref_date.isoformat(),
             "partially_mocked": any(s.get("is_mock") for s in self.steps),
             "supervisor_issues": self.supervisor_issues,
             "agent7_findings": self.agent7_findings,
@@ -365,8 +449,19 @@ def main(argv=None):
     ap.add_argument("--demo-broken", action="store_true", help="replace Agent 1 with sample 03")
     ap.add_argument("--no-isolate", action="store_true",
                     help="run agents inside this process (faster; a timed-out agent keeps running)")
+    ap.add_argument("--ref-date", metavar="YYYY-MM-DD",
+                    help="reference date for Agent 1 (ISO format); defaults to today")
     ap.add_argument("--out", default="run_report.json")
     a = ap.parse_args(argv)
+
+    # Validate --ref-date before doing any file loading
+    ref_date = None
+    if a.ref_date:
+        try:
+            ref_date = datetime.date.fromisoformat(a.ref_date)
+        except ValueError:
+            print(f"--ref-date {a.ref_date!r} is not a valid ISO date (YYYY-MM-DD)")
+            return 2
 
     try:
         agents = load_agents(a.agents)
@@ -388,7 +483,7 @@ def main(argv=None):
 
     # Demo uses the IDs of sample 01, so only the two planted faults of sample 03 show
     ids = ("case-demo-001", "run-0001", "corr-0001") if a.demo_broken else None
-    rep = Run(agents, a.kb, ids, isolate=not a.no_isolate).execute(story, corrections)
+    rep = Run(agents, a.kb, ids, isolate=not a.no_isolate, ref_date=ref_date).execute(story, corrections)
     with open(a.out, "w", encoding="utf-8") as f:
         json.dump(rep, f, indent=2, ensure_ascii=False)
     print_summary(rep)

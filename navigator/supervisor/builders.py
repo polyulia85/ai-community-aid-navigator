@@ -3,6 +3,7 @@
 Agents never call each other. The Supervisor keeps one CaseState and builds every
 AgentRequest from it, passing each agent only what it needs.
 """
+import datetime
 import itertools
 import json
 
@@ -79,11 +80,20 @@ def make_request(state, role_id, task_type, payload, task_scope="all_needs",
 
 
 # ---------------------------------------------------------------- Agent 1, 2
-def agent1_request(state, story_text, locale="en-US"):
-    """S0 runs here: the story is masked before Agent 1 sees it."""
+def agent1_request(state, story_text, locale="en-US", ref_date=None):
+    """S0 runs here: the story is masked before Agent 1 sees it.
+
+    ref_date: a datetime.date or ISO string to pass to Agent 1 so it can
+    resolve relative dates in the story.  Defaults to today if not supplied.
+    """
     masked, issues = mask_user_text(story_text)
+    if ref_date is None:
+        ref_date = datetime.date.today()
+    if isinstance(ref_date, datetime.date):
+        ref_date = ref_date.isoformat()
     req = make_request(state, "agent_1", "understand_story",
-                       {"story_text": masked, "locale": locale}, task_scope="full_story")
+                       {"story_text": masked, "locale": locale, "ref_date": ref_date},
+                       task_scope="full_story")
     return req, issues
 
 
@@ -295,14 +305,20 @@ def agent8_request(state, package, agent6_req, agent6_result):
                         upstream_result_refs=[agent6_req["request_id"]])
 
 
-def agent10_request(state, package, agent8_req, agent8_result, repair_round=0):
-    plan = agent8_result["result"]
+def agent10_request(state, package, agent8_req, current_plan, repair_round=0):
+    """Build an Agent 10 request from the current (merged) plan.
+
+    current_plan must have the same keys as a plan dict:
+    plan_version, action_cards, potential_options, coverage_gaps.
+    In round 0 that is the first Agent 8 result; in repair rounds it is the
+    merged plan kept by the Supervisor (Fix 1).
+    """
     payload = {
-        "plan_version": plan.get("plan_version"),
+        "plan_version": current_plan.get("plan_version"),
         "repair_round": repair_round,
-        "action_cards": plan.get("action_cards", []),
-        "potential_options": plan.get("potential_options", []),
-        "coverage_gaps": plan.get("coverage_gaps", []),
+        "action_cards": current_plan.get("action_cards", []),
+        "potential_options": current_plan.get("potential_options", []),
+        "coverage_gaps": current_plan.get("coverage_gaps", []),
         "needs": package["needs"],
         "matches": package["matches"],
         "checked_claims": package["checked_claims"],
