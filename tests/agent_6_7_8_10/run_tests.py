@@ -9,9 +9,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from navigator.agents.agent_6_7_8_10.agent_6_7_8_10 import handle, TASK_TYPES
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SAMPLES = os.path.join(HERE, "..", "..", "navigator", "samples", "agent_6_7_8_10"); os.makedirs(SAMPLES, exist_ok=True)
+# Sample outputs are written only with --save, so a normal test run never changes tracked files.
+SAVE = "--save" in sys.argv
+SAMPLES = os.path.join(HERE, "..", "..", "navigator", "samples", "agent_6_7_8_10")
 load = lambda *p: json.load(open(os.path.join(HERE, *p)))
-save = lambda name, obj: json.dump(obj, open(os.path.join(SAMPLES, name), "w"), indent=2)
+save = lambda name, obj: json.dump(obj, open(os.path.join(SAMPLES, name), "w"), indent=2) if SAVE else None
 results = []
 
 def check(name, expected, actual):
@@ -282,12 +284,314 @@ vc["evidence_records"] = vc["evidence_records"] + [
 r8v = handle(req_like(cl, "agent_8", {"proposed_actions": acts, "needs": vc["needs"], "matches": vc["matches"], "checked_claims": vc["checked_claims"], "plan_version": "plan_v1"}, 46))["result"]
 c211 = [c for c in r8v["action_cards"] if c["program_id"] == "MOCK-211-01"][0]
 cui = [c for c in r8v["action_cards"] if c["program_id"] == "MOCK-UI-01"]
-check("C-CON1 Verified contact and hours appear in next_step with the check date, evidence linked",
-      [True, True], ["Call 2-1-1 and press 8, Mon-Sat 7 a.m. to 7 p.m. (checked Oct 21)." in c211["next_step"], "EV-MOCK-008" in c211["source_refs"]])
+# C-CON1: verified contact appears in next_step AND contacts[] is populated correctly
+con1_contacts = c211.get("contacts", [])
+check("C-CON1 Verified contact in next_step with check date; contacts[] populated with label/value/checked_at/evidence_refs",
+      [True, True, True, True],
+      ["Call 2-1-1 and press 8, Mon-Sat 7 a.m. to 7 p.m (checked Oct 21)." in c211["next_step"],
+       "EV-MOCK-008" in c211["source_refs"],
+       any(x["label"] == "Contact" and x["value"] == "Call 2-1-1 and press 8, Mon-Sat 7 a.m. to 7 p.m." and x["checked_at"] == "2026-10-21" for x in con1_contacts),
+       any("EV-MOCK-008" in x["evidence_refs"] for x in con1_contacts)])
 check("C-CON2 Unverified contact is never shown", True, all("916-555-0100" not in c["next_step"] for c in cui))
 closed_ns = [c["next_step"] for c in r8v["action_cards"] if c["program_id"] == "MOCK-RENT-01"]
 r10v = handle(req_like(cl, "agent_10", dict(r8v, needs=vc["needs"], matches=vc["matches"], checked_claims=vc["checked_claims"],
               program_availability=vc["program_availability"], evidence_records=vc["evidence_records"], repair_round=0), 47))["result"]
 check("C-CON3 Plan with verified contacts passes Agent 10 (no V8)", [], [f["rule_id"] for f in r10v["flags"] if f["rule_id"] == "V8"])
+
+# Windows portability (Slav, Nov 2): no platform-specific strftime day codes in the agent
+SRC = open(os.path.join(HERE, "..", "..", "navigator", "agents", "agent_6_7_8_10", "agent_6_7_8_10.py")).read()
+check("C-WIN No platform-specific day codes in date formatting (Windows, Mac, Linux)", False, ("%" + "-d" in SRC) or ("%" + "#d" in SRC))
+
+# ---- v0.7 contacts[] field and short next_step (Nov 4)
+print("\nPART C (v0.7): contacts[] field and short next_step")
+
+# C-CF1: many verified items → next_step ≤ 350 chars, at most 2 contacts in next_step, all appear in contacts[]
+cf1_claims_base = []
+for i in range(8):
+    cf1_claims_base.append({
+        "program_id": "MOCK-CF1-PROG", "field_path": f"application_method[{i}]",
+        "claim_value": f"Apply method {i}: https://example.org/apply{i}" if i == 0 else f"Method {i} (in person)",
+        "verification_status": "verified", "evidence_refs": [f"EV-CF1-{i:02d}"], "checked_at": "2026-10-21T15:00:00Z", "issue": None})
+for j in range(9):
+    cf1_claims_base.append({
+        "program_id": "MOCK-CF1-PROG", "field_path": f"contact[{j}]",
+        "claim_value": f"(916) 555-01{j:02d}",
+        "verification_status": "verified", "evidence_refs": [f"EV-CF1-C{j:02d}"], "checked_at": "2026-10-21T15:00:00Z", "issue": None})
+cf1_matches = [{"program_id": "MOCK-CF1-PROG", "need_ids": ["need_001"], "match_status": "supported_match",
+                "matched_criteria": [], "missing_case_facts": [], "mismatch_criteria": [], "evidence_refs": ["EV-CF1-00"],
+                "subcategory": "employment_services"}]
+cf1_needs = [{"need_id": "need_001", "category": "employment_assistance", "subcategory": None, "description": "x",
+              "original_quote": "x", "confirmation_status": "confirmed", "user_reported": True, "urgency": "high",
+              "urgency_reason": "x", "user_priority": None}]
+cf1_acts = [{"action_id": "act_01", "need_id": "need_001", "program_id": "MOCK-CF1-PROG", "suggested_priority": 1,
+             "order_group": "parallel", "rationale": "x", "dependency_ids": [], "official_deadline": None,
+             "user_target_date": None, "estimated_processing_time": None, "evidence_refs": ["EV-CF1-00"],
+             "uncertainty_notes": [], "user_override_allowed": True}]
+r8cf1 = handle(req_like(base, "agent_8", {"proposed_actions": cf1_acts, "needs": cf1_needs, "matches": cf1_matches,
+               "checked_claims": cf1_claims_base, "plan_version": "plan_cf1"}, 50))["result"]
+cf1_card = r8cf1["action_cards"][0]
+cf1_contacts_in_ns = [x for x in cf1_card.get("contacts", []) if x["value"] in cf1_card["next_step"]]
+check("C-CF1 8 app methods + 9 contacts: next_step ≤ 350 chars, ≤ 2 contacts in next_step, all verified items in contacts[]",
+      [True, True, True],
+      [len(cf1_card["next_step"]) <= 350,
+       len(cf1_contacts_in_ns) <= 2,
+       len(cf1_card.get("contacts", [])) == 17])
+
+# C-CF2: unverified and missing checked_at do not appear in contacts[] or next_step
+cf2_claims = [
+    {"program_id": "MOCK-CF2-PROG", "field_path": "contact[0]", "claim_value": "VERIFIED-PHONE: (916) 555-0200",
+     "verification_status": "verified", "evidence_refs": ["EV-CF2-V"], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+    {"program_id": "MOCK-CF2-PROG", "field_path": "contact[1]", "claim_value": "UNVERIFIED-PHONE: (916) 555-0201",
+     "verification_status": "unverified", "evidence_refs": [], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+    {"program_id": "MOCK-CF2-PROG", "field_path": "contact[2]", "claim_value": "NO-DATE-PHONE: (916) 555-0202",
+     "verification_status": "verified", "evidence_refs": ["EV-CF2-ND"], "checked_at": None, "issue": None},
+    {"program_id": "MOCK-CF2-PROG", "field_path": "application_method[0]", "claim_value": "UNVERIFIED-METHOD online",
+     "verification_status": "unverified", "evidence_refs": [], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+]
+cf2_matches = [{"program_id": "MOCK-CF2-PROG", "need_ids": ["need_001"], "match_status": "supported_match",
+                "matched_criteria": [], "missing_case_facts": [], "mismatch_criteria": [], "evidence_refs": ["EV-CF2-V"],
+                "subcategory": "employment_services"}]
+cf2_acts = [{"action_id": "act_01", "need_id": "need_001", "program_id": "MOCK-CF2-PROG", "suggested_priority": 1,
+             "order_group": "parallel", "rationale": "x", "dependency_ids": [], "official_deadline": None,
+             "user_target_date": None, "estimated_processing_time": None, "evidence_refs": ["EV-CF2-V"],
+             "uncertainty_notes": [], "user_override_allowed": True}]
+r8cf2 = handle(req_like(base, "agent_8", {"proposed_actions": cf2_acts, "needs": cf1_needs, "matches": cf2_matches,
+               "checked_claims": cf2_claims, "plan_version": "plan_cf2"}, 51))["result"]
+cf2_card = r8cf2["action_cards"][0]
+cf2_contacts = cf2_card.get("contacts", [])
+check("C-CF2 Unverified and no-date items absent from contacts[] and next_step",
+      [True, True, True],
+      [all(x["value"] != "UNVERIFIED-PHONE: (916) 555-0201" for x in cf2_contacts),
+       all(x["value"] != "NO-DATE-PHONE: (916) 555-0202" for x in cf2_contacts),
+       "UNVERIFIED-METHOD" not in cf2_card["next_step"] and "UNVERIFIED-PHONE" not in cf2_card["next_step"]])
+
+# C-CF3: verified application link shows in next_step with its check date
+cf3_claims = [
+    {"program_id": "MOCK-CF3-PROG", "field_path": "application_method[0]",
+     "claim_value": "APPLY HERE at https://example.org/apply-cf3",
+     "verification_status": "verified", "evidence_refs": ["EV-CF3-A"], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+]
+cf3_matches = [{"program_id": "MOCK-CF3-PROG", "need_ids": ["need_001"], "match_status": "supported_match",
+                "matched_criteria": [], "missing_case_facts": [], "mismatch_criteria": [], "evidence_refs": ["EV-CF3-A"],
+                "subcategory": "employment_services"}]
+cf3_acts = [{"action_id": "act_01", "need_id": "need_001", "program_id": "MOCK-CF3-PROG", "suggested_priority": 1,
+             "order_group": "parallel", "rationale": "x", "dependency_ids": [], "official_deadline": None,
+             "user_target_date": None, "estimated_processing_time": None, "evidence_refs": ["EV-CF3-A"],
+             "uncertainty_notes": [], "user_override_allowed": True}]
+r8cf3 = handle(req_like(base, "agent_8", {"proposed_actions": cf3_acts, "needs": cf1_needs, "matches": cf3_matches,
+               "checked_claims": cf3_claims, "plan_version": "plan_cf3"}, 52))["result"]
+cf3_card = r8cf3["action_cards"][0]
+check("C-CF3 Verified application link (with URL) shows in next_step with check date",
+      [True, True],
+      ["https://example.org/apply-cf3" in cf3_card["next_step"],
+       "(checked Oct 21)." in cf3_card["next_step"]])
+
+# C-CF4: temporarily_closed program's card has an empty contacts[]
+cf4_claims = [
+    {"program_id": "MOCK-CF4-PROG", "field_path": "contact[0]", "claim_value": "(916) 555-0300",
+     "verification_status": "verified", "evidence_refs": ["EV-CF4-C"], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+]
+cf4_matches = [{"program_id": "MOCK-CF4-PROG", "need_ids": ["need_001"], "match_status": "supported_match",
+                "matched_criteria": [], "missing_case_facts": [], "mismatch_criteria": [], "evidence_refs": ["EV-CF4-C"],
+                "subcategory": "employment_services"}]
+cf4_acts = [{"action_id": "act_01", "need_id": "need_001", "program_id": "MOCK-CF4-PROG", "suggested_priority": 1,
+             "order_group": "later",
+             "rationale": "Temporarily closed. Reopens Nov 5. Use an open option first.",
+             "dependency_ids": [], "official_deadline": None,
+             "user_target_date": None, "estimated_processing_time": None, "evidence_refs": ["EV-CF4-C"],
+             "uncertainty_notes": ["This program is temporarily closed."], "user_override_allowed": True}]
+r8cf4 = handle(req_like(base, "agent_8", {"proposed_actions": cf4_acts, "needs": cf1_needs, "matches": cf4_matches,
+               "checked_claims": cf4_claims, "plan_version": "plan_cf4"}, 53))["result"]
+cf4_card = r8cf4["action_cards"][0]
+check("C-CF4 Closed program card has empty contacts[]", [], cf4_card.get("contacts", []))
+
+# C-OD1: overdue rent (housing_assistance, urgency immediate, user_target_date in the past) → open housing option in "first"
+od1_needs = [
+    {"need_id": "need_h1", "category": "housing_assistance", "subcategory": "rental_assistance",
+     "description": "Overdue rent", "original_quote": "x", "confirmation_status": "confirmed",
+     "user_reported": True, "urgency": "immediate", "urgency_reason": "Rent is overdue",
+     "user_priority": None},
+]
+od1_matches = [
+    {"program_id": "MOCK-OD1-OPEN", "need_ids": ["need_h1"], "match_status": "supported_match",
+     "matched_criteria": [], "missing_case_facts": [], "mismatch_criteria": [], "evidence_refs": [],
+     "subcategory": "rental_assistance"},
+]
+od1_req = req_like(base, "agent_6", {
+    "needs": od1_needs, "matches": od1_matches, "checked_claims": [],
+    "program_availability": [{"program_id": "MOCK-OD1-OPEN", "availability": "confirmed_open", "evidence_refs": []}],
+    "timing": [{"program_id": "MOCK-OD1-OPEN", "need_id": "need_h1",
+                "user_target_date": "2026-10-01", "official_deadline": None, "estimated_processing_time": None}],
+    "evidence_records": [],
+}, 54)
+r6od1 = handle(od1_req)["result"]["proposed_actions"]
+check("C-OD1 Immediate housing need + open program → order_group 'first'",
+      "first", next(a["order_group"] for a in r6od1 if a["program_id"] == "MOCK-OD1-OPEN"))
+
+# C-CF5: Agent 10 passes a plan built with contacts[] and short next_step (no V8)
+r10cf5 = handle(req_like(base, "agent_10", {
+    "plan": r8cf3,
+    "needs": cf1_needs, "matches": cf3_matches,
+    "checked_claims": cf3_claims,
+    "availability": {"MOCK-CF3-PROG": "confirmed_open"},
+    "evidence_records": [{"evidence_id": "EV-CF3-A", "program_id": "MOCK-CF3-PROG",
+                          "field_path": "application_method[0]",
+                          "claim_value": "APPLY HERE at https://example.org/apply-cf3",
+                          "source_url": "https://example.org/apply-cf3",
+                          "checked_at": "2026-10-21T15:00:00Z", "verification_status": "verified"}],
+}, 55))["result"]
+check("C-CF5 Agent 10 passes plan with contacts[] field and short next_step (no V8)", [], [f["rule_id"] for f in r10cf5["flags"] if f["rule_id"] == "V8"])
+
+# ---- v0.8 rules (Slav's follow-ups, Nov 2026)
+print("\nPART C (v0.8): Slav's follow-ups and audit fixes")
+
+# C-AP1: rules/requirements in application_method rows are not in contacts[]
+cap1_claims = [
+    {"program_id": "PROG-AP1", "field_path": "application_method[0]",
+     "claim_value": "You must be at least 18 years old to apply.",
+     "verification_status": "verified", "evidence_refs": ["EV-AP1-0"], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+    {"program_id": "PROG-AP1", "field_path": "application_method[1]",
+     "claim_value": "Minimum required to file: one document showing income.",
+     "verification_status": "verified", "evidence_refs": ["EV-AP1-1"], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+    {"program_id": "PROG-AP1", "field_path": "application_method[2]",
+     "claim_value": "Paper application forms are available at the office.",
+     "verification_status": "verified", "evidence_refs": ["EV-AP1-2"], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+    {"program_id": "PROG-AP1", "field_path": "application_method[3]",
+     "claim_value": "You may apply as soon as you lose your job.",
+     "verification_status": "verified", "evidence_refs": ["EV-AP1-3"], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+    {"program_id": "PROG-AP1", "field_path": "application_method[4]",
+     "claim_value": "Apply online at https://example.org/apply-ap1",
+     "verification_status": "verified", "evidence_refs": ["EV-AP1-4"], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+]
+from navigator.agents.agent_6_7_8_10.agent_6_7_8_10 import _build_contacts
+cap1_contacts = _build_contacts(cap1_claims, "PROG-AP1")
+cap1_values = [x["value"] for x in cap1_contacts]
+check("C-AP1 Rules/requirements not in contacts[]; valid URL method is included",
+      [False, False, False, False, True],
+      ["You must be at least 18" in str(cap1_values),
+       "Minimum required" in str(cap1_values),
+       "Paper application forms" in str(cap1_values),
+       "You may apply as soon as" in str(cap1_values),
+       any("https://example.org/apply-ap1" in v for v in cap1_values)])
+
+# C-HR1: hours detection without a colon and "24 hours a day"
+from navigator.agents.agent_6_7_8_10.agent_6_7_8_10 import _extract_hours
+check("C-HR1 Hours without colon and '24 hours a day' are detected",
+      [True, True, True, True],
+      [_extract_hours("Open 8 a.m. to 5 p.m. weekdays") is not None,
+       _extract_hours("7:00 a.m. to 7:00 p.m. Mon–Sat") is not None,
+       _extract_hours("Monday through Saturday, all day") is not None,
+       _extract_hours("Available 24 hours a day") is not None])
+
+# C-AP2: URL application row shows "Apply online: <url>" in next_step
+cap2_claims = [
+    {"program_id": "PROG-AP2", "field_path": "application_method[0]",
+     "claim_value": "APPLY HERE on our portal https://wkf.ms/4tjLVzi",
+     "verification_status": "verified", "evidence_refs": ["EV-AP2-0"], "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+]
+cap2_matches = [{"program_id": "PROG-AP2", "need_ids": ["need_001"], "match_status": "supported_match",
+                 "matched_criteria": [], "missing_case_facts": [], "mismatch_criteria": [], "evidence_refs": ["EV-AP2-0"],
+                 "subcategory": "employment_services"}]
+cap2_acts = [{"action_id": "act_01", "need_id": "need_001", "program_id": "PROG-AP2", "suggested_priority": 1,
+              "order_group": "parallel", "rationale": "x", "dependency_ids": [], "official_deadline": None,
+              "user_target_date": None, "estimated_processing_time": None, "evidence_refs": ["EV-AP2-0"],
+              "uncertainty_notes": [], "user_override_allowed": True}]
+r8cap2 = handle(req_like(base, "agent_8", {"proposed_actions": cap2_acts, "needs": cf1_needs, "matches": cap2_matches,
+               "checked_claims": cap2_claims, "plan_version": "plan_cap2"}, 60))["result"]
+cap2_ns = r8cap2["action_cards"][0]["next_step"]
+check("C-AP2 URL application row shows 'Apply online: <url>' in next_step",
+      [True, True],
+      ["Apply online: https://wkf.ms/4tjLVzi" in cap2_ns,
+       "(checked Oct 21)." in cap2_ns])
+
+# C-NC1 (A8-01): action's own need_id is used for related_need_ids; other needs go to coverage_gaps
+cnc1_needs_raw = [
+    {"need_id": "need_food", "category": "food_assistance", "subcategory": "calfresh_benefits",
+     "description": "food", "original_quote": "x", "confirmation_status": "confirmed",
+     "user_reported": True, "urgency": "high", "urgency_reason": "x", "user_priority": None},
+    {"need_id": "need_housing", "category": "housing_assistance", "subcategory": "rental_assistance",
+     "description": "housing", "original_quote": "x", "confirmation_status": "confirmed",
+     "user_reported": True, "urgency": "high", "urgency_reason": "x", "user_priority": None},
+]
+cnc1_matches = [{"program_id": "PROG-NC1", "need_ids": ["need_food", "need_housing"], "match_status": "supported_match",
+                 "matched_criteria": [], "missing_case_facts": [], "mismatch_criteria": [], "evidence_refs": [],
+                 "subcategory": "calfresh_benefits"}]
+cnc1_acts = [{"action_id": "act_01", "need_id": "need_food", "program_id": "PROG-NC1", "suggested_priority": 1,
+              "order_group": "parallel", "rationale": "x", "dependency_ids": [], "official_deadline": None,
+              "user_target_date": None, "estimated_processing_time": None, "evidence_refs": [],
+              "uncertainty_notes": [], "user_override_allowed": True}]
+for _order, _tag in [([cnc1_acts[0]], "forward"), ([dict(cnc1_acts[0])] , "reversed")]:
+    # reversed: swap need_ids order in the match
+    _matches = cnc1_matches if _tag == "forward" else [dict(cnc1_matches[0], need_ids=["need_housing", "need_food"])]
+    _r8nc1 = handle(req_like(base, "agent_8", {"proposed_actions": _order, "needs": cnc1_needs_raw,
+                    "matches": _matches, "plan_version": "plan_nc1"}, 61))["result"]
+    _card_nc1 = _r8nc1["action_cards"][0]
+    _gaps_nc1 = [g["need_id"] for g in _r8nc1["coverage_gaps"]]
+    check(f"C-NC1 ({_tag}) action need_id used for related_need_ids; other need in coverage_gaps",
+          [["need_food"], ["need_housing"]],
+          [_card_nc1["related_need_ids"], _gaps_nc1])
+
+# C-XP1 (A10-01): phone only in another program's evidence → V8 critical, card not released
+cxp1_cards = [{"card_id": "CARD-RENT", "program_id": "PROG-RENT",
+               "action_title": "Ask about rent help", "reason": "rent reason",
+               "next_step": "Call 916-555-0199 for help.", "priority_reason": "x",
+               "order_group": "parallel", "dependency_card_ids": [], "source_refs": [],
+               "uncertainty_notes": [], "official_deadline": None, "user_target_date": None,
+               "processing_estimate": None, "progress_status": "not_started",
+               "related_need_ids": ["need_housing"], "contacts": []}]
+cxp1_matches = [{"program_id": "PROG-RENT", "need_ids": ["need_housing"], "match_status": "supported_match",
+                 "matched_criteria": [], "missing_case_facts": [], "mismatch_criteria": [], "evidence_refs": []}]
+cxp1_needs = [{"need_id": "need_housing", "category": "housing_assistance", "subcategory": "rental_assistance",
+               "description": "x", "original_quote": "x", "confirmation_status": "confirmed",
+               "user_reported": True, "urgency": "high", "urgency_reason": "x", "user_priority": None}]
+# 916-555-0199 only exists in FOOD evidence (different program)
+cxp1_ev = [{"evidence_id": "EV-XP1-F", "program_id": "PROG-FOOD",
+             "field_path": "contact[0]", "claim_value": "916-555-0199",
+             "source_url": "", "checked_at": "2026-10-21T15:00:00Z", "verification_status": "verified"}]
+rxp1 = handle(req_like(base, "agent_10", {
+    "plan": {"action_cards": cxp1_cards, "potential_options": [], "coverage_gaps": []},
+    "needs": cxp1_needs, "matches": cxp1_matches, "checked_claims": [],
+    "availability": {"PROG-RENT": "confirmed_open"}, "evidence_records": cxp1_ev,
+}, 62))["result"]
+check("C-XP1 (A10-01) Phone only in other program's evidence → V8 critical, card not released",
+      [True, True],
+      [any(f["rule_id"] == "V8" and f["severity"] == "critical" for f in rxp1["flags"]),
+       "CARD-RENT" not in rxp1["passed_card_ids"]])
+
+# C-ALT1 (A8-03): closed program that is the only option for its need never says "open option above"
+calt1_needs = [{"need_id": "need_alt", "category": "food_assistance", "subcategory": "food_pantry",
+                "description": "x", "original_quote": "x", "confirmation_status": "confirmed",
+                "user_reported": True, "urgency": "high", "urgency_reason": "x", "user_priority": None}]
+calt1_matches = [{"program_id": "PROG-ALT1-CLOSED", "need_ids": ["need_alt"], "match_status": "supported_match",
+                  "matched_criteria": [], "missing_case_facts": [], "mismatch_criteria": [], "evidence_refs": [],
+                  "subcategory": "food_pantry"}]
+calt1_acts = [{"action_id": "act_01", "need_id": "need_alt", "program_id": "PROG-ALT1-CLOSED",
+               "suggested_priority": 1, "order_group": "later",
+               "rationale": "Temporarily closed. No reopening date is published. Use an open option first.",
+               "dependency_ids": [], "official_deadline": None, "user_target_date": None,
+               "estimated_processing_time": None, "evidence_refs": [], "uncertainty_notes": [], "user_override_allowed": True}]
+r8alt1 = handle(req_like(base, "agent_8", {"proposed_actions": calt1_acts, "needs": calt1_needs,
+               "matches": calt1_matches, "program_availability": [{"program_id": "PROG-ALT1-CLOSED",
+               "availability": "temporarily_closed", "evidence_refs": []}], "plan_version": "plan_alt1"}, 63))["result"]
+calt1_ns = r8alt1["action_cards"][0]["next_step"]
+check("C-ALT1 (A8-03) Closed program with no open alternative never says 'open option above'",
+      [False, True],
+      ["open option above" in calt1_ns,
+       "2-1-1" in calt1_ns or "check back" in calt1_ns.lower()])
+
+# C-EV1 (A8-04): verified contact whose evidence_refs are not in evidence_records is excluded
+cev1_claims = [
+    {"program_id": "PROG-EV1", "field_path": "contact[0]",
+     "claim_value": "Call (916) 555-9999 for help.",
+     "verification_status": "verified", "evidence_refs": ["EV-EV1-MISSING"],
+     "checked_at": "2026-10-21T15:00:00Z", "issue": None},
+]
+cev1_ev = [{"evidence_id": "EV-EV1-OTHER", "program_id": "PROG-EV1",
+            "field_path": "contact[1]", "claim_value": "other",
+            "source_url": "", "checked_at": "2026-10-21T15:00:00Z", "verification_status": "verified"}]
+cev1_contacts = _build_contacts(cev1_claims, "PROG-EV1", evidence_records=cev1_ev)
+check("C-EV1 (A8-04) Verified contact with no matching evidence_refs excluded when evidence_records provided",
+      [],
+      cev1_contacts)
 
 print(f"\n{sum(results)} of {len(results)} checks passed")

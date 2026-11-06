@@ -70,7 +70,8 @@ def _reopen_date(p, program_id):
 
 def _short_date(iso):
     try:
-        return datetime.strptime(iso, "%Y-%m-%d").strftime("%b %-d")
+        d = datetime.strptime(iso, "%Y-%m-%d")
+        return f"{d:%b} {d.day}"  # portable day without leading zero (works on Windows too)
     except (ValueError, TypeError):
         return str(iso)
 
@@ -114,22 +115,166 @@ def _program_label(match):
     return name or org
 
 
-CONTACT_FIELDS = ("contact", "hours", "opening_hours")
+_HOURS_RE = re.compile(
+    r"\d{1,2}:\d{2}\s*(?:am|pm|a\.m\.|p\.m\.)"          # HH:MM am/pm
+    r"|\d{1,2}\s*(?:a\.m\.|p\.m\.)"                       # H a.m. / H p.m. (no colon)
+    r"|monday|tuesday|wednesday|thursday|friday|saturday|sunday"  # named day
+    r"|\d+\s+hours?\s+a\s+day",                            # "24 hours a day"
+    re.I)
+
+# application_method values that are actual ways to apply (not rules/requirements)
+_APP_METHOD_RE = re.compile(
+    r"https?://"                            # URL
+    r"|\(?\d{3}\)?[\s.\-]\d{3}[\s.\-]\d{4}"  # phone number
+    r"|\b(online|by phone|by mail|by fax|in person)\b"  # named channel
+    r"|\b2-1-1\b|\b211\b"                  # 2-1-1 / 211 service line
+    r"|(?:call|text)\s+\d{3,}"             # "Call 211", "Call 898-211", etc.
+    r"|\b(p\.?o\.?\s*box|po box|mailing address|street address|\d+\s+\w+\s+(st|ave|blvd|dr|rd|way|lane|ln|court|ct)\b)",  # address
+    re.I)
+
+# application_method rows that state a rule or requirement, not a way to apply
+_RULE_ROW_RE = re.compile(
+    r"^(you must|you may|minimum required|paper application forms|applicants under|to be eligible)",
+    re.I)
 
 
-def _verified_contacts(claims, program_id):
-    """Contacts and hours for next_step: only verified claims, each with its check date (v1.1 4.8, accepted Oct 26)."""
+def _extract_hours(text):
+    """Return the hours substring if the text contains a time expression, else None."""
+    m = _HOURS_RE.search(str(text))
+    if not m:
+        return None
+    # grab from the first time token to end of sentence / value
+    return str(text)[m.start():].strip()
+
+
+def _build_contacts(claims, program_id, evidence_records=None):
+    """
+    Build contacts[] for an Agent 8 card (v0.7+).
+    Only verified claims with a valid checked_at and field_path starting with
+    'contact' or 'application_method' are included.
+    application_method rows are only included when they are actual ways to apply
+    (URL, phone, address, or named channel); rules and requirements are excluded.
+    When evidence_records is provided, a contacts item is only included if at
+    least one of its evidence_refs exists in evidence_records for the same program_id.
+    Returns a list of dicts: {label, value, hours, checked_at, evidence_refs}.
+    """
+    # build a set of evidence_ids scoped to this program (A8-04)
+    if evidence_records is not None:
+        valid_ev = {e["evidence_id"] for e in evidence_records if e.get("program_id") == program_id}
+    else:
+        valid_ev = None
     out = []
     for c in claims:
-        if (c.get("program_id") == program_id and c.get("verification_status") == "verified"
-                and str(c.get("field_path", "")).split("[")[0] in CONTACT_FIELDS and c.get("claim_value")):
-            when = str(c.get("checked_at") or "")[:10]
-            try:
-                when = datetime.strptime(when, "%Y-%m-%d").strftime("%b %-d")
-            except ValueError:
-                continue  # no check date, so it cannot be shown
-            out.append((f"{str(c['claim_value']).strip()} (checked {when}).", c.get("evidence_refs", [])))
+        if c.get("program_id") != program_id:
+            continue
+        if c.get("verification_status") != "verified":
+            continue
+        fp = str(c.get("field_path", ""))
+        if not (fp.startswith("contact") or fp.startswith("application_method")):
+            continue
+        val = c.get("claim_value")
+        if not val:
+            continue
+        when = str(c.get("checked_at") or "")[:10]
+        try:
+            datetime.strptime(when, "%Y-%m-%d")
+        except ValueError:
+            continue  # no valid check date — never appears
+        # contact rows about lost/stolen cards or EBT account servicing are not actionable
+        if fp.startswith("contact") and re.search(r"lost or stolen|EBT Customer Service", str(val), re.I):
+            continue
+        # application_method rows: exclude rules/requirements; must be actual ways to apply
+        if fp.startswith("application_method"):
+            if _RULE_ROW_RE.match(str(val)):
+                continue
+            if not _APP_METHOD_RE.search(str(val)):
+                continue
+        refs = list(c.get("evidence_refs") or [])
+        # A8-04: at least one evidence_ref must be in the program's evidence records
+        if valid_ev is not None and not (set(refs) & valid_ev):
+            continue
+        label = "How to apply" if fp.startswith("application_method") else "Contact"
+        # For URL application methods, normalise value to "Apply online: <clean url>"
+        raw_val = str(val).strip()
+        if label == "How to apply":
+            url_m = _URL_RE.search(raw_val)
+            if url_m:
+                raw_val = f"Apply online: {_clean_url(url_m.group(0))}"
+        out.append({
+            "label": label,
+            "value": raw_val,
+            "hours": _extract_hours(val),
+            "checked_at": when,
+            "evidence_refs": refs,
+        })
     return out
+
+
+_URL_RE = re.compile(r"https?://\S+")
+_TRAIL_PUNCT_RE = re.compile(r"[\]\[)(.,;:\"']+$")
+
+
+def _clean_url(raw):
+    """Strip trailing punctuation characters from a URL extracted by _URL_RE."""
+    return _TRAIL_PUNCT_RE.sub("", raw)
+
+
+# Sentence boundary: punctuation followed by whitespace and an uppercase letter/digit
+_SENT_SPLIT_RE = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9])")
+
+
+def _first_sentence(text, max_chars=120):
+    """Return the first sentence of text, at most max_chars characters.
+
+    Splits on sentence-ending punctuation followed by whitespace + uppercase/digit
+    so that abbreviations like a.m., p.m., or 2-1-1 are not treated as sentence ends.
+    If the first sentence exceeds max_chars, the trailing clause after the last comma
+    is removed first (e.g. ", which EDD describes as…" is dropped).  Only if the result
+    is still over max_chars is it cut at the last word boundary (with "…" appended).
+    """
+    first = _SENT_SPLIT_RE.split(text.strip(), maxsplit=1)[0]
+    if len(first) <= max_chars:
+        return first
+    # Try dropping the trailing comma clause
+    shorter = first.rsplit(",", 1)[0]
+    if len(shorter) <= max_chars:
+        return shorter
+    # Final fallback: hard cut at word boundary
+    cut = shorter[:max_chars].rsplit(None, 1)[0]
+    return cut + "…"
+
+
+def _next_step_contacts(contacts):
+    """
+    Return at most 2 contact snippets for next_step (v0.7+):
+    1. First "How to apply" item that has a URL → "Apply online: <url> (checked Mon D)."
+       If no URL item, the first "How to apply" item with a phone or 2-1-1 pattern.
+    2. First "Contact" item with a phone pattern.
+    Each non-URL item uses only the first sentence (≤ 120 chars) of the value.
+    Double periods are avoided: if the sentence already ends with ".", it is stripped
+    before appending " (checked Mon D).".
+    """
+    _phone_re = re.compile(r"\(?\d{3}\)?[\s.\-]\d{3}[\s.\-]\d{4}|\b2-1-1\b|\b211\b", re.I)
+    # 1st snippet: URL "How to apply" first; fall back to phone/2-1-1 "How to apply"
+    online_url = next((c for c in contacts if c["label"] == "How to apply" and _URL_RE.search(c["value"])), None)
+    online_phone = next((c for c in contacts if c["label"] == "How to apply" and _phone_re.search(c["value"])), None)
+    online = online_url or online_phone
+    phone = next((c for c in contacts if c["label"] == "Contact" and _phone_re.search(c["value"])), None)
+    snippets = []
+    for item in [online, phone]:
+        if item is None:
+            continue
+        d = datetime.strptime(item["checked_at"], "%Y-%m-%d")
+        url_m = _URL_RE.search(item["value"]) if item["label"] == "How to apply" else None
+        if url_m:
+            snippets.append(f"Apply online: {_clean_url(url_m.group(0))} (checked {d:%b} {d.day}).")
+        else:
+            sentence = _first_sentence(item["value"])
+            # Strip the trailing period so "(checked Mon D)." never follows a period
+            if sentence.endswith("."):
+                sentence = sentence[:-1]
+            snippets.append(f"{sentence} (checked {d:%b} {d.day}).")
+    return snippets
 
 
 def _subcat(match, needs):
@@ -167,7 +312,8 @@ GROUP_ORDER = {"first": 0, "parallel": 1, "later": 2}
 
 def _fmt_date(iso):
     try:
-        return datetime.strptime(iso, "%Y-%m-%d").strftime("%B %-d, %Y")
+        d = datetime.strptime(iso, "%Y-%m-%d")
+        return f"{d:%B} {d.day}, {d.year}"  # portable day without leading zero (works on Windows too)
     except (ValueError, TypeError):
         return str(iso)
 
@@ -276,7 +422,10 @@ def agent_8(request):
     matches = {m["program_id"]: m for m in p["matches"]}
     needs = {n["need_id"]: n for n in p["needs"]}
     acts = p["proposed_actions"]
+    evidence_records = p.get("evidence_records")
     id_map = {a["action_id"]: f"card_{i:02d}" for i, a in enumerate(acts, 1)}
+    # build a set of (program_id, avail) to know which programs are open (for D/A8-03)
+    avail_map = _availability(p)
     cards = []
     for a in acts:
         m = matches.get(a["program_id"])
@@ -294,15 +443,44 @@ def agent_8(request):
                 reopen = re.search(r"Reopens ([A-Z][a-z]{2} \d+(?:, after your [A-Z][a-z]{2} \d+ date)?)", a["rationale"])
                 title = f"{title} (reopens {reopen.group(1)})" if reopen else f"{title} (closed for now)"
                 reason = f"This program is temporarily closed right now. It may be relevant later because it {offers}."
-                next_step = "Use the open option above first. Check back with this program when it reopens."
-        if m and not a["rationale"].startswith("Temporarily closed"):
-            for text, refs in _verified_contacts(p.get("checked_claims", []), a["program_id"]):
-                next_step = f"{next_step} {text}"
-                a = dict(a, evidence_refs=list(dict.fromkeys(a["evidence_refs"] + refs)))
+                # A8-03: say "open option above" only if another open card exists for this need
+                need_id = a.get("need_id")
+                has_open = any(
+                    x["program_id"] != a["program_id"]
+                    and x.get("need_id") == need_id
+                    and avail_map.get(x["program_id"]) != "temporarily_closed"
+                    for x in acts
+                )
+                if has_open:
+                    next_step = "Use the open option above first. Check back with this program when it reopens."
+                else:
+                    next_step = "Check back when this program reopens. Contact 2-1-1 for other help while you wait."
+        is_closed = a["rationale"].startswith("Temporarily closed")
+        claims = p.get("checked_claims", [])
+        if m and not is_closed:
+            contacts = _build_contacts(claims, a["program_id"], evidence_records)
+            snippets = _next_step_contacts(contacts)
+            for snippet in snippets:
+                # Only append a snippet if the whole snippet fits within the 250-char budget
+                candidate = next_step + " " + snippet
+                if len(candidate) <= 250:
+                    next_step = candidate
+            if contacts:
+                all_refs = [r for item in contacts for r in item["evidence_refs"]]
+                a = dict(a, evidence_refs=list(dict.fromkeys(a["evidence_refs"] + all_refs)))
+        else:
+            contacts = []
         if not m:
             title, reason = "Follow up on your applications", "Checking in helps you catch any requests for more information."
             next_step = "After applying, watch for letters or messages and respond to any requests for documents."
-        related = m["need_ids"] if m else sorted({x["need_id"] for x in acts if x["action_id"] in a["dependency_ids"]})
+        # B/A8-01: related_need_ids uses action's own need_id; fall back to match's need_ids only when null
+        if m:
+            if a.get("need_id") is not None:
+                related = [a["need_id"]]
+            else:
+                related = m["need_ids"]
+        else:
+            related = sorted({x["need_id"] for x in acts if x["action_id"] in a["dependency_ids"]})
         cards.append({
             "card_id": id_map[a["action_id"]], "source_action_ids": [a["action_id"]], "related_need_ids": related, "program_id": a["program_id"],
             "action_title": title, "reason": reason, "next_step": next_step, "priority_reason": a["rationale"],
@@ -310,6 +488,7 @@ def agent_8(request):
             "source_refs": a["evidence_refs"], "uncertainty_notes": a["uncertainty_notes"],
             "official_deadline": a["official_deadline"], "user_target_date": a["user_target_date"],
             "processing_estimate": a["estimated_processing_time"], "progress_status": "not_started",
+            "contacts": contacts,
         })
     repair = p.get("repair_flags")
     if repair:
@@ -473,7 +652,13 @@ def agent_10(request):
     matches = {m["program_id"]: m for m in p["matches"]}
     claims = p.get("checked_claims", [])
     avail = _availability(p)
-    evidence_text = " ".join(str(e.get("source_url", "")) + " " + str(e.get("claim_value", "")) for e in p.get("evidence_records", []))
+    # A10-01: build a per-program evidence text so V8 only fires when a
+    # phone/URL is missing from *that program's* own evidence records.
+    evidence_records = p.get("evidence_records", [])
+    ev_by_program = {}
+    for e in evidence_records:
+        ev_by_program.setdefault(e.get("program_id"), []).append(
+            str(e.get("source_url", "")) + " " + str(e.get("claim_value", "")))
     flags = []
 
     def flag(card, rule, reason, fix, claim=""):
@@ -527,8 +712,10 @@ def agent_10(request):
                  "Show user dates as the user's date, never as an official deadline.")
         if not c.get("next_step", "").strip():
             flag(cid, "V6", "Card has no grounded next step", "Add a concrete next step.")
+        # A10-01: check phone/URL only against this card's program's evidence
+        prog_ev_text = " ".join(ev_by_program.get(pid, []))
         for found in URL_OR_PHONE.findall(text):
-            if found not in evidence_text:
+            if found not in prog_ev_text:
                 flag(cid, "V8", f"Contact or link not in evidence: {found}", "Remove it or use the verified contact.")
         if c.get("progress_status") != "not_started":
             flag(cid, "V10", "Progress status was set without user input", "Set progress_status to not_started.")
