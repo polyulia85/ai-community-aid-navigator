@@ -1,6 +1,6 @@
-# Agents 3, 4, 5: Retrieval, Matching, Verification (owner: Silver)
+# Agents 3, 4, 5: Retrieval, Matching, Verification (owner: Silver) — v1.5
 
-Built against Shared JSON Contracts v1.0 (frozen Oct 23): results carry schema_version "1.0"; task_type retrieve_candidates / match_resources / verify_resources. Python 3.11+, standard library only.
+Shared JSON Contracts v1.1 (agent results still carry schema_version "1.0", as in v1.0); task_type retrieve_candidates / match_resources / verify_resources. Python 3.11+, standard library only.
 
 | File | Agent | What it does |
 |---|---|---|
@@ -33,7 +33,9 @@ Each module exposes `handle(request: dict) -> dict` (AgentRequest in, AgentResul
 | `UNKNOWN_PROGRAM` (Agent 5) | program_id not in the KB | `partial`, or `failed` if none known |
 | `COUNTY_FROM_ZIP_FALLBACK` (Agents 3-4) | ZIP given without a county; county taken from the local fallback | warning only |
 
-**Nov 2 update (Saint John's reopening):** published Nov 2, 2026 after checking the official pages (see `navigator/kb/staged/NOV2_CHECKLIST.md`); replaced rows are in `navigator/kb/history/superseded_evidence.json`.
+**Nov 2 update (Saint John's reopening):** published Nov 2, 2026 after checking the official pages and built in permanently by `build_kb.py`; replaced rows are in `navigator/kb/history/superseded_evidence.json` (rebuilt each run, no duplicates). Claim values quote the page verbatim; conclusions drawn from them (e.g. Saint John's `confirmed_open`) are labeled as inferences in `notes`.
+
+**Changes in v1.5 (Nov 3):** ev_sjhap_020/021 claim values are verbatim page text, inference moved to notes; ev_calfresh_020 source is the CDSS page with the 2026–2027 waiver list; KB header says contracts v1.1; staged Nov 2 draft and checklist removed (done).
 
 **Same-page rule (Nov 2):** on one source page, statements about different dates (e.g. "closed now" + "reopens Nov 2") are complementary; two different values for the same field with no date difference are `conflicting`.
 
