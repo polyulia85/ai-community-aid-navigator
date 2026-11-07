@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "note": "Contracts v1.0 (frozen Oct 23). Built by kb/tools/build_kb.py.",
+  "note": "Contracts v1.1. Nov 2, 2026 update published. Built by navigator/kb/tools/build_kb.py.",
   "program_records": [
     {
       "program_id": "prog_food_calfresh_sac_001",
@@ -829,7 +829,7 @@
       ],
       "application_method": [
         {
-          "value": "Apply online through the 'APPLY HERE' link on the program page: https://wkf.ms/4tjLVzi",
+          "value": "APPLY HERE (https://wkf.ms/4tjLVzi)",
           "evidence_refs": [
             "ev_sjhap_020"
           ],
@@ -1235,7 +1235,7 @@
       "program_id": "prog_food_calfresh_sac_001",
       "field_path": "eligibility_criteria[15]",
       "claim_value": "Sacramento County is not listed among the counties where the ABAWD work requirement is waived (Nov 1, 2025 to Oct 31, 2026: Alpine, Colusa, Imperial, Merced, Monterey, Plumas, Tulare; Nov 1, 2026 to Oct 31, 2027: Colusa, Imperial, Kings, Merced, Monterey, Plumas, Tulare).",
-      "source_url": "https://cdss.ca.gov/inforesources/CalFresh/ABAWD",
+      "source_url": "https://cdss.ca.gov/inforesources/cdss-programs/calfresh/able-bodied-adults-without-dependents",
       "checked_at": "2026-11-02T15:30:00-08:00",
       "verification_status": "verified",
       "source_title": "CalFresh Work and Community Engagement Requirements (Able-Bodied Adults Without Dependents) | CDSS",
@@ -2274,27 +2274,27 @@
       "evidence_id": "ev_sjhap_020",
       "program_id": "prog_housing_saintjohns_sac_001",
       "field_path": "application_method[0]",
-      "claim_value": "Apply online through the 'APPLY HERE' link on the program page: https://wkf.ms/4tjLVzi",
+      "claim_value": "APPLY HERE (https://wkf.ms/4tjLVzi)",
       "source_url": "https://saintjohnsprogram.org/get-help/housing-assistance-program/",
       "checked_at": "2026-11-02T15:30:00-08:00",
       "verification_status": "verified",
       "source_title": "Housing Assistance Program | Saint John's Program for Real Change (page text as published, checked Nov 2, 2026)",
       "source_authority_scope": "local_provider_operating_intake",
       "effective_date": "2026-11-02",
-      "notes": "Replaces ev_sjhap_014 ('return back to this page on Monday, November 2nd'). The online form link appeared on the page on Nov 2. Rent in the Nov 1 test case was due before this date."
+      "notes": "Verbatim link text from the page; the link opens the online application form. Replaces ev_sjhap_014 ('return back to this page on Monday, November 2nd'). The online form link appeared on the page on Nov 2. Rent in the Nov 1 test case was due before this date."
     },
     {
       "evidence_id": "ev_sjhap_021",
       "program_id": "prog_housing_saintjohns_sac_001",
       "field_path": "availability",
-      "claim_value": "The page no longer states that funds are exhausted and shows an 'APPLY HERE' link to the online application form.",
+      "claim_value": "APPLY HERE",
       "source_url": "https://saintjohnsprogram.org/get-help/housing-assistance-program/",
       "checked_at": "2026-11-02T15:30:00-08:00",
       "verification_status": "verified",
       "source_title": "Housing Assistance Program | Saint John's Program for Real Change (page text as published, checked Nov 2, 2026)",
       "source_authority_scope": "local_provider_operating_intake",
       "effective_date": "2026-11-02",
-      "notes": "Replaces ev_sjhap_019 ('all of the funds for October 2026 have been exhausted') and ev_sjhap_022 ('return back to this page on Monday, November 2nd'). Basis for availability = confirmed_open (published status only, not a funding guarantee)."
+      "notes": "Verbatim link text, shown on the page on Nov 2, 2026. INFERENCE: availability = confirmed_open is inferred from what changed on the page: the October notice ('We regret to announce that all of the funds for October 2026 have been exhausted...') is no longer shown, and an 'APPLY HERE' link to the online application form is. The page has no sentence stating that applications are open. Published status only, not a funding guarantee. Replaces ev_sjhap_019 and ev_sjhap_022."
     },
     {
       "evidence_id": "ev_cas_001",

@@ -1,11 +1,14 @@
 """Agent 4 - Resource Matching (contract 4.4 / frozen 11.5). Preliminary fit only, never an eligibility decision.
 Reads ONLY its inputs: program_criteria[] is built by the Supervisor from the KB (Slav, Oct 22).
-Basic rules for Oct 23:
+Rules (v1.6, after Julia's review of Nov 3):
 - confirmed location outside the program's service area -> confirmed_mismatch (names criterion + fact)
-- location inside service area -> potential_match
-- location and household size confirmed AND no case fact missing (e.g. income) -> supported_match (decision 9, proposed)
-- unknown income is NEVER a mismatch; it goes to missing_case_facts
-- no location known, or no service-area criteria supplied -> insufficient_information
+- location unknown, or no service-area criteria supplied -> insufficient_information
+- inside the service area -> potential_match
+- supported_match ONLY when location and household size are confirmed, no needed case fact is missing,
+  AND every criterion was evaluated. Text eligibility criteria are not evaluated yet (structured criteria are
+  proposed for contracts v1.2), so a program with any eligibility criteria stays potential_match and the
+  unevaluated criteria are reported (CRITERIA_NOT_EVALUATED). A confirmed fact is not a confirmed match.
+- income is asked for only when the program's own criteria mention income; unknown income is NEVER a mismatch.
 """
 from .common import to_counties, area_covers, envelope, bad_request, check_task, issue
 
@@ -55,14 +58,24 @@ def handle(request, kb_path=None):  # kb_path kept for a uniform signature; Agen
             m["match_status"] = "supported_match" if confirmed else "potential_match"
             m["explanation"] = ("May fit this need; this is a preliminary match, not an eligibility decision. "
                                 "Only the program can decide eligibility.")
-        for f in INCOME_FACTS:
-            if facts.get(f, {}).get("value") is None and m["match_status"] != "confirmed_mismatch":
-                m["missing_case_facts"].append(f)
-        # Decision 9 (Silver's proposal, pending team agreement): supported_match requires that no case fact the
-        # match depends on is missing. Unknown income keeps it at potential_match (still never a mismatch).
-        if m["match_status"] == "supported_match" and m["missing_case_facts"]:
+        other = [c for c in crit if not c["field_path"].startswith("geography")]
+        income_relevant = any("income" in str(c.get("value", "")).lower() for c in other)
+        if income_relevant and m["match_status"] != "confirmed_mismatch":
+            for f in INCOME_FACTS:
+                if facts.get(f, {}).get("value") is None:
+                    m["missing_case_facts"].append(f)
+        if m["match_status"] in ("potential_match", "supported_match") and other:
+            issues.append(issue("CRITERIA_NOT_EVALUATED", "info",
+                                f"{len(other)} eligibility criteria not evaluated yet: "
+                                + ", ".join(c["field_path"] for c in other) + ". Only the program can decide.", pid))
+        if m["match_status"] == "supported_match" and (m["missing_case_facts"] or other):
             m["match_status"] = "potential_match"
-            m["explanation"] += " Not yet a supported match: " + ", ".join(m["missing_case_facts"]) + " still unknown."
+            why = []
+            if m["missing_case_facts"]:
+                why.append(", ".join(m["missing_case_facts"]) + " still unknown")
+            if other:
+                why.append(f"{len(other)} program criteria not yet evaluated")
+            m["explanation"] += " Not yet a supported match: " + "; ".join(why) + "."
         refs += m["evidence_refs"]
         matches.append(m)
     return envelope(request, "agent_4", "completed", {"matches": matches}, issues, refs)

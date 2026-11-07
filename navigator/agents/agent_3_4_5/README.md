@@ -1,6 +1,6 @@
-# Agents 3, 4, 5: Retrieval, Matching, Verification (owner: Silver)
+# Agents 3, 4, 5: Retrieval, Matching, Verification (owner: Silver) — v1.6
 
-Built against Shared JSON Contracts v1.0 (frozen Oct 23): results carry schema_version "1.0"; task_type retrieve_candidates / match_resources / verify_resources. Python 3.11+, standard library only.
+Shared JSON Contracts v1.1 (agent results still carry schema_version "1.0", as in v1.0); task_type retrieve_candidates / match_resources / verify_resources. Python 3.11+, standard library only.
 
 | File | Agent | What it does |
 |---|---|---|
@@ -10,7 +10,7 @@ Built against Shared JSON Contracts v1.0 (frozen Oct 23): results carry schema_v
 
 Each module exposes `handle(request: dict) -> dict` (AgentRequest in, AgentResult out). `is_mock` is `true` until the logic is final.
 
-**Run the tests** (from repo root): `python -m unittest discover tests -v` (20 tests)
+**Run the tests** (from repo root): `python -m unittest discover tests -v` (30 tests)
 **Regenerate samples:** `python navigator/samples/agent_3_4_5/make_samples.py`
 **Rebuild / check the KB:** `python navigator/kb/tools/build_kb.py` then `python navigator/kb/tools/validate_kb.py`
 **Review spreadsheet (optional):** `python navigator/kb/tools/make_sheet.py out.xlsx` needs `openpyxl`; it is not needed to run the agents.
@@ -33,10 +33,20 @@ Each module exposes `handle(request: dict) -> dict` (AgentRequest in, AgentResul
 | `UNKNOWN_PROGRAM` (Agent 5) | program_id not in the KB | `partial`, or `failed` if none known |
 | `COUNTY_FROM_ZIP_FALLBACK` (Agents 3-4) | ZIP given without a county; county taken from the local fallback | warning only |
 
-**Nov 2 update (Saint John's reopening):** published Nov 2, 2026 after checking the official pages (see `navigator/kb/staged/NOV2_CHECKLIST.md`); replaced rows are in `navigator/kb/history/superseded_evidence.json`.
+**Nov 2 update (Saint John's reopening):** published Nov 2, 2026 after checking the official pages and built in permanently by `build_kb.py`; replaced rows are in `navigator/kb/history/superseded_evidence.json` (rebuilt each run, no duplicates). Claim values quote the page verbatim; conclusions drawn from them (e.g. Saint John's `confirmed_open`) are labeled as inferences in `notes`.
+
+**Changes in v1.5 (Nov 3):** ev_sjhap_020/021 claim values are verbatim page text, inference moved to notes; ev_calfresh_020 source is the CDSS page with the 2026–2027 waiver list; KB header says contracts v1.1; staged Nov 2 draft and checklist removed (done).
 
 **Same-page rule (Nov 2):** on one source page, statements about different dates (e.g. "closed now" + "reopens Nov 2") are complementary; two different values for the same field with no date difference are `conflicting`.
 
+**Changes in v1.6 (Nov 6, Julia's technical review of Nov 3):**
+- Agent 3: reports total found vs. returned and `CANDIDATES_TRUNCATED` (3.1); documented ordering (need order, subcategory match, then program_id); unknown location returns `GEOGRAPHY_UNRESOLVED`, never a coverage gap (3.2); malformed payloads return `failed` + `INPUT_INVALID` (3.3).
+- Agent 4: `supported_match` only when every criterion was evaluated; text eligibility criteria are not evaluated yet, so they are listed in `CRITERIA_NOT_EVALUATED` and the result stays `potential_match` (4.2). Income is requested only when the program's criteria mention income (4.3).
+- Agent 5: missing evidence is also an unresolved question + `EVIDENCE_MISSING` (5.1); dated statements from one page stay separate claims, with no combined "current" value (5.3).
+
 **Known limits:**
+- Criterion-based matching (Julia 4.1, 4.4) waits for structured criteria in contracts v1.2 (Slav's proposal: county/ZIP, household size, monthly income with is_approximate, employment status). Until then no program with eligibility criteria reaches `supported_match`.
+- Evidence freshness (Julia 5.2) waits for the v1.2 windows (proposal: availability 7 days, contacts/hours 30, rules/limits 90).
+- `is_mock` stays `true` until the v1.2 rule is confirmed (proposal: false for rule-based logic over the real KB).
 - Agent 4 does not compare income against limits; dollar thresholds must not be hard-coded (TD 24.1).
 - `build_program_criteria_from_kb()` in `common.py` is for local tests only; it stands in for the Supervisor.

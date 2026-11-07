@@ -27,6 +27,9 @@ def handle(request, kb_path=None):
                 checked.append({"program_id": pid, "field_path": fp, "claim_value": None,
                                 "verification_status": "unverified", "evidence_refs": [], "checked_at": None,
                                 "issue": "No published value on file; left empty, not guessed."})
+                # Julia's review 5.1: missing evidence is also an unresolved question, not only a quiet status
+                unresolved.append(f"{pid} {fp}: no evidence on file - confirm with the program.")
+                issues.append(issue("EVIDENCE_MISSING", "warning", f"{fp} has no evidence on file", fp))
                 continue
             groups = {}
             for e in rows:
@@ -39,7 +42,16 @@ def handle(request, kb_path=None):
                     status, value, note = "conflicting", None, "Sources disagree; all values kept separately."
                 elif len(values) > 1 and statuses == {"verified"} and len({e.get("effective_date") for e in evs}) == len(evs):
                     # Same page, statements about DIFFERENT dates (e.g. "closed now" + "reopens Nov 2"): complementary.
-                    status, value, note = "verified", " | ".join(e["claim_value"] for e in evs), "Dated statements from the same source; all kept."
+                    # Julia's review 5.3: keep each dated statement as its own claim; no combined "current" value is
+                    # derived here (that needs the agreed date-aware rule).
+                    for e in evs:
+                        refs.append(e["evidence_id"])
+                        checked.append({"program_id": pid, "field_path": path, "claim_value": e["claim_value"],
+                                        "verification_status": "verified", "evidence_refs": [e["evidence_id"]],
+                                        "checked_at": e["checked_at"],
+                                        "issue": f"Dated statement (effective_date {e.get('effective_date') or 'not stated'}); "
+                                                 "current status is not derived here."})
+                    continue
                 elif len(values) > 1:  # same page, same date, different values: a real contradiction (e.g. SMUD form)
                     status, value, note = "conflicting", None, "The same source gives different values; all kept separately."
                 elif statuses == {"verified"}:

@@ -57,7 +57,8 @@ class T1_ClearMatch(unittest.TestCase):
         confirmed = [dict(f, confirmation_status="confirmed") for f in FACTS]
         self.assertEqual(match(cand, confirmed)["result"]["matches"][0]["match_status"], "potential_match")  # income unknown
         with_income = confirmed + [{"fact_id": "fact_009", "field": "household_gross_monthly_income", "value": 0, "confirmation_status": "confirmed"}]
-        self.assertEqual(match(cand, with_income)["result"]["matches"][0]["match_status"], "supported_match")
+        # v1.6 (Julia 4.2): CalFresh has eligibility criteria that are not evaluated yet, so it stays potential_match
+        self.assertEqual(match(cand, with_income)["result"]["matches"][0]["match_status"], "potential_match")
 
 
 class T2_UnknownInfo(unittest.TestCase):
@@ -209,7 +210,7 @@ class T8_SamePageRule(unittest.TestCase):
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
             json.dump(kb, f)
         try:
-            return agent_5.handle(req("agent_5", "verify_resources", {"programs_to_check": [{"program_id": "prog_test_fixture_002", "field_paths": ["availability"]}]}), kb_path=f.name)["result"]["checked_claims"][0]
+            return agent_5.handle(req("agent_5", "verify_resources", {"programs_to_check": [{"program_id": "prog_test_fixture_002", "field_paths": ["availability"]}]}), kb_path=f.name)["result"]["checked_claims"]
         finally:
             os.unlink(f.name)
 
@@ -218,14 +219,95 @@ class T8_SamePageRule(unittest.TestCase):
                 "source_url": "https://example.org/one-page", "checked_at": "2026-11-02T09:00:00-08:00", "verification_status": "verified", "effective_date": eff}
 
     def test_closed_now_reopens_later_is_complementary(self):
-        c = self.run5([self.row("ev_a", "Funds for October are exhausted.", None), self.row("ev_b", "Applications reopen Monday, November 2nd.", "2026-11-02")])
-        self.assertEqual(c["verification_status"], "verified")
-        self.assertEqual(set(c["evidence_refs"]), {"ev_a", "ev_b"})
+        claims = self.run5([self.row("ev_a", "Funds for October are exhausted.", None), self.row("ev_b", "Applications reopen Monday, November 2nd.", "2026-11-02")])
+        # v1.6 (Julia 5.3): each dated statement stays its own claim; no combined "current" value
+        self.assertEqual([c["evidence_refs"] for c in claims], [["ev_a"], ["ev_b"]])
+        self.assertTrue(all(c["verification_status"] == "verified" for c in claims))
+        self.assertTrue(all("|" not in c["claim_value"] for c in claims))
 
     def test_two_values_same_field_same_page_is_conflicting(self):
-        c = self.run5([self.row("ev_c", "Income documents: last 30 days.", None), self.row("ev_d", "Income documents: last 60 days.", None)])
+        c = self.run5([self.row("ev_c", "Income documents: last 30 days.", None), self.row("ev_d", "Income documents: last 60 days.", None)])[0]
         self.assertEqual(c["verification_status"], "conflicting")
         self.assertIsNone(c["claim_value"])
+
+
+class T9_AuditFixes(unittest.TestCase):
+    """Julia's technical review of Agents 3-5 (Nov 3): baseline fixes, one test per finding.
+    Program criteria below are TEST FIXTURES, not real KB programs."""
+    PID = "prog_test_fixture_003"
+
+    def m4(self, criteria, facts):
+        crit = [{"program_id": self.PID, "field_path": "geography[0]", "value": "Sacramento County", "evidence_refs": ["ev_x"]}]
+        crit += [{"program_id": self.PID, "field_path": f"eligibility_criteria[{i}]", "value": v, "evidence_refs": [f"ev_{i}"]}
+                 for i, v in enumerate(criteria)]
+        out = agent_4.handle(req("agent_4", "match_resources", {"candidate_programs": [{"program_id": self.PID, "matched_need_ids": ["need_001"]}],
+                                                                  "case_facts": facts, "needs": NEEDS, "program_criteria": crit}))
+        return out, out["result"]["matches"][0]
+
+    CONFIRMED = [{"fact_id": "f1", "field": "county", "value": "Sacramento County", "confirmation_status": "confirmed"},
+                 {"fact_id": "f2", "field": "household_size", "value": 4, "confirmation_status": "confirmed"}]
+    INCOME = [{"fact_id": "f3", "field": "household_gross_monthly_income", "value": 5000, "confirmation_status": "confirmed"}]
+
+    # --- Agent 4 (scenarios A-F from the review)
+    def test_A_income_present_is_not_a_match_against_the_limit(self):
+        out, m = self.m4(["Gross monthly income at or below $3,000 for a household of 4."], self.CONFIRMED + self.INCOME)
+        self.assertEqual(m["match_status"], "potential_match")
+        self.assertIn("CRITERIA_NOT_EVALUATED", {i["code"] for i in out["issues"]})
+
+    def test_B_income_required_but_unknown_is_reported(self):
+        out, m = self.m4(["Household income within HUD low-income guidelines."], self.CONFIRMED)
+        self.assertIn("household_gross_monthly_income", m["missing_case_facts"])
+        self.assertNotEqual(m["match_status"], "confirmed_mismatch")
+
+    def test_C_income_not_relevant_does_not_downgrade(self):
+        out, m = self.m4([], self.CONFIRMED)
+        self.assertNotIn("household_gross_monthly_income", m["missing_case_facts"])
+        self.assertEqual(m["match_status"], "supported_match")  # nothing left unevaluated
+        out, m = self.m4(["Must live in Sacramento County for six months."], self.CONFIRMED)
+        self.assertNotIn("household_gross_monthly_income", m["missing_case_facts"])  # no income criterion
+
+    def test_D_dependent_children_criterion_is_not_assumed(self):
+        out, m = self.m4(["Household must include a child under 18."], self.CONFIRMED)
+        self.assertEqual(m["match_status"], "potential_match")
+
+    def test_E_crisis_specific_criterion_is_not_assumed(self):
+        out, m = self.m4(["Applicant must have lost a family member (bereavement)."], self.CONFIRMED)
+        self.assertEqual(m["match_status"], "potential_match")
+        self.assertIn("eligibility_criteria[0]", out["issues"][-1]["message"])
+
+    def test_F_geography_ok_but_other_criterion_unproven(self):
+        out, m = self.m4(["Valid lease required.", "Income below the limit."], self.CONFIRMED + self.INCOME)
+        self.assertEqual(m["match_status"], "potential_match")
+        self.assertIn("2 program criteria not yet evaluated", m["explanation"])
+
+    # --- Agent 3
+    def test_3_1_truncation_is_reported(self):
+        r = req("agent_3", "retrieve_candidates", {"needs": [NEEDS[1]], "geography": GEO, "max_candidates": 1})
+        out = agent_3.handle(r)
+        self.assertEqual([c["program_id"] for c in out["result"]["candidate_programs"]], [SJ])  # ordering policy
+        self.assertIn("CANDIDATES_TRUNCATED", {i["code"] for i in out["issues"]})
+        self.assertIn("2 candidate(s) found, 1 returned", out["result"]["retrieval_notes"][0])
+
+    def test_3_2_unknown_geography_is_not_a_coverage_gap(self):
+        out = retrieve(geography=["90210"])
+        codes = {i["code"] for i in out["issues"]}
+        self.assertIn("GEOGRAPHY_UNRESOLVED", codes)
+        self.assertNotIn("COVERAGE_GAP", codes)
+        self.assertEqual(out["status"], "partial")
+
+    def test_3_3_malformed_payload_is_a_structured_error(self):
+        for bad in ({"needs": [{"category": "food_assistance"}], "geography": GEO},
+                    {"needs": "food", "geography": GEO},
+                    {"needs": NEEDS, "geography": GEO, "max_candidates": 0}):
+            out = agent_3.handle(req("agent_3", "retrieve_candidates", bad))
+            self.assertEqual(out["status"], "failed")
+            self.assertEqual(out["issues"][0]["code"], "INPUT_INVALID")
+
+    # --- Agent 5
+    def test_5_1_missing_evidence_is_an_unresolved_question(self):
+        out = agent_5.handle(req("agent_5", "verify_resources", {"programs_to_check": [{"program_id": CALFRESH, "field_paths": ["deadlines"]}]}))
+        self.assertTrue(any("deadlines" in q for q in out["result"]["unresolved_questions"]))
+        self.assertIn("EVIDENCE_MISSING", {i["code"] for i in out["issues"]})
 
 
 if __name__ == "__main__":
