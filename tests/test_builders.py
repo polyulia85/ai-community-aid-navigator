@@ -1,4 +1,6 @@
 """Tests for Supervisor builders. Run from the repo root:  python -m unittest -v"""
+import copy
+import datetime
 import json
 import os
 import unittest
@@ -6,9 +8,10 @@ import unittest
 from navigator.supervisor import builders as B
 from navigator.supervisor import checks
 from navigator.supervisor import contract as C
+from tests.fake_agents import FIXTURE_KB
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "navigator")
-KB = os.path.join(ROOT, "kb", "kb_sacramento.json")
+KB = FIXTURE_KB
 
 
 def load(name):
@@ -23,18 +26,18 @@ def new_state():
 class TestRequests(unittest.TestCase):
     def test_every_request_has_all_envelope_fields(self):
         st = new_state()
-        req, _ = B.agent1_request(st, "I lost my job.")
+        req, _ = B.agent1_request(st, "I lost my job.", ref_date=datetime.date(2026, 11, 15))
         self.assertEqual(set(C.REQUEST_FIELDS) - set(req), set())
         self.assertEqual(req["schema_version"], "1.0")
 
     def test_request_ids_are_unique(self):
         st = new_state()
-        a, _ = B.agent1_request(st, "x"); b = B.agent2_request(st)
+        a, _ = B.agent1_request(st, "x", ref_date=datetime.date(2026, 11, 15)); b = B.agent2_request(st)
         self.assertNotEqual(a["request_id"], b["request_id"])
 
     def test_s0_runs_before_agent1(self):
         st = new_state()
-        req, issues = B.agent1_request(st, "My SSN is 123-45-6789, rent $1,450.")
+        req, issues = B.agent1_request(st, "My SSN is 123-45-6789, rent $1,450.", ref_date=datetime.date(2026, 11, 15))
         self.assertNotIn("123-45-6789", req["payload"]["story_text"])
         self.assertIn("$1,450", req["payload"]["story_text"])
         self.assertEqual(issues[0]["code"], "PII_MASKED")
@@ -99,18 +102,33 @@ class TestWithKB(unittest.TestCase):
         self.assertEqual([p["program_id"] for p in req["payload"]["programs_to_check"]], ["p_ok"])
 
     def test_planning_package_availability_and_timing(self):
+        # Shared timing/enum assertions used by both cases below.
         a4 = {"result": {"matches": []}}; a5 = {"result": {"checked_claims": []}}
-        pkg = B.planning_package(self.st, self.programs, self.evidence, self.cands, a4, a5)
-        avail = {a["program_id"]: a["availability"] for a in pkg["program_availability"]}
-        self.assertEqual(avail["prog_housing_saintjohns_sac_001"], "temporarily_closed")
-        t = {x["program_id"]: x for x in pkg["timing"]}
-        housing = t["prog_housing_saintjohns_sac_001"]
-        self.assertEqual(housing["user_target_date"], "2026-11-01")   # the user's date
-        self.assertIsNone(housing["official_deadline"])               # never invented
-        self.assertIsNone(t["prog_income_edd_ui_ca_001"]["user_target_date"])
-        self.assertIn("three weeks", t["prog_income_edd_ui_ca_001"]["estimated_processing_time"])
-        # the package itself must pass the Supervisor's own privacy and enum checks
-        self.assertEqual(checks.s4_enums({"result": pkg}), [])
+
+        def _check_timing_and_enums(pkg):
+            t = {x["program_id"]: x for x in pkg["timing"]}
+            housing = t["prog_housing_saintjohns_sac_001"]
+            self.assertEqual(housing["user_target_date"], "2026-11-01")   # the user's date
+            self.assertIsNone(housing["official_deadline"])               # never invented
+            self.assertIsNone(t["prog_income_edd_ui_ca_001"]["user_target_date"])
+            self.assertIn("three weeks", t["prog_income_edd_ui_ca_001"]["estimated_processing_time"])
+            self.assertEqual(checks.s4_enums({"result": pkg}), [])
+
+        # Case A: Saint John's temporarily_closed → package reflects that
+        progs_a = copy.deepcopy(self.programs)
+        progs_a["prog_housing_saintjohns_sac_001"]["availability"] = "temporarily_closed"
+        pkg_a = B.planning_package(self.st, progs_a, self.evidence, self.cands, a4, a5)
+        avail_a = {a["program_id"]: a["availability"] for a in pkg_a["program_availability"]}
+        self.assertEqual(avail_a["prog_housing_saintjohns_sac_001"], "temporarily_closed")
+        _check_timing_and_enums(pkg_a)
+
+        # Case B: Saint John's confirmed_open → package reflects that
+        progs_b = copy.deepcopy(self.programs)
+        progs_b["prog_housing_saintjohns_sac_001"]["availability"] = "confirmed_open"
+        pkg_b = B.planning_package(self.st, progs_b, self.evidence, self.cands, a4, a5)
+        avail_b = {a["program_id"]: a["availability"] for a in pkg_b["program_availability"]}
+        self.assertEqual(avail_b["prog_housing_saintjohns_sac_001"], "confirmed_open")
+        _check_timing_and_enums(pkg_b)
 
     def test_planning_package_passes_availability_evidence(self):
         """Availability rows (e.g. a closure or reopening note) reach Agents 6, 8 and 10 (fix Oct 25)."""
@@ -134,7 +152,7 @@ class TestWithKB(unittest.TestCase):
         self.assertNotIn("program_name", a4["result"]["matches"][0])   # Agent 4 result untouched
 
     def test_stale_result_after_confirmation(self):
-        req, _ = B.agent1_request(new_state(), "x")    # built at version 1
+        req, _ = B.agent1_request(new_state(), "x", ref_date=datetime.date(2026, 11, 15))    # built at version 1
         old = dict(load("02_agent1_result_expected.json"), case_version=req["case_version"])
         self.assertIn("STALE_RESULT", {i["code"] for i in checks.s3_stale(old, self.st.case_version)})
 

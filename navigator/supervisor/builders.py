@@ -1,8 +1,9 @@
-"""Supervisor builders: the inputs for each agent (Shared JSON Contracts v1.0, sections 4 and 5.1).
+"""Supervisor builders: the inputs for each agent (Shared JSON Contracts v1.1, sections 4 and 5.1).
 
 Agents never call each other. The Supervisor keeps one CaseState and builds every
 AgentRequest from it, passing each agent only what it needs.
 """
+import datetime
 import itertools
 import json
 
@@ -16,6 +17,19 @@ ZIP_TO_COUNTY = {"95823": "Sacramento County"}
 # Fields the plan shows; Agent 5 verifies them (contract 4.5)
 FIELDS_TO_VERIFY = ("eligibility_criteria", "required_documents", "application_method",
                     "contact", "deadlines", "availability")
+
+
+def _ref_date_iso(ref_date, who):
+    """Convert ref_date to an ISO string. Raises ValueError if None.
+
+    Same behaviour in every builder that takes ref_date (agent1, 6, 8, 10).
+    """
+    if ref_date is None:
+        raise ValueError(f"{who}: ref_date must not be None; "
+                         "pass a datetime.date or ISO string")
+    if isinstance(ref_date, datetime.date):
+        return ref_date.isoformat()
+    return ref_date
 
 
 # ---------------------------------------------------------------- KB
@@ -79,11 +93,19 @@ def make_request(state, role_id, task_type, payload, task_scope="all_needs",
 
 
 # ---------------------------------------------------------------- Agent 1, 2
-def agent1_request(state, story_text, locale="en-US"):
-    """S0 runs here: the story is masked before Agent 1 sees it."""
+def agent1_request(state, story_text, locale="en-US", ref_date=None):
+    """S0 runs here: the story is masked before Agent 1 sees it.
+
+    ref_date: a datetime.date or ISO string to pass to Agent 1 so it can
+    resolve relative dates in the story.  The runner always supplies this
+    (Run.__init__ calls _today() when none is given).
+    Raises ValueError if ref_date is None so the omission is caught early.
+    """
     masked, issues = mask_user_text(story_text)
+    ref_date = _ref_date_iso(ref_date, "agent1_request")
     req = make_request(state, "agent_1", "understand_story",
-                       {"story_text": masked, "locale": locale}, task_scope="full_story")
+                       {"story_text": masked, "locale": locale, "ref_date": ref_date},
+                       task_scope="full_story")
     return req, issues
 
 
@@ -282,33 +304,45 @@ def planning_package(state, programs, evidence, agent3_result, agent4_result, ag
     }
 
 
-def agent6_request(state, package, upstream):
-    return make_request(state, "agent_6", "prioritize_actions", package,
+def agent6_request(state, package, upstream, *, ref_date):
+    """ref_date: datetime.date or ISO string, same value as in the Agent 1 payload (FIX 16)."""
+    payload = dict(package, ref_date=_ref_date_iso(ref_date, "agent6_request"))
+    return make_request(state, "agent_6", "prioritize_actions", payload,
                         upstream_result_refs=upstream)
 
 
-def agent8_request(state, package, agent6_req, agent6_result):
+def agent8_request(state, package, agent6_req, agent6_result, *, ref_date):
+    """ref_date: datetime.date or ISO string, same value as in the Agent 1 payload (FIX 16)."""
     payload = {k: package[k] for k in ("needs", "matches", "checked_claims",
                                         "program_availability", "evidence_records", "agent7_findings")}
     payload["proposed_actions"] = agent6_result["result"]["proposed_actions"]
+    payload["ref_date"] = _ref_date_iso(ref_date, "agent8_request")
     return make_request(state, "agent_8", "build_plan", payload,
                         upstream_result_refs=[agent6_req["request_id"]])
 
 
-def agent10_request(state, package, agent8_req, agent8_result, repair_round=0):
-    plan = agent8_result["result"]
+def agent10_request(state, package, agent8_req, current_plan, repair_round=0, *, ref_date):
+    """Build an Agent 10 request from the current (merged) plan (FIX 16: ref_date added).
+
+    current_plan must have the same keys as a plan dict:
+    plan_version, action_cards, potential_options, coverage_gaps.
+    In round 0 that is the first Agent 8 result; in repair rounds it is the
+    merged plan kept by the Supervisor (Fix 1).
+    ref_date: datetime.date or ISO string, same value as in the Agent 1 payload.
+    """
     payload = {
-        "plan_version": plan.get("plan_version"),
+        "plan_version": current_plan.get("plan_version"),
         "repair_round": repair_round,
-        "action_cards": plan.get("action_cards", []),
-        "potential_options": plan.get("potential_options", []),
-        "coverage_gaps": plan.get("coverage_gaps", []),
+        "action_cards": current_plan.get("action_cards", []),
+        "potential_options": current_plan.get("potential_options", []),
+        "coverage_gaps": current_plan.get("coverage_gaps", []),
         "needs": package["needs"],
         "matches": package["matches"],
         "checked_claims": package["checked_claims"],
         "program_availability": package["program_availability"],
         "evidence_records": package["evidence_records"],
         "open_agent7_findings": package["agent7_findings"],
+        "ref_date": _ref_date_iso(ref_date, "agent10_request"),
     }
     return make_request(state, "agent_10", "validate_plan", payload,
                         allowed_case_facts=state.case_facts,

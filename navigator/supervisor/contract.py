@@ -1,7 +1,6 @@
-"""Shared JSON Contracts v1.0 (frozen Oct 23, 2026) as Python constants.
+"""Shared JSON Contracts v1.1 (Oct 27, 2026; built on v1.0, frozen Oct 23) as Python constants.
 
-One place for every allowed value. If the contract changes (v1.1),
-only this file changes.
+One place for every allowed value. If the contract changes, only this file changes.
 """
 
 SCHEMA_VERSION = "1.0"
@@ -70,4 +69,123 @@ FORBIDDEN_FIELDS = {
     "ssn", "social_security_number", "date_of_birth", "dob",
     "bank_account", "bank_account_number", "routing_number",
     "card_number", "credit_card_number", "cvv",
+}
+
+# Per-role, per-task_type required result fields (FIX 5).
+# Structure: RESULT_REQUIRED[role_id][task_type] = {
+#   "result": [top-level keys that must be present in result{}],
+#   "lists":  [which of those keys must be a list],
+#   <list_key>: [required keys of each item in that list],
+# }
+# Rules (contract §2.4):
+#   "or null" fields are required as keys (value may be null).
+#   Only Need.subcategory (§3.4) and Agent 6 suggested_priority (§4.6)
+#   are truly optional (may be absent from the object).
+#   Lists with no item-key entry have no required item structure checked.
+RESULT_REQUIRED = {
+    "agent_1": {
+        "understand_story": {
+            "result": ["narrative_summary", "triggering_events", "proposed_needs",
+                       "factual_claims", "ambiguity_flags",
+                       "safety_or_official_deadline_flags"],
+            "lists":  ["triggering_events", "proposed_needs", "factual_claims",
+                       "ambiguity_flags", "safety_or_official_deadline_flags"],
+            "proposed_needs":  ["need_id", "category", "description",
+                                "original_quote", "confirmation_status",
+                                "user_reported", "urgency", "urgency_reason",
+                                "user_priority"],
+            "factual_claims":  ["fact_id", "field", "value",
+                                "confirmation_status", "source", "time_context"],
+            "ambiguity_flags": ["field", "quote", "note"],
+            "safety_or_official_deadline_flags": ["type", "quote", "note"],
+        },
+        "parse_clarification_answer": {
+            "result": ["factual_claims"],
+            "lists":  ["factual_claims"],
+            "factual_claims": ["fact_id", "field", "value",
+                               "confirmation_status", "source", "time_context"],
+        },
+    },
+    "agent_2": {
+        "clarify_case": {
+            "result": ["need_updates", "optional_food_check"],
+            "lists":  ["need_updates"],
+            "need_updates": ["need_id", "urgency", "urgency_reason"],
+        },
+    },
+    "agent_3": {
+        "retrieve_candidates": {
+            "result": ["candidate_programs", "retrieval_notes"],
+            "lists":  ["candidate_programs", "retrieval_notes"],
+            "candidate_programs": ["program_id", "matched_need_ids",
+                                   "retrieval_reason", "source_refs", "missing_fields"],
+        },
+    },
+    "agent_4": {
+        "match_resources": {
+            "result": ["matches"],
+            "lists":  ["matches"],
+            "matches": ["program_id", "need_ids", "match_status",
+                        "matched_criteria", "missing_case_facts",
+                        "mismatch_criteria", "evidence_refs", "explanation"],
+        },
+    },
+    "agent_5": {
+        "verify_resources": {
+            "result": ["checked_claims", "update_proposals", "unresolved_questions"],
+            "lists":  ["checked_claims", "update_proposals", "unresolved_questions"],
+            "checked_claims": ["program_id", "field_path", "claim_value",
+                               "verification_status", "evidence_refs",
+                               "checked_at", "issue"],
+            "update_proposals": ["program_id", "field_path", "proposed_value",
+                                 "evidence_refs", "reason"],
+        },
+    },
+    "agent_6": {
+        "prioritize_actions": {
+            "result": ["proposed_actions"],
+            "lists":  ["proposed_actions"],
+            # suggested_priority is truly optional (§4.6: "optional"); all others "or null" = required
+            "proposed_actions": ["action_id", "need_id", "program_id",
+                                 "order_group", "rationale", "dependency_ids",
+                                 "official_deadline", "user_target_date",
+                                 "estimated_processing_time",
+                                 "evidence_refs", "uncertainty_notes",
+                                 "user_override_allowed"],
+        },
+    },
+    "agent_7": {
+        "review_stage": {
+            "result": ["stage_assessment", "findings"],
+            "lists":  ["findings"],
+            "findings": ["finding_id", "rule_id", "severity",
+                         "program_id", "need_id", "field_path",
+                         "evidence_refs", "description", "recommended_action"],
+        },
+    },
+    "agent_8": {
+        "build_plan": {
+            "result": ["plan_version", "action_cards", "potential_options", "coverage_gaps"],
+            "lists":  ["action_cards", "potential_options", "coverage_gaps"],
+            "action_cards": ["card_id", "source_action_ids", "related_need_ids",
+                             "program_id", "action_title", "reason", "next_step",
+                             "priority_reason", "order_group", "dependency_card_ids",
+                             "source_refs", "uncertainty_notes",
+                             "official_deadline", "user_target_date",
+                             "processing_estimate", "progress_status"],
+            "potential_options": ["program_id", "program_name",
+                                  "why_it_may_matter", "what_needs_checking",
+                                  "official_link"],
+            "coverage_gaps": ["need_id", "note"],
+        },
+    },
+    "agent_10": {
+        "validate_plan": {
+            "result": ["verdict", "repair_round", "flags", "passed_card_ids"],
+            "lists":  ["flags", "passed_card_ids"],
+            "flags": ["flag_id", "card_id", "rule_id", "severity",
+                      "claim_text", "reason", "evidence_refs",
+                      "required_correction", "blocks_release"],
+        },
+    },
 }

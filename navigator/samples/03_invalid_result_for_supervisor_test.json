@@ -11,16 +11,24 @@
   "is_mock": true,
   "generated_at": "2026-10-21T12:00:00-06:00",
   "result": {
+    "narrative_summary": "Rent is due soon.",
+    "triggering_events": [],
     "proposed_needs": [
       {
         "need_id": "need_001",
         "category": "housing",
         "description": "Rent",
+        "original_quote": null,
         "confirmation_status": "proposed",
         "user_reported": true,
-        "urgency": "high"
+        "urgency": "high",
+        "urgency_reason": null,
+        "user_priority": null
       }
-    ]
+    ],
+    "factual_claims": [],
+    "ambiguity_flags": [],
+    "safety_or_official_deadline_flags": []
   },
   "issues": [],
   "clarification_requests": [],

@@ -120,3 +120,120 @@ class TestPrivacy(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestS1ResultFields(unittest.TestCase):
+    """FIX 5: per-role result field checks in S1 (check_result level)."""
+
+    def setUp(self):
+        self.req  = load("01_agent1_request.json")   # role_id=agent_1, task_type=understand_story
+        self.good = load("02_agent1_result_expected.json")
+
+    def _req(self, role_id, task_type):
+        r = copy.deepcopy(self.req)
+        r["role_id"] = role_id
+        r["task_type"] = task_type
+        return r
+
+    def _envelope(self, role_id, result_body):
+        r = copy.deepcopy(self.good)
+        r["agent_id"] = role_id
+        r["result"] = result_body
+        return r
+
+    # missing top-level result key
+    def test_missing_top_level_key(self):
+        req = self._req("agent_1", "understand_story")
+        result = copy.deepcopy(self.good)
+        del result["result"]["narrative_summary"]
+        ok, issues = checks.check_result(req, result, req["case_version"])
+        self.assertFalse(ok)
+        refs = {i["related_ref"] for i in issues if i["code"] == "SCHEMA_INVALID"}
+        self.assertIn("narrative_summary", refs)
+
+    # list item that is not an object
+    def test_list_item_not_an_object(self):
+        req = self._req("agent_1", "understand_story")
+        result = copy.deepcopy(self.good)
+        result["result"]["proposed_needs"][0] = "not-a-dict"
+        ok, issues = checks.check_result(req, result, req["case_version"])
+        self.assertFalse(ok)
+        refs = {i["related_ref"] for i in issues if i["code"] == "SCHEMA_INVALID"}
+        self.assertIn("proposed_needs[0]", refs)
+
+    # parse_clarification_answer with only factual_claims — accepted
+    def test_parse_clarification_answer_accepted(self):
+        req = self._req("agent_1", "parse_clarification_answer")
+        result = self._envelope("agent_1", {"factual_claims": [
+            {"fact_id": "f1", "field": "zip_code", "value": "95823",
+             "confirmation_status": "confirmed", "source": "user_statement",
+             "time_context": None}]})
+        ok, issues = checks.check_result(req, result, req["case_version"])
+        self.assertTrue(ok, issues)
+
+    # parse_clarification_answer fact missing time_context — rejected
+    def test_parse_clarification_answer_missing_time_context(self):
+        req = self._req("agent_1", "parse_clarification_answer")
+        result = self._envelope("agent_1", {"factual_claims": [
+            {"fact_id": "f1", "field": "zip_code", "value": "95823",
+             "confirmation_status": "confirmed", "source": "user_statement"}]})
+             # time_context absent
+        ok, issues = checks.check_result(req, result, req["case_version"])
+        self.assertFalse(ok)
+        refs = {i["related_ref"] for i in issues if i["code"] == "SCHEMA_INVALID"}
+        self.assertIn("factual_claims[0].time_context", refs)
+
+    # failed result with empty result{} — no SCHEMA_INVALID from new check
+    def test_failed_result_not_checked(self):
+        req = self._req("agent_1", "understand_story")
+        result = copy.deepcopy(self.good)
+        result["status"] = "failed"
+        result["result"] = {}
+        ok, issues = checks.check_result(req, result, req["case_version"])
+        # S6 fires AGENT_FAILED; S1 extension must NOT fire
+        self.assertIn("AGENT_FAILED", {i["code"] for i in issues})
+        self.assertNotIn("SCHEMA_INVALID", {i["code"] for i in issues})
+
+    # unknown task_type — rejected, no exception
+    def test_unknown_task_type_rejected_no_exception(self):
+        req = self._req("agent_1", "do_magic")
+        ok, issues = checks.check_result(req, self.good, req["case_version"])
+        self.assertFalse(ok)
+        self.assertIn("SCHEMA_INVALID", {i["code"] for i in issues})
+
+
+class TestResultRequiredConsistency(unittest.TestCase):
+    """FIX 5: RESULT_REQUIRED table is internally consistent."""
+
+    # every (role, task_type) in TASK_TYPES has an entry
+    def test_every_task_type_has_an_entry(self):
+        from navigator.supervisor import contract as C
+        for role, tasks in C.TASK_TYPES.items():
+            for task in tasks:
+                entry = C.RESULT_REQUIRED.get(role, {}).get(task)
+                self.assertIsNotNone(
+                    entry, f"RESULT_REQUIRED missing entry for {role}/{task}")
+
+    # every key in "lists" is also in "result"
+    def test_every_lists_key_is_in_result(self):
+        from navigator.supervisor import contract as C
+        for role, tasks in C.RESULT_REQUIRED.items():
+            for task, entry in tasks.items():
+                result_keys = set(entry.get("result", []))
+                for lk in entry.get("lists", []):
+                    self.assertIn(
+                        lk, result_keys,
+                        f"{role}/{task}: lists key {lk!r} not in result")
+
+    # every item-key entry names a key that is in "lists"
+    def test_every_item_key_entry_names_a_lists_key(self):
+        from navigator.supervisor import contract as C
+        for role, tasks in C.RESULT_REQUIRED.items():
+            for task, entry in tasks.items():
+                list_keys = set(entry.get("lists", []))
+                for k in entry:
+                    if k in ("result", "lists"):
+                        continue
+                    self.assertIn(
+                        k, list_keys,
+                        f"{role}/{task}: item-key entry {k!r} not in lists")

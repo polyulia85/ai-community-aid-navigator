@@ -1,5 +1,6 @@
 """Tests for Oct 24 Supervisor changes: Agent 2 need_updates, Agent 7 reviews, agents.json errors,
 process isolation with a real stop on timeout. Run from the repo root:  python -m unittest -v"""
+import datetime
 import json
 import multiprocessing
 import os
@@ -8,9 +9,11 @@ import time
 import unittest
 from unittest import mock
 
+from navigator.supervisor import checks
 from navigator.supervisor import contract as C
 from navigator.supervisor import run as R
 from tests import fake_agents as F
+from tests.fake_agents import FIXTURE_KB
 
 STORY = "I was laid off. Rent is due November 1. ZIP 95823."
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -18,7 +21,7 @@ ROOT = os.path.dirname(HERE)
 
 
 def run_with(**overrides):
-    return R.Run(dict(F.ALL, **overrides), R.DEFAULT_KB).execute(STORY)
+    return R.Run(dict(F.ALL, **overrides), FIXTURE_KB).execute(STORY)
 
 
 def codes(items):
@@ -27,13 +30,13 @@ def codes(items):
 
 class TestAgent2Updates(unittest.TestCase):
     def test_need_updates_applied(self):
-        r = R.Run(dict(F.ALL, agent_2=F.agent_2), R.DEFAULT_KB)
+        r = R.Run(dict(F.ALL, agent_2=F.agent_2), FIXTURE_KB)
         r.execute(STORY)
         urg = {n["need_id"]: n["urgency"] for n in r.state.needs}
         self.assertEqual(urg["need_002"], "immediate")
 
     def test_unknown_need_rejects_agent2_but_run_continues(self):
-        r = R.Run(dict(F.ALL, agent_2=F.agent_2_unknown_need), R.DEFAULT_KB)
+        r = R.Run(dict(F.ALL, agent_2=F.agent_2_unknown_need), FIXTURE_KB)
         rep = r.execute(STORY)
         self.assertEqual(rep["outcome"], "completed")                      # Agent 2 is a soft step
         a2 = [s for s in rep["steps"] if s["role_id"] == "agent_2"]
@@ -111,7 +114,7 @@ class TestConfigErrors(unittest.TestCase):
     def test_main_prints_one_line_and_returns_2(self):
         path = self.write('{"paths": [".."], "agents": {"agent_3": "tests.fake_agents:agent_33"}}')
         with mock.patch("builtins.print") as p:
-            self.assertEqual(R.main(["--agents", path, "--out", os.devnull]), 2)
+            self.assertEqual(R.main(["--agents", path, "--kb", FIXTURE_KB, "--out", os.devnull]), 2)
         self.assertTrue(p.call_args[0][0].startswith("Cannot load agents:"))
 
 
@@ -122,7 +125,7 @@ def ref(name):
 class TestProcessIsolation(unittest.TestCase):
     def test_full_cycle_in_processes(self):
         agents = {role: ref(fn.__name__) for role, fn in F.ALL.items()}
-        rep = R.Run(agents, R.DEFAULT_KB, isolate=True).execute(STORY)
+        rep = R.Run(agents, FIXTURE_KB, isolate=True).execute(STORY)
         self.assertEqual(rep["outcome"], "completed")
 
     def test_timeout_really_stops_the_agent(self):
@@ -130,7 +133,7 @@ class TestProcessIsolation(unittest.TestCase):
         agents["agent_3"] = ref("very_slow_agent")          # sleeps 30 s
         t0 = time.monotonic()
         with mock.patch.object(C, "TIMEOUT_SECONDS", 1):
-            rep = R.Run(agents, R.DEFAULT_KB, isolate=True).execute(STORY)
+            rep = R.Run(agents, FIXTURE_KB, isolate=True).execute(STORY)
         self.assertLess(time.monotonic() - t0, 20)          # 2 tries x 1 s + process start, not 2 x 30 s
         self.assertEqual(rep["outcome"], "stopped_at_agent_3")
         self.assertIn("TIMEOUT", {i["code"] for s in rep["steps"] for i in s["issues"]})
@@ -139,10 +142,188 @@ class TestProcessIsolation(unittest.TestCase):
     def test_crash_in_process_is_reported(self):
         agents = {role: ref(fn.__name__) for role, fn in F.ALL.items()}
         agents["agent_4"] = ref("crashing_agent")
-        rep = R.Run(agents, R.DEFAULT_KB, isolate=True).execute(STORY)
+        rep = R.Run(agents, FIXTURE_KB, isolate=True).execute(STORY)
         self.assertEqual(rep["outcome"], "stopped_at_agent_4")
         msgs = [i["message"] for s in rep["steps"] for i in s["issues"] if i["code"] == "AGENT_EXCEPTION"]
         self.assertTrue(msgs and "ValueError" in msgs[0])
+
+
+class TestFix5SchemaInvalidStops(unittest.TestCase):
+    """FIX 5 run-level regression: per-role S1 failure stops the run."""
+
+    # (a) Agent 1 returns a need without need_id
+    def test_agent1_need_missing_need_id_stops_run(self):
+        def bad_agent_1(req):
+            r = F.agent_1(req)
+            del r["result"]["proposed_needs"][0]["need_id"]
+            return r
+        rep = run_with(agent_1=bad_agent_1)
+        self.assertEqual(rep["outcome"], "stopped_at_agent_1")
+        a1_steps = [s for s in rep["steps"] if s["role_id"] == "agent_1"]
+        all_issues = [i for s in a1_steps for i in s["issues"]]
+        self.assertIn("SCHEMA_INVALID", {i["code"] for i in all_issues})
+        refs = {i["related_ref"] for i in all_issues if i["code"] == "SCHEMA_INVALID"}
+        self.assertIn("proposed_needs[0].need_id", refs)
+
+    # (b) Agent 8 returns a card without card_id
+    def test_agent8_card_missing_card_id_stops_run(self):
+        def bad_agent_8(req):
+            r = F.agent_8(req)
+            del r["result"]["action_cards"][0]["card_id"]
+            return r
+        rep = run_with(agent_8=bad_agent_8)
+        self.assertEqual(rep["outcome"], "stopped_at_agent_8")
+
+    # (c) Agent 10 returns flags as an object
+    def test_agent10_flags_not_list_stops_run(self):
+        def bad_agent_10(req):
+            r = F.agent_10_pass(req)
+            r["result"]["flags"] = {"card_id": "card_01"}
+            return r
+        rep = run_with(agent_10=bad_agent_10)
+        self.assertEqual(rep["outcome"], "stopped_at_agent_10")
+
+
+class TestFix5InputError(unittest.TestCase):
+    """FIX 5: SUPERVISOR_INPUT_ERROR safety net in Run._execute_body."""
+
+    def test_builder_keyerror_gives_input_error_no_exception(self):
+        """Patching B.agent4_request to raise KeyError('need_id') ->
+        outcome stopped_at_agent_4, SUPERVISOR_INPUT_ERROR in supervisor_issues,
+        message contains 'KeyError' and 'need_id', nothing from the story.
+        """
+        from navigator.supervisor import builders as B
+        with mock.patch.object(B, "agent4_request",
+                               side_effect=KeyError("need_id")):
+            rep = run_with()
+        self.assertEqual(rep["outcome"], "stopped_at_agent_4")
+        codes_ = {i["code"] for i in rep["supervisor_issues"]}
+        self.assertIn("SUPERVISOR_INPUT_ERROR", codes_)
+        msg = next(i["message"] for i in rep["supervisor_issues"]
+                   if i["code"] == "SUPERVISOR_INPUT_ERROR")
+        self.assertIn("KeyError", msg)
+        self.assertIn("need_id", msg)
+        # story text must not appear in the message
+        self.assertNotIn("laid off", msg)
+        self.assertNotIn("ZIP", msg)
+
+
+class TestFix5FakeAgentsPassS1(unittest.TestCase):
+    """FIX 5 (d): every fake agent's result passes s1_result_fields for its role/task_type.
+
+    Excluded (broken on purpose): crashing_agent, slow_agent, very_slow_agent,
+    agent_with_ssn -- these are designed to fail or never return a valid result.
+    """
+
+    def _spy(self, fn, calls):
+        """Wrap fn so every (request, result) it produces is appended to calls."""
+        def wrapper(req):
+            result = fn(req)
+            calls.append((req, result))
+            return result
+        return wrapper
+
+    def _run(self, agents):
+        return R.Run(agents, FIXTURE_KB,
+                     ref_date=datetime.date(2026, 11, 15)).execute(STORY)
+
+    def test_all_listed_fake_agents_pass(self):
+        targets = {
+            "agent_1":                            F.agent_1,
+            "agent_2":                            F.agent_2,
+            "agent_2_unknown_need":               F.agent_2_unknown_need,
+            "agent_3":                            F.agent_3,
+            "agent_4":                            F.agent_4,
+            "agent_5":                            F.agent_5,
+            "agent_6":                            F.agent_6,
+            "agent_7":                            F.agent_7,
+            "agent_8":                            F.agent_8,
+            "agent_10_pass":                      F.agent_10_pass,
+            "agent_10_always_flags_card_02":      F.agent_10_always_flags_card_02,
+            "agent_10_flags_card02_once":         F.agent_10_flags_card02_once,
+            "agent_8_repair_card02":              F.agent_8_repair_card02,
+            "agent_8_repair_unknown_card":        F.agent_8_repair_unknown_card,
+            "agent_8_repair_missing_listed_card": F.agent_8_repair_missing_listed_card,
+            "agent_8_repair_card02_no_ids":       F.agent_8_repair_card02_no_ids,
+        }
+
+        calls = {name: [] for name in targets}
+        spies = {name: self._spy(fn, calls[name]) for name, fn in targets.items()}
+
+        # Run 1: exercises agent_1, agent_2, agent_3, agent_4, agent_5, agent_6,
+        # agent_7, agent_8_repair_card02, agent_10_flags_card02_once.
+        # agent_8_repair_card02 handles both normal and repair calls.
+        # agent_10_flags_card02_once flags on round 0, passes on round 1,
+        # so it is called with repair_round 0 and repair_round 1.
+        self._run({
+            "agent_1": spies["agent_1"],
+            "agent_2": spies["agent_2"],
+            "agent_3": spies["agent_3"],
+            "agent_4": spies["agent_4"],
+            "agent_5": spies["agent_5"],
+            "agent_6": spies["agent_6"],
+            "agent_7": spies["agent_7"],
+            "agent_8": spies["agent_8_repair_card02"],
+            "agent_10": spies["agent_10_flags_card02_once"],
+        })
+
+        # Runs 2a, 2b, 2c: one run per repair fake, paired with
+        # agent_10_always_flags_card_02 (always flags -> triggers 2 full repair rounds).
+        # Also exercises agent_2_unknown_need and the three remaining repair fakes.
+        for repair_fn in ("agent_8_repair_unknown_card",
+                          "agent_8_repair_missing_listed_card",
+                          "agent_8_repair_card02_no_ids"):
+            self._run({
+                "agent_1": spies["agent_1"],
+                "agent_2": spies["agent_2_unknown_need"],
+                "agent_3": spies["agent_3"],
+                "agent_4": spies["agent_4"],
+                "agent_5": spies["agent_5"],
+                "agent_6": spies["agent_6"],
+                "agent_8": spies[repair_fn],
+                "agent_10": spies["agent_10_always_flags_card_02"],
+            })
+
+        # Run 3: plain happy path -- exercises agent_8 (no repair) and agent_10_pass.
+        self._run({
+            "agent_1": spies["agent_1"],
+            "agent_3": spies["agent_3"],
+            "agent_4": spies["agent_4"],
+            "agent_5": spies["agent_5"],
+            "agent_6": spies["agent_6"],
+            "agent_8": spies["agent_8"],
+            "agent_10": spies["agent_10_pass"],
+        })
+
+        # Every listed function must have been called at least once.
+        for name in targets:
+            self.assertGreater(len(calls[name]), 0,
+                               f"{name} was never called -- not covered")
+
+        # The four repair fakes must have been called with repair_flags in payload
+        # at least once (proving the repair branch ran, not just the normal branch).
+        for name in ("agent_8_repair_card02", "agent_8_repair_unknown_card",
+                     "agent_8_repair_missing_listed_card", "agent_8_repair_card02_no_ids"):
+            repair_calls = [req for req, _ in calls[name]
+                            if "repair_flags" in req.get("payload", {})]
+            self.assertGreater(len(repair_calls), 0,
+                               f"{name} was never called with repair_flags")
+
+        # agent_10_flags_card02_once must have been called with repair_round 0 and 1.
+        rounds_seen = {req["payload"]["repair_round"]
+                       for req, _ in calls["agent_10_flags_card02_once"]}
+        self.assertIn(0, rounds_seen,
+                      "agent_10_flags_card02_once never called with repair_round 0")
+        self.assertIn(1, rounds_seen,
+                      "agent_10_flags_card02_once never called with repair_round 1")
+
+        # Every captured result must pass s1_result_fields.
+        for name in targets:
+            for req, result in calls[name]:
+                issues = checks.s1_result_fields(req, result)
+                schema_invalid = [i for i in issues if i["code"] == "SCHEMA_INVALID"]
+                self.assertEqual(schema_invalid, [],
+                                 f"{name} produced SCHEMA_INVALID: {schema_invalid}")
 
 
 if __name__ == "__main__":
