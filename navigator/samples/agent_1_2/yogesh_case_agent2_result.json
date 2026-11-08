@@ -1,0 +1,38 @@
+{
+  "request_id": "req-yogesh-002",
+  "run_id": "run-yogesh-001",
+  "case_id": "case-yogesh-sac-01",
+  "case_version": 1,
+  "correlation_id": "corr-yogesh-001",
+  "agent_id": "agent_2",
+  "schema_version": "1.0",
+  "status": "needs_clarification",
+  "is_mock": true,
+  "generated_at": "2026-10-24T12:01:00Z",
+  "result": {
+    "need_updates": [
+      {
+        "need_id": "need_003",
+        "urgency": "immediate",
+        "urgency_reason": "Immediate nutrition support needed for dependents within current week"
+      }
+    ],
+    "optional_food_check": false
+  },
+  "issues": [],
+  "clarification_requests": [
+    {
+      "fact_key": "has_written_eviction_notice",
+      "question_intent": "Determine legal eviction stage for SHRA / legal aid intervention",
+      "user_facing_question": "Have you received a formal written notice or court paper from your landlord?",
+      "reason": "Separates routine rental assistance from urgent legal defense representation",
+      "applicable_program_ids": [
+        "prog_legal_aid_eviction"
+      ],
+      "verified_rule_ref": "ev_legal_evict_002",
+      "necessity_level": "required_for_decision",
+      "can_skip": true
+    }
+  ],
+  "evidence_refs": []
+}

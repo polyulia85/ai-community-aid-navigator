@@ -1,0 +1,97 @@
+{
+  "request_id": "req-yogesh-002",
+  "run_id": "run-yogesh-001",
+  "case_id": "case-yogesh-sac-01",
+  "case_version": 1,
+  "schema_version": "1.0",
+  "role_id": "agent_2",
+  "task_type": "clarify_case",
+  "task_scope": "all_needs",
+  "allowed_case_facts": [
+    {
+      "fact_id": "fact_001",
+      "field": "zip_code",
+      "value": "95823",
+      "confirmation_status": "proposed",
+      "source": "user_statement"
+    },
+    {
+      "fact_id": "fact_004",
+      "field": "employment_status",
+      "value": "laid_off",
+      "confirmation_status": "proposed",
+      "source": "user_statement"
+    },
+    {
+      "fact_id": "fact_005",
+      "field": "rent_amount_monthly",
+      "value": 1450,
+      "confirmation_status": "proposed",
+      "source": "user_statement"
+    }
+  ],
+  "upstream_result_refs": [
+    "req-yogesh-001"
+  ],
+  "source_policy": "verified_kb_only",
+  "correlation_id": "corr-yogesh-001",
+  "payload": {
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "income_assistance",
+        "description": "Lost job last Friday; needs income support",
+        "urgency": "high"
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "Cannot cover rent due November 1",
+        "urgency": "high"
+      },
+      {
+        "need_id": "need_003",
+        "category": "food_assistance",
+        "description": "Running low on food this week",
+        "urgency": "immediate"
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_001",
+        "field": "zip_code",
+        "value": "95823"
+      },
+      {
+        "fact_id": "fact_002",
+        "field": "household_size",
+        "value": 3
+      },
+      {
+        "fact_id": "fact_004",
+        "field": "employment_status",
+        "value": "laid_off"
+      },
+      {
+        "fact_id": "fact_005",
+        "field": "rent_amount_monthly",
+        "value": 1450
+      }
+    ],
+    "already_asked": [
+      "zip_code"
+    ],
+    "candidate_requirements": [
+      {
+        "program_id": "prog_shra_rent",
+        "fact_key": "zip_code",
+        "verified_rule_ref": "ev_shra_geo_001"
+      },
+      {
+        "program_id": "prog_legal_aid_eviction",
+        "fact_key": "has_written_eviction_notice",
+        "verified_rule_ref": "ev_legal_evict_002"
+      }
+    ]
+  }
+}
