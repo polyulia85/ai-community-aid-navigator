@@ -51,5 +51,5 @@ This is not a report of each member's contribution; an overall contribution repo
 
 **Merges into main (Nov 10, ≈20:27–20:40, merge commits)**
 - #9 (`1e2fd98`), #14 (`20b1e23`), #13 into the #11 branch (`9c5d2f8`), #12 (`f4ed319`), #11 (`f727a21`); #8 and #10 closed with #11.
-- main after the merges: 123 tests, all passing. The full cycle on main needs #6 (Agents 1–2).
+- `main` after the merges: 204 tests, all passing. The full cycle on main needs #6 (Agents 1–2).
 - Open: #6, #15, #16, #17.
