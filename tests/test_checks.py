@@ -118,10 +118,6 @@ class TestPrivacy(unittest.TestCase):
         self.assertIn("PRIVACY_VIOLATION", codes(checks.s9_privacy(r)))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestS1ResultFields(unittest.TestCase):
     """FIX 5: per-role result field checks in S1 (check_result level)."""
 
@@ -225,15 +221,136 @@ class TestResultRequiredConsistency(unittest.TestCase):
                         lk, result_keys,
                         f"{role}/{task}: lists key {lk!r} not in result")
 
-    # every item-key entry names a key that is in "lists"
+    # every item-key entry names a key that is in "lists" or "optional_lists"
     def test_every_item_key_entry_names_a_lists_key(self):
         from navigator.supervisor import contract as C
         for role, tasks in C.RESULT_REQUIRED.items():
             for task, entry in tasks.items():
-                list_keys = set(entry.get("lists", []))
+                all_list_keys = set(entry.get("lists", [])) | set(entry.get("optional_lists", []))
                 for k in entry:
-                    if k in ("result", "lists"):
+                    if k in ("result", "lists", "optional_lists"):
                         continue
                     self.assertIn(
-                        k, list_keys,
-                        f"{role}/{task}: item-key entry {k!r} not in lists")
+                        k, all_list_keys,
+                        f"{role}/{task}: item-key entry {k!r} not in lists or optional_lists")
+
+    # no optional_lists key overlaps with "result" or "lists"; each has an item-key entry
+    def test_optional_lists_not_in_result(self):
+        from navigator.supervisor import contract as C
+        for role, tasks in C.RESULT_REQUIRED.items():
+            for task, entry in tasks.items():
+                result_keys = set(entry.get("result", []))
+                list_keys   = set(entry.get("lists", []))
+                for k in entry.get("optional_lists", []):
+                    self.assertNotIn(k, result_keys,
+                        f"{role}/{task}: optional_lists key {k!r} must not be in result")
+                    self.assertNotIn(k, list_keys,
+                        f"{role}/{task}: optional_lists key {k!r} must not be in lists")
+                    self.assertIn(k, entry,
+                        f"{role}/{task}: optional_lists key {k!r} has no item-key entry")
+
+
+class TestS1OptionalLists(unittest.TestCase):
+    """optional_lists: present-must-be-list, absent-is-fine, items are checked."""
+
+    def _req(self, task_type="parse_clarification_answer"):
+        req = load("01_agent1_request.json")
+        req["role_id"] = "agent_1"
+        req["task_type"] = task_type
+        return req
+
+    def _envelope(self, result_body):
+        r = load("02_agent1_result_expected.json")
+        r["agent_id"] = "agent_1"
+        r["result"] = result_body
+        return r
+
+    def test_proposed_needs_absent_is_accepted(self):
+        """proposed_needs absent -> accepted (it is optional)."""
+        req = self._req()
+        result = self._envelope({"factual_claims": [
+            {"fact_id": "f1", "field": "zip_code", "value": "95823",
+             "confirmation_status": "proposed", "source": "user_statement",
+             "time_context": None}]})
+        ok, issues = checks.check_result(req, result, req["case_version"])
+        self.assertTrue(ok, issues)
+
+    def test_proposed_needs_not_a_list_schema_invalid(self):
+        """proposed_needs = {} (not a list) -> SCHEMA_INVALID with related_ref 'proposed_needs'."""
+        req = self._req()
+        result = self._envelope({"factual_claims": [], "proposed_needs": {}})
+        ok, issues = checks.check_result(req, result, req["case_version"])
+        self.assertFalse(ok)
+        refs = {i["related_ref"] for i in issues if i["code"] == "SCHEMA_INVALID"}
+        self.assertIn("proposed_needs", refs)
+
+    def test_proposed_needs_item_missing_category_schema_invalid(self):
+        """proposed_needs item without category -> SCHEMA_INVALID."""
+        req = self._req()
+        result = self._envelope({"factual_claims": [], "proposed_needs": [
+            {"need_id": "need_003", "description": "d", "original_quote": "q",
+             "confirmation_status": "proposed", "user_reported": True,
+             "urgency": "normal", "urgency_reason": None, "user_priority": None}
+            # category missing
+        ]})
+        ok, issues = checks.check_result(req, result, req["case_version"])
+        self.assertFalse(ok)
+        refs = {i["related_ref"] for i in issues if i["code"] == "SCHEMA_INVALID"}
+        self.assertIn("proposed_needs[0].category", refs)
+
+    def test_optional_lists_key_not_treated_as_list_key(self):
+        """'optional_lists' in the result body is never iterated as a list of items."""
+        req = self._req()
+        result = self._envelope({"factual_claims": [], "optional_lists": ["not-a-dict"]})
+        ok, issues = checks.check_result(req, result, req["case_version"])
+        msgs = [i["message"] for i in issues if i["code"] == "SCHEMA_INVALID"]
+        self.assertFalse(any("optional_lists" in m for m in msgs), msgs)
+
+
+class TestS5ProposedNeedsNotReference(unittest.TestCase):
+    """S5: proposed_needs[*].need_id is a definition, not a reference."""
+
+    def _req(self):
+        req = load("01_agent1_request.json")
+        req["role_id"] = "agent_1"
+        req["task_type"] = "parse_clarification_answer"
+        return req
+
+    def _envelope(self, result_body):
+        r = load("02_agent1_result_expected.json")
+        r["agent_id"] = "agent_1"
+        r["result"] = result_body
+        return r
+
+    def test_new_need_id_in_proposed_needs_accepted(self):
+        """Full check_result on parse_clarification_answer with proposed_needs[0].need_id
+        unknown in the known set -> accepted, no UNKNOWN_REFERENCE."""
+        req = self._req()
+        result = self._envelope({"factual_claims": [], "proposed_needs": [
+            {"need_id": "need_009", "category": "food_assistance", "description": "d",
+             "original_quote": "q", "confirmation_status": "proposed",
+             "user_reported": True, "urgency": "normal",
+             "urgency_reason": None, "user_priority": None}]})
+        ok, issues = checks.check_result(req, result, req["case_version"],
+                                         known={"need_id": {"need_001"}})
+        self.assertTrue(ok, issues)
+        self.assertNotIn("UNKNOWN_REFERENCE", {i["code"] for i in issues})
+
+    def test_deeper_nested_need_id_still_checked(self):
+        """A need_id one level deeper (proposed_needs[0].extra.need_id) -> UNKNOWN_REFERENCE."""
+        result = {"result": {"proposed_needs": [{"need_id": "need_009",
+                                                  "extra": {"need_id": "need_404"}}]}}
+        out = checks.s5_references(result, {"need_id": {"need_001"}})
+        flagged = {i["related_ref"] for i in out if i["code"] == "UNKNOWN_REFERENCE"}
+        self.assertIn("proposed_needs[0].extra.need_id", flagged)
+        self.assertNotIn("proposed_needs[0].need_id", flagged)
+
+    def test_need_updates_need_id_still_checked(self):
+        """agent_2 need_updates[0].need_id 'need_404' -> UNKNOWN_REFERENCE."""
+        result = {"result": {"need_updates": [{"need_id": "need_404"}]}}
+        out = checks.s5_references(result, {"need_id": {"need_001"}})
+        self.assertIn("UNKNOWN_REFERENCE", {i["code"] for i in out})
+
+
+if __name__ == "__main__":
+    unittest.main()

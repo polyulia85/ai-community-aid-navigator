@@ -326,5 +326,49 @@ class TestFix5FakeAgentsPassS1(unittest.TestCase):
                                  f"{name} produced SCHEMA_INVALID: {schema_invalid}")
 
 
+class TestDialog1AmbiguityFlags(unittest.TestCase):
+    """DIALOG 1: ambiguity_flags forwarded from Agent 1 to Agent 2."""
+
+    def test_flags_given_payload_has_them(self):
+        """(a) flags given -> Agent 2 payload has them unchanged."""
+        from navigator.supervisor import builders as B
+        flag = {"field": "triggering_circumstances", "quote": "hard times", "note": "unspecified_hardship_cause"}
+        st = B.CaseState("c1", "r1", "x1")
+        req = B.agent2_request(st, ambiguity_flags=[flag])
+        self.assertEqual(req["payload"]["ambiguity_flags"], [flag])
+
+    def test_empty_list_no_key(self):
+        """(b) empty list -> no ambiguity_flags key in payload."""
+        from navigator.supervisor import builders as B
+        st = B.CaseState("c2", "r2", "x2")
+        req = B.agent2_request(st, ambiguity_flags=[])
+        self.assertNotIn("ambiguity_flags", req["payload"])
+
+    def test_none_no_key(self):
+        """(b) None -> no ambiguity_flags key in payload."""
+        from navigator.supervisor import builders as B
+        st = B.CaseState("c3", "r3", "x3")
+        req = B.agent2_request(st, ambiguity_flags=None)
+        self.assertNotIn("ambiguity_flags", req["payload"])
+
+    def test_execute_passes_flags_from_agent1(self):
+        """(c) fake Agent 1 returns one flag -> Agent 2 request carries it in execute()."""
+        flag = {"field": "triggering_circumstances", "quote": "I was laid off.", "note": "unspecified_hardship_cause"}
+        received = {}
+
+        def agent_1_with_flag(req):
+            r = F.agent_1(req)
+            r["result"]["ambiguity_flags"] = [flag]
+            return r
+
+        def spy2(req):
+            received["payload"] = req["payload"]
+            return F.agent_2(req)
+
+        R.Run(dict(F.ALL, agent_1=agent_1_with_flag, agent_2=spy2), FIXTURE_KB).execute(STORY)
+        self.assertIn("ambiguity_flags", received["payload"])
+        self.assertEqual(received["payload"]["ambiguity_flags"], [flag])
+
+
 if __name__ == "__main__":
     unittest.main()

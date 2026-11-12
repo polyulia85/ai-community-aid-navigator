@@ -157,5 +157,219 @@ class TestWithKB(unittest.TestCase):
         self.assertIn("STALE_RESULT", {i["code"] for i in checks.s3_stale(old, self.st.case_version)})
 
 
+class TestCaseStateSeq(unittest.TestCase):
+    """CaseState.next_seq and first_seq for dialog continuity."""
+
+    def test_next_seq_starts_at_one(self):
+        st = B.CaseState("c", "r", "x")
+        self.assertEqual(st.next_seq, 1)
+
+    def test_next_seq_increments_with_ids(self):
+        st = B.CaseState("c", "r", "x")
+        st.next_request_id()
+        st.next_request_id()
+        self.assertEqual(st.next_seq, 3)
+
+    def test_first_seq_restores_counter(self):
+        st = B.CaseState("c", "r", "x", first_seq=5)
+        rid = st.next_request_id()
+        self.assertEqual(rid, "req-0005")
+        self.assertEqual(st.next_seq, 6)
+
+    def test_default_behaviour_unchanged(self):
+        """first_seq=1 default: first id is req-0001."""
+        st = B.CaseState("c", "r", "x")
+        self.assertEqual(st.next_request_id(), "req-0001")
+
+
+class TestAgent1AnswerRequest(unittest.TestCase):
+    """agent1_answer_request: S0 masking, validation, payload shape."""
+
+    def setUp(self):
+        self.st = new_state()
+        self.ref = datetime.date(2026, 11, 15)
+
+    def test_ssn_in_answer_is_masked(self):
+        req, issues = B.agent1_answer_request(
+            self.st, "My number is 123-45-6789", ["zip_code"], self.ref)
+        self.assertNotIn("123-45-6789", req["payload"]["answer_text"])
+        self.assertTrue(any(i["code"] == "PII_MASKED" for i in issues))
+        for i in issues:
+            self.assertNotIn("123-45-6789", i["message"])
+
+    def test_pending_fact_keys_in_payload(self):
+        req, _ = B.agent1_answer_request(
+            self.st, "95823", ["zip_code"], self.ref)
+        self.assertEqual(req["payload"]["pending_fact_keys"], ["zip_code"])
+        self.assertEqual(req["payload"]["ref_date"], "2026-11-15")
+
+    def test_existing_needs_in_payload(self):
+        self.st.needs = [{"need_id": "need_001", "category": "housing_assistance",
+                          "confirmation_status": "proposed"}]
+        req, _ = B.agent1_answer_request(self.st, "yes", ["zip_code"], self.ref)
+        self.assertEqual(req["payload"]["existing_needs"],
+                         [{"need_id": "need_001", "category": "housing_assistance"}])
+
+    def test_ref_date_none_raises(self):
+        with self.assertRaises(ValueError):
+            B.agent1_answer_request(self.st, "x", ["zip_code"], None)
+
+    def test_empty_pending_keys_raises(self):
+        with self.assertRaises(ValueError):
+            B.agent1_answer_request(self.st, "x", [], self.ref)
+
+    def test_non_list_pending_keys_raises(self):
+        with self.assertRaises(ValueError):
+            B.agent1_answer_request(self.st, "x", "zip_code", self.ref)
+
+    def test_pending_keys_with_empty_string_raises(self):
+        with self.assertRaises(ValueError):
+            B.agent1_answer_request(self.st, "x", ["zip_code", ""], self.ref)
+
+
+class TestMergeAnswerFacts(unittest.TestCase):
+    """merge_answer_facts: keeps asked fields, drops others, replaces existing."""
+
+    def _claim(self, field, value, fact_id="f1"):
+        return {"fact_id": fact_id, "field": field, "value": value,
+                "confirmation_status": "proposed", "source": "user_statement",
+                "time_context": None}
+
+    def _result(self, claims):
+        return {"result": {"factual_claims": claims}}
+
+    def test_claim_for_unasked_field_dropped_with_warning(self):
+        st = new_state()
+        issues = B.merge_answer_facts(st, self._result([
+            self._claim("zip_code", "95823"),
+            self._claim("household_size", 3),      # not in pending
+        ]), ["zip_code"])
+        self.assertEqual(len(st.case_facts), 1)
+        self.assertEqual(st.case_facts[0]["field"], "zip_code")
+        outside = [i for i in issues if i["code"] == "ANSWER_FACT_OUTSIDE_QUESTION"]
+        self.assertEqual(len(outside), 1)
+        self.assertEqual(outside[0]["related_ref"], "household_size")
+        # message must name the field only, not the value
+        self.assertNotIn("3", outside[0]["message"])
+
+    def test_new_value_replaces_old(self):
+        st = new_state()
+        st.case_facts = [self._claim("zip_code", "00000", "f0")]
+        B.merge_answer_facts(st, self._result([self._claim("zip_code", "95823")]), ["zip_code"])
+        vals = [f["value"] for f in st.case_facts if f["field"] == "zip_code"]
+        self.assertEqual(vals, ["95823"])
+
+    def test_income_zero_is_kept(self):
+        """income '0' is a real answer (Julia's decision); it must not be dropped as falsy."""
+        st = new_state()
+        B.merge_answer_facts(st, self._result([
+            self._claim("household_gross_monthly_income", 0)
+        ]), ["household_gross_monthly_income"])
+        vals = [f["value"] for f in st.case_facts
+                if f["field"] == "household_gross_monthly_income"]
+        self.assertEqual(vals, [0])
+
+    def test_unanswered_key_stays_absent(self):
+        """A field in pending_fact_keys that the result does not mention stays absent."""
+        st = new_state()
+        B.merge_answer_facts(st, self._result([]), ["zip_code", "household_size"])
+        fields = {f["field"] for f in st.case_facts}
+        self.assertNotIn("zip_code", fields)
+        self.assertNotIn("household_size", fields)
+
+    def test_confirmation_status_stays_proposed(self):
+        st = new_state()
+        B.merge_answer_facts(st, self._result([self._claim("zip_code", "95823")]), ["zip_code"])
+        self.assertEqual(st.case_facts[0]["confirmation_status"], "proposed")
+
+
+class TestMergeAnswerNeeds(unittest.TestCase):
+    """merge_answer_needs: new needs added, duplicates dropped."""
+
+    def _need(self, nid, cat):
+        return {"need_id": nid, "category": cat, "description": "d",
+                "original_quote": "q", "confirmation_status": "proposed",
+                "user_reported": True, "urgency": "normal",
+                "urgency_reason": None, "user_priority": None}
+
+    def _result(self, needs):
+        return {"result": {"factual_claims": [], "proposed_needs": needs}}
+
+    def test_new_food_need_added_as_proposed(self):
+        st = new_state()
+        st.needs = [self._need("need_001", "housing_assistance"),
+                    self._need("need_002", "income_assistance")]
+        issues = B.merge_answer_needs(st, self._result([
+            self._need("need_003", "food_assistance")]))
+        self.assertEqual(len(st.needs), 3)
+        self.assertEqual(st.needs[2]["need_id"], "need_003")
+        self.assertEqual(st.needs[2]["confirmation_status"], "proposed")
+        self.assertEqual(issues, [])
+
+    def test_reused_need_id_dropped_with_warning(self):
+        st = new_state()
+        st.needs = [self._need("need_001", "housing_assistance")]
+        issues = B.merge_answer_needs(st, self._result([
+            self._need("need_001", "food_assistance")]))  # same id
+        self.assertEqual(len(st.needs), 1)
+        dup = [i for i in issues if i["code"] == "ANSWER_NEED_DUPLICATE"]
+        self.assertEqual(len(dup), 1)
+        self.assertEqual(dup[0]["related_ref"], "need_001")
+
+    def test_existing_category_dropped_with_warning(self):
+        st = new_state()
+        st.needs = [self._need("need_001", "housing_assistance")]
+        issues = B.merge_answer_needs(st, self._result([
+            self._need("need_002", "housing_assistance")]))  # same category
+        self.assertEqual(len(st.needs), 1)
+        dup = [i for i in issues if i["code"] == "ANSWER_NEED_DUPLICATE"]
+        self.assertEqual(len(dup), 1)
+        self.assertEqual(dup[0]["related_ref"], "need_002")
+        self.assertIn("housing_assistance", dup[0]["message"])
+
+    def test_no_proposed_needs_key_valid(self):
+        """Result without proposed_needs is valid."""
+        st = new_state()
+        st.needs = [self._need("need_001", "housing_assistance")]
+        issues = B.merge_answer_needs(st, {"result": {"factual_claims": []}})
+        self.assertEqual(len(st.needs), 1)
+        self.assertEqual(issues, [])
+
+    def test_proposed_needs_not_a_list_warning(self):
+        """proposed_needs present but not a list -> ANSWER_NEEDS_INVALID, nothing added."""
+        st = new_state()
+        st.needs = [self._need("need_001", "housing_assistance")]
+        issues = B.merge_answer_needs(st, {"result": {"proposed_needs": {"bad": True}}})
+        self.assertEqual(len(st.needs), 1)
+        self.assertTrue(any(i["code"] == "ANSWER_NEEDS_INVALID" for i in issues))
+
+    def test_item_not_a_dict_dropped(self):
+        """proposed_needs item that is not a dict -> ANSWER_NEED_INVALID, related_ref None."""
+        st = new_state()
+        issues = B.merge_answer_needs(st, self._result(["not-a-dict"]))
+        self.assertEqual(len(st.needs), 0)
+        inv = [i for i in issues if i["code"] == "ANSWER_NEED_INVALID"]
+        self.assertEqual(len(inv), 1)
+        self.assertIsNone(inv[0]["related_ref"])
+
+    def test_item_missing_category_dropped(self):
+        """Item with need_id but no category -> ANSWER_NEED_INVALID, related_ref is the need_id."""
+        st = new_state()
+        issues = B.merge_answer_needs(st, self._result([{"need_id": "need_003"}]))
+        self.assertEqual(len(st.needs), 0)
+        inv = [i for i in issues if i["code"] == "ANSWER_NEED_INVALID"]
+        self.assertEqual(len(inv), 1)
+        self.assertEqual(inv[0]["related_ref"], "need_003")
+
+    def test_item_missing_need_id_dropped(self):
+        """Item with category but no need_id -> ANSWER_NEED_INVALID, related_ref None."""
+        st = new_state()
+        issues = B.merge_answer_needs(st, self._result([{"category": "food_assistance"}]))
+        self.assertEqual(len(st.needs), 0)
+        inv = [i for i in issues if i["code"] == "ANSWER_NEED_INVALID"]
+        self.assertEqual(len(inv), 1)
+        self.assertIsNone(inv[0]["related_ref"])
+
+
 if __name__ == "__main__":
     unittest.main()

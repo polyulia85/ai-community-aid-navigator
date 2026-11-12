@@ -361,8 +361,9 @@ class Run:
         B.confirm_agent1(st, r1, corrections)            # user confirms the summary (simulated here)
 
         self._stage = "agent_2"
+        ambiguity_flags = r1["result"].get("ambiguity_flags") or []
         if "agent_2" in self.agents:                     # soft step: it improves data, nothing depends on it
-            r2 = self.call(B.agent2_request(st))
+            r2 = self.call(B.agent2_request(st, ambiguity_flags=ambiguity_flags))
             if r2:
                 self.supervisor_issues += B.apply_need_updates(st, r2)
                 if r2.get("clarification_requests"):
@@ -370,6 +371,11 @@ class Run:
                         "CLARIFICATION_PENDING", "info",
                         f"{len(r2['clarification_requests'])} question(s) for the user; demo continues without an answer"))
 
+        return self._plan_body()
+
+    def _plan_body(self):
+        """Agents 3-10 and repair rounds. Called from _execute_body and from dialog.confirm."""
+        st = self.state
         self._stage = "agent_3"
         q3, geo_issues = B.agent3_request(st)
         self.supervisor_issues += geo_issues

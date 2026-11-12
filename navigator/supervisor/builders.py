@@ -4,7 +4,6 @@ Agents never call each other. The Supervisor keeps one CaseState and builds ever
 AgentRequest from it, passing each agent only what it needs.
 """
 import datetime
-import itertools
 import json
 
 from navigator.supervisor import contract as C
@@ -46,7 +45,8 @@ def load_kb(path):
 class CaseState:
     """Everything the Supervisor knows about one case. Only the Supervisor writes here."""
 
-    def __init__(self, case_id, run_id, correlation_id, source_policy="verified_kb_only"):
+    def __init__(self, case_id, run_id, correlation_id, source_policy="verified_kb_only",
+                 first_seq=1):
         self.case_id = case_id
         self.run_id = run_id
         self.correlation_id = correlation_id
@@ -56,10 +56,17 @@ class CaseState:
         self.case_facts = []       # CaseFact objects (contract 3.2), confirmed by the user
         self.already_asked = []    # fact_keys asked, including skipped or declined
         self.results = {}          # request_id -> accepted AgentResult
-        self._counter = itertools.count(1)
+        self._seq = first_seq      # next number to use
 
     def next_request_id(self):
-        return f"req-{next(self._counter):04d}"
+        rid = f"req-{self._seq:04d}"
+        self._seq += 1
+        return rid
+
+    @property
+    def next_seq(self):
+        """The number the next request_id will use. Used by dialog to store and restore."""
+        return self._seq
 
     def fact(self, field):
         for f in self.case_facts:
@@ -128,12 +135,117 @@ def confirm_agent1(state, agent1_result, corrections=None):
     state.bump_version()
 
 
-def agent2_request(state, candidate_requirements=None):
+def agent2_request(state, candidate_requirements=None, ambiguity_flags=None):
     payload = {"needs": state.needs, "case_facts": state.case_facts,
                "already_asked": state.already_asked}
     if candidate_requirements:
         payload["candidate_requirements"] = candidate_requirements
+    # PROPOSED for contracts v1.2 (CR by Slav): Agent 1 ambiguity flags passed to Agent 2
+    if ambiguity_flags:
+        payload["ambiguity_flags"] = ambiguity_flags
     return make_request(state, "agent_2", "clarify_case", payload)
+
+
+def agent1_answer_request(state, answer_text, pending_fact_keys, ref_date):
+    """Build an Agent 1 parse_clarification_answer request (contract 4.1).
+
+    S0 masking of answer_text (same mask_user_text as the story).
+    ref_date is required (_ref_date_iso raises ValueError if None).
+    pending_fact_keys must be a non-empty list of non-empty strings.
+    Returns (request, issues) where issues carries any PII_MASKED warnings.
+
+    PROPOSED for contracts v1.2 (CR-014 by Yogesh, option (a) proposed by Slav Nov 11):
+    also sends existing_needs so Agent 1 can propose new needs without repeating existing ones.
+    """
+    if not (isinstance(pending_fact_keys, list) and pending_fact_keys
+            and all(isinstance(k, str) and k for k in pending_fact_keys)):
+        raise ValueError("agent1_answer_request: pending_fact_keys must be a non-empty list of strings")
+    masked, issues = mask_user_text(answer_text)
+    ref_date_iso = _ref_date_iso(ref_date, "agent1_answer_request")
+    # PROPOSED for contracts v1.2 (CR-014): existing_needs so Agent 1 can propose new needs
+    existing_needs = [{"need_id": n["need_id"], "category": n["category"]} for n in state.needs]
+    payload = {
+        "answer_text": masked,
+        "pending_fact_keys": pending_fact_keys,
+        "ref_date": ref_date_iso,
+        "existing_needs": existing_needs,
+    }
+    req = make_request(state, "agent_1", "parse_clarification_answer", payload)
+    return req, issues
+
+
+def merge_answer_facts(state, result, pending_fact_keys):
+    """Apply factual_claims from a parse_clarification_answer result to case state.
+
+    Only claims whose field is in pending_fact_keys are kept; any other field
+    is dropped with an ANSWER_FACT_OUTSIDE_QUESTION warning.
+    A kept claim replaces any existing fact with the same field.
+    confirmation_status stays 'proposed' until the user confirms.
+    Returns issues.
+    """
+    issues = []
+    pending_set = set(pending_fact_keys)
+    for claim in result.get("result", {}).get("factual_claims", []):
+        field = claim.get("field")
+        if field not in pending_set:
+            issues.append({"code": "ANSWER_FACT_OUTSIDE_QUESTION", "severity": "warning",
+                           "message": f"Claim for field {field!r} is outside the asked keys; dropped",
+                           "related_ref": field})
+            continue
+        # Replace any existing fact with the same field, then append the new one
+        state.case_facts = [f for f in state.case_facts if f.get("field") != field]
+        state.case_facts.append(dict(claim, confirmation_status="proposed"))
+    return issues
+
+
+def merge_answer_needs(state, result):
+    """Apply proposed_needs from a parse_clarification_answer result to case state.
+
+    PROPOSED for contracts v1.2 (CR-014 by Yogesh, option (a) proposed by Slav Nov 11):
+    each proposed need is added with confirmation_status 'proposed' only when
+    its need_id is new AND its category is not already present.
+    A reused need_id or a repeated category is dropped with ANSWER_NEED_DUPLICATE (warning).
+    A result without proposed_needs is valid (the key is optional here).
+    Returns issues.
+    """
+    issues = []
+    raw = result.get("result", {}).get("proposed_needs")
+    if raw is None:
+        return issues
+    if not isinstance(raw, list):
+        issues.append({"code": "ANSWER_NEEDS_INVALID", "severity": "warning",
+                       "message": "proposed_needs in answer result is not a list; ignored",
+                       "related_ref": None})
+        return issues
+    existing_ids = {n["need_id"] for n in state.needs}
+    existing_cats = {n["category"] for n in state.needs}
+    for need in raw:
+        if not isinstance(need, dict):
+            issues.append({"code": "ANSWER_NEED_INVALID", "severity": "warning",
+                           "message": "proposed_needs item is not an object; dropped",
+                           "related_ref": None})
+            continue
+        nid = need.get("need_id")
+        cat = need.get("category")
+        if not nid or not cat:
+            issues.append({"code": "ANSWER_NEED_INVALID", "severity": "warning",
+                           "message": "proposed_needs item missing need_id or category; dropped",
+                           "related_ref": nid})
+            continue
+        if nid in existing_ids:
+            issues.append({"code": "ANSWER_NEED_DUPLICATE", "severity": "warning",
+                           "message": f"Need id {nid!r} already present (category {cat!r}); dropped",
+                           "related_ref": nid})
+            continue
+        if cat in existing_cats:
+            issues.append({"code": "ANSWER_NEED_DUPLICATE", "severity": "warning",
+                           "message": f"Category {cat!r} already present; dropped",
+                           "related_ref": nid})
+            continue
+        state.needs.append(dict(need, confirmation_status="proposed"))
+        existing_ids.add(nid)
+        existing_cats.add(cat)
+    return issues
 
 
 def apply_need_updates(state, agent2_result):
