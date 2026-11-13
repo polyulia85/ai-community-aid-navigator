@@ -225,6 +225,10 @@ p, e = assemble({"program_id": PID, "program_name": "Sacramento Coordinated Acce
                  "availability": "confirmed_open", "verification_status": "verified"}, ca_ev)
 programs.append(p); evidence += e
 
+import sys as _sys; _sys.path.insert(0, HERE)
+from records_nov12 import build as build_nov12
+_p, _e = build_nov12(ev_row, assemble)
+programs += _p; evidence += _e
 out = {"schema_version": "1.0", "note": "Contracts v1.1. Nov 2, 2026 update published. Built by navigator/kb/tools/build_kb.py.",
        "program_records": programs, "evidence_records": evidence}
 target = os.path.join(KB_DIR, "kb_sacramento.json")

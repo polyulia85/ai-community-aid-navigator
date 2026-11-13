@@ -51,6 +51,13 @@ git clone: https://github.com/polyulia85/ai-community-aid-navigator.git
 ### Set up virtual environment
 python -m venv venv
 
+### Run the knowledge base builder
+python3 navigator/kb/tools/build_kb.py
+python3 navigator/kb/tools/validate_kb.py
+
+### Run all tests
+python3 -m unittest discover tests -v
+
 ## Team
 
 - Iuliia Poliakova — Project Lead
@@ -60,6 +67,28 @@ python -m venv venv
 - Yogesh Kushwaha — Crisis Understanding & User Navigation
 
 - Silver Sanchez Cardenas — Resource Retrieval, Matching & Verification
+
+## Knowledge base
+
+`navigator/kb/kb_sacramento.json` is the local knowledge base for Sacramento County. As of Nov 12, 2026 it covers **11 programs** and **200 evidence records** across food assistance, housing assistance, and income assistance:
+
+| Program | Category | Availability |
+|---|---|---|
+| CalFresh | food_assistance / calfresh_benefits | confirmed_open |
+| Unemployment Insurance (EDD) | income_assistance / unemployment_insurance | confirmed_open |
+| Saint John's Housing Assistance Program | housing_assistance / rental_assistance | confirmed_open |
+| Sacramento Coordinated Access System (2-1-1, press 8) | housing_assistance / eviction_prevention | confirmed_open |
+| Emergency Food Distribution — Midtown (River City Food Bank) | food_assistance / food_pantry | confirmed_open |
+| Emergency Food Distribution — Arden-Arcade (River City Food Bank) | food_assistance / food_pantry | confirmed_open |
+| Client Choice Food Pantry (Salvation Army Sacramento Metro) | food_assistance / food_pantry | confirmed_open |
+| Rent & Utility Assistance — rental assistance (Salvation Army Sacramento Metro) | housing_assistance / rental_assistance | unknown (funding depends on availability) |
+| Food Finder — partner food distribution sites (Sacramento Food Bank & Family Services) | food_assistance / food_pantry | confirmed_open |
+| Elk Grove Food Bank Services (food distribution) | food_assistance / food_pantry | confirmed_open |
+| Free legal help for tenants (Legal Services of Northern California, Sacramento office) | housing_assistance / housing_legal_aid | confirmed_open |
+
+Sources and terms of use: `navigator/kb/SOURCES.md` (32 source links, 15 sites, 13 owners as of Nov 12, 2026).
+
+KB is rebuilt by running `python3 navigator/kb/tools/build_kb.py` from the repo root. Validation: `python3 navigator/kb/tools/validate_kb.py`.
 
 - M. Hisham Abbasi — Prioritization, Action Planning & Quality Validation
 

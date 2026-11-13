@@ -1,0 +1,996 @@
+{
+  "schema_version": "1.0",
+  "note": "Emergency and crisis resources for the safety path. Separate from the KB; category emergency_crisis PROPOSED for contracts v1.2.",
+  "program_records": [
+    {
+      "program_id": "res_emergency_911_sac_001",
+      "program_name": "9-1-1 Emergency",
+      "organization": "Emergency services (County of Sacramento guidance)",
+      "category": "emergency_crisis",
+      "subcategory": "emergency_services",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [
+        {
+          "value": "Call 9-1-1 to report: a fire; a serious injury or medical condition; a crime in progress or a serious crime has just occurred; anything that poses or indicates an immediate threat to people or property.",
+          "evidence_refs": [
+            "ev_e911_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        },
+        {
+          "value": "Calmly and clearly answer the dispatcher's questions. Stay on the line until the 9-1-1 dispatcher says it is okay to hang up.",
+          "evidence_refs": [
+            "ev_e911_002"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "contact": [
+        {
+          "value": "9-1-1",
+          "evidence_refs": [
+            "ev_e911_003"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "unknown",
+      "sources": [
+        "ev_e911_001",
+        "ev_e911_002",
+        "ev_e911_003",
+        "ev_e911_004"
+      ],
+      "last_verified_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "needs_review"
+    },
+    {
+      "program_id": "res_crisis_988_us_001",
+      "program_name": "988 Suicide & Crisis Lifeline",
+      "organization": "988 Suicide & Crisis Lifeline",
+      "category": "emergency_crisis",
+      "subcategory": "mental_health_crisis",
+      "geography": [
+        "United States"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [
+        {
+          "value": "Call or text 988, or chat at chat.988lifeline.org.",
+          "evidence_refs": [
+            "ev_c988_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        },
+        {
+          "value": "Using the 988 Lifeline is free; conversations are confidential.",
+          "evidence_refs": [
+            "ev_c988_002"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "contact": [
+        {
+          "value": "Call or text 988.",
+          "evidence_refs": [
+            "ev_c988_003"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        },
+        {
+          "value": "Spanish: call 988 and press 2, or text AYUDA to 988.",
+          "evidence_refs": [
+            "ev_c988_004"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        },
+        {
+          "value": "Veterans, service members and their loved ones: call 988 and press 1 (Veterans Crisis Line).",
+          "evidence_refs": [
+            "ev_c988_005"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        },
+        {
+          "value": "Deaf and Hard of Hearing people have 24/7/365 access to 988 Videophone.",
+          "evidence_refs": [
+            "ev_c988_006"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "unknown",
+      "sources": [
+        "ev_c988_001",
+        "ev_c988_002",
+        "ev_c988_003",
+        "ev_c988_004",
+        "ev_c988_005",
+        "ev_c988_006",
+        "ev_c988_007"
+      ],
+      "last_verified_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "needs_review"
+    },
+    {
+      "program_id": "res_dv_weave_sac_001",
+      "program_name": "WEAVE 24-Hour Support & Information Line",
+      "organization": "WEAVE (Sacramento)",
+      "category": "emergency_crisis",
+      "subcategory": "domestic_violence_sexual_assault",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [
+        {
+          "value": "WEAVE serves adult and child survivors of domestic violence, sexual assault, and sex trafficking.",
+          "evidence_refs": [
+            "ev_weave_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "24-Hour Support & Information Line: (916) 920-2952",
+          "evidence_refs": [
+            "ev_weave_002"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_weave_001",
+        "ev_weave_002",
+        "ev_weave_003"
+      ],
+      "last_verified_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "res_dv_hotline_us_001",
+      "program_name": "National Domestic Violence Hotline",
+      "organization": "National Domestic Violence Hotline (The Hotline)",
+      "category": "emergency_crisis",
+      "subcategory": "domestic_violence_sexual_assault",
+      "geography": [
+        "United States"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [
+        {
+          "value": "Free, confidential, and compassionate support, in over 200 languages.",
+          "evidence_refs": [
+            "ev_ndvh_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "contact": [
+        {
+          "value": "Call 800.799.SAFE (7233).",
+          "evidence_refs": [
+            "ev_ndvh_002"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        },
+        {
+          "value": "Text START to 88788. Msg & data rates may apply.",
+          "evidence_refs": [
+            "ev_ndvh_003"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        },
+        {
+          "value": "Chat with a Live Advocate at thehotline.org.",
+          "evidence_refs": [
+            "ev_ndvh_004"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_ndvh_001",
+        "ev_ndvh_002",
+        "ev_ndvh_003",
+        "ev_ndvh_004",
+        "ev_ndvh_005"
+      ],
+      "last_verified_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "res_dv_fjc_sac_001",
+      "program_name": "Sacramento Regional Family Justice Center",
+      "organization": "Sacramento Regional Family Justice Center (Sacramento County District Attorney)",
+      "category": "emergency_crisis",
+      "subcategory": "domestic_violence_sexual_assault",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [
+        {
+          "value": "Services listed: individual and group counseling, a mobile civil legal team, safety planning, temporary restraining order applications, and Camp HOPE.",
+          "evidence_refs": [
+            "ev_fjc_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "contact": [
+        {
+          "value": "916.875.HOPE (4673)",
+          "evidence_refs": [
+            "ev_fjc_002"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        },
+        {
+          "value": "3701 Power Inn, Suite 3100 (Third Floor), Sacramento, CA 95826",
+          "evidence_refs": [
+            "ev_fjc_003"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-06T16:05:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_fjc_001",
+        "ev_fjc_002",
+        "ev_fjc_003",
+        "ev_fjc_004"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    }
+    ,
+    {
+      "program_id": "er_police_sacpd_001",
+      "program_name": "Sacramento Police Department — Non-Emergency",
+      "organization": "Sacramento Police Department",
+      "category": "emergency_crisis",
+      "subcategory": "local_police_non_emergency",
+      "geography": [
+        "City of Sacramento"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "916-808-5471",
+          "evidence_refs": [
+            "ev_sacpd_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "unknown",
+      "sources": [
+        "ev_sacpd_001",
+        "ev_sacpd_002"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "er_police_sheriff_001",
+      "program_name": "Sacramento County Sheriff's Office — Non-Emergency",
+      "organization": "Sacramento County Sheriff's Office",
+      "category": "emergency_crisis",
+      "subcategory": "local_police_non_emergency",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "916-874-5115",
+          "evidence_refs": [
+            "ev_sheriff_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_sheriff_001",
+        "ev_sheriff_002"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "er_police_citrusheights_001",
+      "program_name": "Citrus Heights Police — Non-Emergency",
+      "organization": "Citrus Heights Police",
+      "category": "emergency_crisis",
+      "subcategory": "local_police_non_emergency",
+      "geography": [
+        "Citrus Heights"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "916-727-5500",
+          "evidence_refs": [
+            "ev_citrusheights_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "unknown",
+      "sources": [
+        "ev_citrusheights_001",
+        "ev_citrusheights_002"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "er_police_elkgrove_001",
+      "program_name": "Elk Grove Police — Non-Emergency",
+      "organization": "Elk Grove Police",
+      "category": "emergency_crisis",
+      "subcategory": "local_police_non_emergency",
+      "geography": [
+        "Elk Grove"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "916-714-5115",
+          "evidence_refs": [
+            "ev_elkgrove_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "unknown",
+      "sources": [
+        "ev_elkgrove_001",
+        "ev_elkgrove_002"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "er_police_folsom_001",
+      "program_name": "Folsom Police — Non-Emergency",
+      "organization": "Folsom Police",
+      "category": "emergency_crisis",
+      "subcategory": "local_police_non_emergency",
+      "geography": [
+        "Folsom"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "916-355-7231",
+          "evidence_refs": [
+            "ev_folsom_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "unknown",
+      "sources": [
+        "ev_folsom_001",
+        "ev_folsom_002"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "er_police_galt_001",
+      "program_name": "Galt Police — Non-Emergency",
+      "organization": "Galt Police",
+      "category": "emergency_crisis",
+      "subcategory": "local_police_non_emergency",
+      "geography": [
+        "Galt"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "209-366-7000",
+          "evidence_refs": [
+            "ev_galt_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "unknown",
+      "sources": [
+        "ev_galt_001",
+        "ev_galt_002"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "er_police_ranchocordova_001",
+      "program_name": "Rancho Cordova Police — Non-Emergency",
+      "organization": "Rancho Cordova Police",
+      "category": "emergency_crisis",
+      "subcategory": "local_police_non_emergency",
+      "geography": [
+        "Rancho Cordova"
+      ],
+      "eligibility_criteria": [],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "916-362-5115",
+          "evidence_refs": [
+            "ev_ranchocordova_001"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "unknown",
+      "sources": [
+        "ev_ranchocordova_001",
+        "ev_ranchocordova_002"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    }
+  ],
+  "evidence_records": [
+    {
+      "evidence_id": "ev_e911_001",
+      "program_id": "res_emergency_911_sac_001",
+      "field_path": "application_method[0]",
+      "claim_value": "Call 9-1-1 to report: a fire; a serious injury or medical condition; a crime in progress or a serious crime has just occurred; anything that poses or indicates an immediate threat to people or property.",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Calling 911 | County of Sacramento (no page date shown)",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "List items from the page, joined in one claim."
+    },
+    {
+      "evidence_id": "ev_e911_002",
+      "program_id": "res_emergency_911_sac_001",
+      "field_path": "application_method[1]",
+      "claim_value": "Calmly and clearly answer the dispatcher's questions. Stay on the line until the 9-1-1 dispatcher says it is okay to hang up.",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Calling 911 | County of Sacramento (no page date shown)",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_e911_003",
+      "program_id": "res_emergency_911_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "9-1-1",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Calling 911 | County of Sacramento (no page date shown)",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_e911_004",
+      "program_id": "res_emergency_911_sac_001",
+      "field_path": "availability",
+      "claim_value": "The county page does not state hours.",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Calling 911 | County of Sacramento (no page date shown)",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "availability = unknown because the page does not state hours. TEAM DECISION: the safety path should always show 911 regardless of this field."
+    },
+    {
+      "evidence_id": "ev_c988_001",
+      "program_id": "res_crisis_988_us_001",
+      "field_path": "application_method[0]",
+      "claim_value": "Call or text 988, or chat at chat.988lifeline.org.",
+      "source_url": "https://988lifeline.org/get-help/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Get Help | 988 Suicide & Crisis Lifeline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_c988_002",
+      "program_id": "res_crisis_988_us_001",
+      "field_path": "application_method[1]",
+      "claim_value": "Using the 988 Lifeline is free; conversations are confidential.",
+      "source_url": "https://988lifeline.org/get-help/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Get Help | 988 Suicide & Crisis Lifeline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": "Paraphrase of two statements on the page."
+    },
+    {
+      "evidence_id": "ev_c988_003",
+      "program_id": "res_crisis_988_us_001",
+      "field_path": "contact[0]",
+      "claim_value": "Call or text 988.",
+      "source_url": "https://988lifeline.org/get-help/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Get Help | 988 Suicide & Crisis Lifeline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_c988_004",
+      "program_id": "res_crisis_988_us_001",
+      "field_path": "contact[1]",
+      "claim_value": "Spanish: call 988 and press 2, or text AYUDA to 988.",
+      "source_url": "https://988lifeline.org/get-help/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Get Help | 988 Suicide & Crisis Lifeline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_c988_005",
+      "program_id": "res_crisis_988_us_001",
+      "field_path": "contact[2]",
+      "claim_value": "Veterans, service members and their loved ones: call 988 and press 1 (Veterans Crisis Line).",
+      "source_url": "https://988lifeline.org/get-help/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Get Help | 988 Suicide & Crisis Lifeline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_c988_006",
+      "program_id": "res_crisis_988_us_001",
+      "field_path": "contact[3]",
+      "claim_value": "Deaf and Hard of Hearing people have 24/7/365 access to 988 Videophone.",
+      "source_url": "https://988lifeline.org/get-help/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Get Help | 988 Suicide & Crisis Lifeline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_c988_007",
+      "program_id": "res_crisis_988_us_001",
+      "field_path": "availability",
+      "claim_value": "The Get Help page does not state the hours of the main 988 line.",
+      "source_url": "https://988lifeline.org/get-help/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Get Help | 988 Suicide & Crisis Lifeline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": "24/7 is stated only for the Veterans Crisis Line and the videophone on the pages checked (988lifeline.org/get-help, /what-to-expect; samhsa.gov/mental-health/988 and /faqs). Re-check before showing hours. The safety path should always show 988."
+    },
+    {
+      "evidence_id": "ev_weave_001",
+      "program_id": "res_dv_weave_sac_001",
+      "field_path": "eligibility_criteria[0]",
+      "claim_value": "WEAVE serves adult and child survivors of domestic violence, sexual assault, and sex trafficking.",
+      "source_url": "https://weaveinc.org/get-help",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Get Help | WEAVE (Sacramento)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_weave_002",
+      "program_id": "res_dv_weave_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "24-Hour Support & Information Line: (916) 920-2952",
+      "source_url": "https://weaveinc.org/get-help",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Get Help | WEAVE (Sacramento)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Matches the number in Julia's protocol."
+    },
+    {
+      "evidence_id": "ev_weave_003",
+      "program_id": "res_dv_weave_sac_001",
+      "field_path": "availability",
+      "claim_value": "24-Hour Support & Information Line (also described on the page as the 24/7 Support Line).",
+      "source_url": "https://weaveinc.org/get-help",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Get Help | WEAVE (Sacramento)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Basis for availability = confirmed_open (published hours)."
+    },
+    {
+      "evidence_id": "ev_ndvh_001",
+      "program_id": "res_dv_hotline_us_001",
+      "field_path": "application_method[0]",
+      "claim_value": "Free, confidential, and compassionate support, in over 200 languages.",
+      "source_url": "https://www.thehotline.org/about/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "About The Hotline | National Domestic Violence Hotline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_ndvh_002",
+      "program_id": "res_dv_hotline_us_001",
+      "field_path": "contact[0]",
+      "claim_value": "Call 800.799.SAFE (7233).",
+      "source_url": "https://www.thehotline.org/about/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "About The Hotline | National Domestic Violence Hotline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": "Matches the number in Julia's protocol (1-800-799-7233)."
+    },
+    {
+      "evidence_id": "ev_ndvh_003",
+      "program_id": "res_dv_hotline_us_001",
+      "field_path": "contact[1]",
+      "claim_value": "Text START to 88788. Msg & data rates may apply.",
+      "source_url": "https://www.thehotline.org/about/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "About The Hotline | National Domestic Violence Hotline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_ndvh_004",
+      "program_id": "res_dv_hotline_us_001",
+      "field_path": "contact[2]",
+      "claim_value": "Chat with a Live Advocate at thehotline.org.",
+      "source_url": "https://www.thehotline.org/about/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "About The Hotline | National Domestic Violence Hotline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": "Chat hours are not stated separately."
+    },
+    {
+      "evidence_id": "ev_ndvh_005",
+      "program_id": "res_dv_hotline_us_001",
+      "field_path": "availability",
+      "claim_value": "24 hours a day, seven days a week, 365 days a year.",
+      "source_url": "https://www.thehotline.org/about/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "About The Hotline | National Domestic Violence Hotline",
+      "source_authority_scope": "national_service_operator",
+      "effective_date": null,
+      "notes": "Basis for availability = confirmed_open (published hours)."
+    },
+    {
+      "evidence_id": "ev_fjc_001",
+      "program_id": "res_dv_fjc_sac_001",
+      "field_path": "application_method[0]",
+      "claim_value": "Services listed: individual and group counseling, a mobile civil legal team, safety planning, temporary restraining order applications, and Camp HOPE.",
+      "source_url": "https://sacda.org/victim-services/family-justice-center/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "The Sacramento Regional Family Justice Center | Sacramento County District Attorney (last modified Feb 2, 2026)",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "List from the page, joined in one claim."
+    },
+    {
+      "evidence_id": "ev_fjc_002",
+      "program_id": "res_dv_fjc_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "916.875.HOPE (4673)",
+      "source_url": "https://sacda.org/victim-services/family-justice-center/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "The Sacramento Regional Family Justice Center | Sacramento County District Attorney (last modified Feb 2, 2026)",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "Matches the number in Julia's protocol."
+    },
+    {
+      "evidence_id": "ev_fjc_003",
+      "program_id": "res_dv_fjc_sac_001",
+      "field_path": "contact[1]",
+      "claim_value": "3701 Power Inn, Suite 3100 (Third Floor), Sacramento, CA 95826",
+      "source_url": "https://sacda.org/victim-services/family-justice-center/",
+      "checked_at": "2026-11-06T16:05:00-08:00",
+      "verification_status": "verified",
+      "source_title": "The Sacramento Regional Family Justice Center | Sacramento County District Attorney (last modified Feb 2, 2026)",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_fjc_004",
+      "program_id": "res_dv_fjc_sac_001",
+      "field_path": "availability",
+      "claim_value": "Monday-Friday, 8:30 AM - 5:00 PM",
+      "source_url": "https://sacramentofjc.org/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Sacramento Regional Family Justice Center (sacramentofjc.org)",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "Hours stated on the official FJC page: MONDAY-FRIDAY, 8:30A-5:00P. Not 24/7. Rechecked 2026-11-12."
+    },
+    {
+      "evidence_id": "ev_sacpd_001",
+      "program_id": "er_police_sacpd_001",
+      "field_path": "contact[0]",
+      "claim_value": "916-808-5471",
+      "source_url": "https://www.cityofsacramento.gov/police/your-sacpd/about/contact-us",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Contact Us | Sacramento Police Department",
+      "source_authority_scope": "local_government",
+      "effective_date": null,
+      "notes": "Non-emergency dispatch number as published on the city page."
+    },
+    {
+      "evidence_id": "ev_sacpd_002",
+      "program_id": "er_police_sacpd_001",
+      "field_path": "availability",
+      "claim_value": "Hours not stated on the page.",
+      "source_url": "https://www.cityofsacramento.gov/police/your-sacpd/about/contact-us",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Contact Us | Sacramento Police Department",
+      "source_authority_scope": "local_government",
+      "effective_date": null,
+      "notes": "Hours not stated on the contact page checked."
+    },
+    {
+      "evidence_id": "ev_sheriff_001",
+      "program_id": "er_police_sheriff_001",
+      "field_path": "contact[0]",
+      "claim_value": "916-874-5115",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "Non-emergency number for the Sacramento County Sheriff's Communications Center."
+    },
+    {
+      "evidence_id": "ev_sheriff_002",
+      "program_id": "er_police_sheriff_001",
+      "field_path": "availability",
+      "claim_value": "24 hours/7 days",
+      "source_url": "https://www.sacsheriff.com/pages/faqs.php",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "FAQs | Sacramento County Sheriff's Office",
+      "source_authority_scope": "local_government",
+      "effective_date": null,
+      "notes": "The Sheriff's FAQ states the Communications Center is available 24 hours/7 days."
+    },
+    {
+      "evidence_id": "ev_citrusheights_001",
+      "program_id": "er_police_citrusheights_001",
+      "field_path": "contact[0]",
+      "claim_value": "916-727-5500",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_citrusheights_002",
+      "program_id": "er_police_citrusheights_001",
+      "field_path": "availability",
+      "claim_value": "Hours not stated on the page.",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "Hours not stated on the county page checked."
+    },
+    {
+      "evidence_id": "ev_elkgrove_001",
+      "program_id": "er_police_elkgrove_001",
+      "field_path": "contact[0]",
+      "claim_value": "916-714-5115",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_elkgrove_002",
+      "program_id": "er_police_elkgrove_001",
+      "field_path": "availability",
+      "claim_value": "Hours not stated on the page.",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "Hours not stated on the county page checked."
+    },
+    {
+      "evidence_id": "ev_folsom_001",
+      "program_id": "er_police_folsom_001",
+      "field_path": "contact[0]",
+      "claim_value": "916-355-7231",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_folsom_002",
+      "program_id": "er_police_folsom_001",
+      "field_path": "availability",
+      "claim_value": "Hours not stated on the page.",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "Hours not stated on the county page checked."
+    },
+    {
+      "evidence_id": "ev_galt_001",
+      "program_id": "er_police_galt_001",
+      "field_path": "contact[0]",
+      "claim_value": "209-366-7000",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_galt_002",
+      "program_id": "er_police_galt_001",
+      "field_path": "availability",
+      "claim_value": "Hours not stated on the page.",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "Hours not stated on the county page checked."
+    },
+    {
+      "evidence_id": "ev_ranchocordova_001",
+      "program_id": "er_police_ranchocordova_001",
+      "field_path": "contact[0]",
+      "claim_value": "916-362-5115",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_ranchocordova_002",
+      "program_id": "er_police_ranchocordova_001",
+      "field_path": "availability",
+      "claim_value": "Hours not stated on the page.",
+      "source_url": "https://www.saccounty.gov/Pages/Calling911.aspx",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Calling 911 | County of Sacramento",
+      "source_authority_scope": "county_government",
+      "effective_date": null,
+      "notes": "Hours not stated on the county page checked."
+    }
+  ]
+}

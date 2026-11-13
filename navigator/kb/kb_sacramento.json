@@ -980,6 +980,653 @@
       ],
       "last_verified_at": "2026-10-23T01:55:00-07:00",
       "verification_status": "verified"
+    },
+    {
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "program_name": "Emergency Food Distribution (Midtown)",
+      "organization": "River City Food Bank",
+      "category": "food_assistance",
+      "subcategory": "food_pantry",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [
+        {
+          "value": "All are welcome.",
+          "evidence_refs": [
+            "ev_rcfbmt_004"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Each household may receive a full grocery offering once per week.",
+          "evidence_refs": [
+            "ev_rcfbmt_005"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "If returning a second time the same week, you will only be able to access USDA items (e.g., canned and dry goods).",
+          "evidence_refs": [
+            "ev_rcfbmt_006"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "required_documents": [
+        {
+          "value": "ID is helpful, but not required.",
+          "evidence_refs": [
+            "ev_rcfbmt_007"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "application_method": [
+        {
+          "value": "Walk in during distribution hours. Bring your own cart or bags to carry groceries.",
+          "evidence_refs": [
+            "ev_rcfbmt_008"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "contact": [
+        {
+          "value": "1800 28th St. Sacramento, CA 95816",
+          "evidence_refs": [
+            "ev_rcfbmt_009"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Tuesday & Thursday: 10:30am - 1:30pm",
+          "evidence_refs": [
+            "ev_rcfbmt_010"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Phone: 916-446-2627",
+          "evidence_refs": [
+            "ev_rcfbmt_011"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_rcfbmt_001",
+        "ev_rcfbmt_002",
+        "ev_rcfbmt_003",
+        "ev_rcfbmt_004",
+        "ev_rcfbmt_005",
+        "ev_rcfbmt_006",
+        "ev_rcfbmt_007",
+        "ev_rcfbmt_008",
+        "ev_rcfbmt_009",
+        "ev_rcfbmt_010",
+        "ev_rcfbmt_011",
+        "ev_rcfbmt_012",
+        "ev_rcfbmt_013",
+        "ev_rcfbmt_014",
+        "ev_rcfbmt_015",
+        "ev_rcfbmt_016",
+        "ev_rcfbmt_017"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "program_name": "Emergency Food Distribution (Arden-Arcade)",
+      "organization": "River City Food Bank",
+      "category": "food_assistance",
+      "subcategory": "food_pantry",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [
+        {
+          "value": "All are welcome.",
+          "evidence_refs": [
+            "ev_rcfbar_004"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Each household may receive a full grocery offering once per week.",
+          "evidence_refs": [
+            "ev_rcfbar_005"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "If returning a second time the same week, you will only be able to access USDA items (e.g., canned and dry goods).",
+          "evidence_refs": [
+            "ev_rcfbar_006"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "required_documents": [
+        {
+          "value": "ID is helpful, but not required.",
+          "evidence_refs": [
+            "ev_rcfbar_007"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "application_method": [
+        {
+          "value": "Walk in during distribution hours. Bring your own cart or bags to carry groceries.",
+          "evidence_refs": [
+            "ev_rcfbar_008"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "contact": [
+        {
+          "value": "(The Center at St. Matthew's) 2300 Edison Ave. Sacramento, CA 95821",
+          "evidence_refs": [
+            "ev_rcfbar_009"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Wednesday & Friday: 10:30am - 1:30pm",
+          "evidence_refs": [
+            "ev_rcfbar_010"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Phone: 916-446-2627",
+          "evidence_refs": [
+            "ev_rcfbar_011"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_rcfbar_001",
+        "ev_rcfbar_002",
+        "ev_rcfbar_003",
+        "ev_rcfbar_004",
+        "ev_rcfbar_005",
+        "ev_rcfbar_006",
+        "ev_rcfbar_007",
+        "ev_rcfbar_008",
+        "ev_rcfbar_009",
+        "ev_rcfbar_010",
+        "ev_rcfbar_011",
+        "ev_rcfbar_012",
+        "ev_rcfbar_013",
+        "ev_rcfbar_014",
+        "ev_rcfbar_015",
+        "ev_rcfbar_016",
+        "ev_rcfbar_017"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "program_name": "Client Choice Food Pantry",
+      "organization": "The Salvation Army Sacramento Metro",
+      "category": "food_assistance",
+      "subcategory": "food_pantry",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [
+        {
+          "value": "Seniors, individuals with disabilities, low-income or no-income households, and homeless households in Sacramento County.",
+          "evidence_refs": [
+            "ev_sapantry_004"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Income guidelines are based on The Emergency Food Assistance Program.",
+          "evidence_refs": [
+            "ev_sapantry_005"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "Location: 3213 Orange Grove Ave., North Highlands, CA 95660",
+          "evidence_refs": [
+            "ev_sapantry_006"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Food Pantry Schedule: Tuesday, Wednesday, Thursday 9AM - 1PM",
+          "evidence_refs": [
+            "ev_sapantry_007"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "North Highlands Family Services: (916) 678-4010",
+          "evidence_refs": [
+            "ev_sapantry_008"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        },
+        {
+          "value": "Food for Seniors: 60 years old +, 4th Monday & Thursday, 9AM - 1PM",
+          "evidence_refs": [
+            "ev_sapantry_009"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_sapantry_001",
+        "ev_sapantry_002",
+        "ev_sapantry_003",
+        "ev_sapantry_004",
+        "ev_sapantry_005",
+        "ev_sapantry_006",
+        "ev_sapantry_007",
+        "ev_sapantry_008",
+        "ev_sapantry_009",
+        "ev_sapantry_010"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "program_name": "Rent & Utility Assistance (rental assistance)",
+      "organization": "The Salvation Army Sacramento Metro",
+      "category": "housing_assistance",
+      "subcategory": "rental_assistance",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [
+        {
+          "value": "Seniors, individuals with disabilities, low-income or no-income households, and homeless households in Sacramento County.",
+          "evidence_refs": [
+            "ev_sarent_004"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Rental Assistance - Requires a 3-day pay or quit notice.",
+          "evidence_refs": [
+            "ev_sarent_005"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Income guidelines are based on The Emergency Food Assistance Program.",
+          "evidence_refs": [
+            "ev_sarent_006"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Assistance programs are based on residence, income qualifications and availability of funding.",
+          "evidence_refs": [
+            "ev_sarent_011"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        }
+      ],
+      "required_documents": [
+        {
+          "value": "A 3-day pay or quit notice.",
+          "evidence_refs": [
+            "ev_sarent_007"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "North Highlands Family Services: 3213 Orange Grove Ave., North Highlands, CA 95660",
+          "evidence_refs": [
+            "ev_sarent_008"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        },
+        {
+          "value": "Rent & Utility Assistance Schedule: Monday, Tuesday, Wednesday, Thursday 9AM - 4PM",
+          "evidence_refs": [
+            "ev_sarent_009"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "North Highlands Family Services: (916) 678-4010",
+          "evidence_refs": [
+            "ev_sarent_010"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "unknown",
+      "sources": [
+        "ev_sarent_001",
+        "ev_sarent_002",
+        "ev_sarent_003",
+        "ev_sarent_004",
+        "ev_sarent_005",
+        "ev_sarent_006",
+        "ev_sarent_007",
+        "ev_sarent_008",
+        "ev_sarent_009",
+        "ev_sarent_010",
+        "ev_sarent_011",
+        "ev_sarent_012"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "needs_review"
+    },
+    {
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "program_name": "Food Finder (partner food distribution sites)",
+      "organization": "Sacramento Food Bank & Family Services",
+      "category": "food_assistance",
+      "subcategory": "food_pantry",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [
+        {
+          "value": "It's always recommended that you contact the location before visiting to confirm hours, eligibility requirements.",
+          "evidence_refs": [
+            "ev_sfbfs_004"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "required_documents": [],
+      "application_method": [
+        {
+          "value": "Use the Food Finder on https://www.sacramentofoodbank.org/find-food to locate a distribution site near you.",
+          "evidence_refs": [
+            "ev_sfbfs_005"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "contact": [
+        {
+          "value": "Main line: (916) 456-1980",
+          "evidence_refs": [
+            "ev_sfbfs_006"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "CalFresh Outreach: (916) 779-0052",
+          "evidence_refs": [
+            "ev_sfbfs_007"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Office: 1951 Bell Avenue, Sacramento, CA 95838",
+          "evidence_refs": [
+            "ev_sfbfs_008"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_sfbfs_001",
+        "ev_sfbfs_002",
+        "ev_sfbfs_003",
+        "ev_sfbfs_004",
+        "ev_sfbfs_005",
+        "ev_sfbfs_006",
+        "ev_sfbfs_007",
+        "ev_sfbfs_008",
+        "ev_sfbfs_009"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "program_name": "Elk Grove Food Bank Services (food distribution)",
+      "organization": "Elk Grove Food Bank Services",
+      "category": "food_assistance",
+      "subcategory": "food_pantry",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [
+        {
+          "value": "Our programs serve low-income families, children, seniors, chronically ill, migrant families, disabled, working poor, unemployed and the homeless.",
+          "evidence_refs": [
+            "ev_egfbs_004"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        },
+        {
+          "value": "All services are provided at no cost.",
+          "evidence_refs": [
+            "ev_egfbs_005"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        }
+      ],
+      "required_documents": [],
+      "application_method": [],
+      "contact": [
+        {
+          "value": "Physical address: 9888 Kent Street, Elk Grove, CA 95624",
+          "evidence_refs": [
+            "ev_egfbs_006"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        },
+        {
+          "value": "Phone: 916-685-8453",
+          "evidence_refs": [
+            "ev_egfbs_007"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        },
+        {
+          "value": "We serve our clients: Monday through Friday: 9:00 am to 2:00 pm; 1st Thursday of the month: open 12:30 pm to 2 pm; 4th Wednesday of the month: open 12:30 pm to 2 pm. Closed on most major holidays and Saturdays / Sundays.",
+          "evidence_refs": [
+            "ev_egfbs_008"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        },
+        {
+          "value": "CalFresh Coordinator: (916) 685-8453 x 205",
+          "evidence_refs": [
+            "ev_egfbs_009"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:26:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_egfbs_001",
+        "ev_egfbs_002",
+        "ev_egfbs_003",
+        "ev_egfbs_004",
+        "ev_egfbs_005",
+        "ev_egfbs_006",
+        "ev_egfbs_007",
+        "ev_egfbs_008",
+        "ev_egfbs_009",
+        "ev_egfbs_010"
+      ],
+      "last_verified_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified"
+    },
+    {
+      "program_id": "prog_housing_lsnc_sac_001",
+      "program_name": "Free legal help for tenants (Sacramento office)",
+      "organization": "Legal Services of Northern California (LSNC)",
+      "category": "housing_assistance",
+      "subcategory": "housing_legal_aid",
+      "geography": [
+        "Sacramento County"
+      ],
+      "eligibility_criteria": [
+        {
+          "value": "Serving low-income clients in Sacramento county.",
+          "evidence_refs": [
+            "ev_lsnc_004"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Service priorities include tenants rights, evictions and lock outs.",
+          "evidence_refs": [
+            "ev_lsnc_005"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "LSNC does not provide rental assistance or other monetary payments.",
+          "evidence_refs": [
+            "ev_lsnc_006"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "required_documents": [],
+      "application_method": [
+        {
+          "value": "Call during intake hours: Monday, Tuesday, Thursday and Friday, 8:30 a.m. to 12 p.m., 1 p.m. to 5 p.m. or until full. The list can fill quickly; call when the office opens.",
+          "evidence_refs": [
+            "ev_lsnc_007"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "contact": [
+        {
+          "value": "Phone: (916) 551-2150",
+          "evidence_refs": [
+            "ev_lsnc_008"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "After-hours intake (leave a message): (866) 815-5990",
+          "evidence_refs": [
+            "ev_lsnc_009"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "First contact by email for people who are deaf, hard of hearing or have trouble using the phone: sacramento-office@lsnc.net",
+          "evidence_refs": [
+            "ev_lsnc_010"
+          ],
+          "verification_status": "verified",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        },
+        {
+          "value": "Address: 515 - 12th Street, Sacramento, CA 95814",
+          "evidence_refs": [
+            "ev_lsnc_011"
+          ],
+          "verification_status": "needs_review",
+          "checked_at": "2026-11-12T10:30:00-08:00"
+        }
+      ],
+      "deadlines": [],
+      "processing_time": null,
+      "availability": "confirmed_open",
+      "sources": [
+        "ev_lsnc_001",
+        "ev_lsnc_002",
+        "ev_lsnc_003",
+        "ev_lsnc_004",
+        "ev_lsnc_005",
+        "ev_lsnc_006",
+        "ev_lsnc_007",
+        "ev_lsnc_008",
+        "ev_lsnc_009",
+        "ev_lsnc_010",
+        "ev_lsnc_011",
+        "ev_lsnc_012"
+      ],
+      "last_verified_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified"
     }
   ],
   "evidence_records": [
@@ -2451,6 +3098,1137 @@
       "source_authority_scope": "continuum_of_care_lead_agency",
       "effective_date": null,
       "notes": "Not needed just to call 2-1-1; needed if financial assistance is offered."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_001",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "program_name",
+      "claim_value": "River City Food Bank's Emergency Food Distribution has 2 locations: Midtown and Arden-Arcade. RCFB utilizes a Choice Food Model where each guest can select the items that best meet their needs.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "This record is the Midtown site."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_002",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "organization",
+      "claim_value": "River City Food Bank (RCFB)",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbmt_003",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "geography[0]",
+      "claim_value": "Sacramento County",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Page: open 'to anyone experiencing food insecurity in Sacramento County'."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_004",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "eligibility_criteria[0]",
+      "claim_value": "All are welcome.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Page also: 'anyone experiencing food insecurity in Sacramento County'. Intake questions are optional."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_005",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "eligibility_criteria[1]",
+      "claim_value": "Each household may receive a full grocery offering once per week.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbmt_006",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "eligibility_criteria[2]",
+      "claim_value": "If returning a second time the same week, you will only be able to access USDA items (e.g., canned and dry goods).",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbmt_007",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "required_documents[0]",
+      "claim_value": "ID is helpful, but not required.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbmt_008",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "application_method[0]",
+      "claim_value": "Walk in during distribution hours. Bring your own cart or bags to carry groceries.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "No appointment or application is described on the page."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_009",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "1800 28th St. Sacramento, CA 95816",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbmt_010",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "contact[1]",
+      "claim_value": "Tuesday & Thursday: 10:30am - 1:30pm",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbmt_011",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "contact[2]",
+      "claim_value": "Phone: 916-446-2627",
+      "source_url": "https://rivercityfoodbank.org/thanksgivingfood2026/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Holiday Food Distribution & Closures | River City Food Bank",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Listed in the site footer next to both distribution sites' hours and addresses."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_012",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "availability",
+      "claim_value": "These sites are open four days a week to provide healthy, nutritious food to anyone experiencing food insecurity in Sacramento County.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Basis for availability = confirmed_open (published schedule). Closure dates are separate dated rows."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_013",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "availability",
+      "claim_value": "November 11 - Veterans Day (closed)",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-11-11",
+      "notes": "Year confirmed by the Oct-Dec 2026 calendar PDF (Nov 11 marked CLOSED)."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_014",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "availability",
+      "claim_value": "November 20 - Closed",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "conflicting",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-11-20",
+      "notes": "CONFLICT: the distribution page and the holiday banner say Nov 20 is closed, but the holiday page's closure list reads 'Friday, Nov. 20 - Distribution' and the Oct-Dec 2026 calendar PDF does not mark Nov 20 closed. Call 916-446-2627 before going."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_015",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "availability",
+      "claim_value": "November 25-27 - Thanksgiving Holiday (closed)",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-11-25",
+      "notes": "Year confirmed by the calendar PDF (Nov 25-27 marked CLOSED)."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_016",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "availability",
+      "claim_value": "Thursday, December 24 through Friday, January 1, 2027 (holiday closure)",
+      "source_url": "https://rivercityfoodbank.org/thanksgivingfood2026/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Holiday Food Distribution & Closures | River City Food Bank",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-12-24",
+      "notes": "Holiday page states the years; the calendar PDF also marks Dec 24-31 CLOSED."
+    },
+    {
+      "evidence_id": "ev_rcfbmt_017",
+      "program_id": "prog_food_rivercity_midtown_sac_001",
+      "field_path": "availability",
+      "claim_value": "Holiday distribution: Tuesday, November 24, 2026, 10:30am - 1:30pm, Midtown Distribution, 1800 28th Street",
+      "source_url": "https://rivercityfoodbank.org/thanksgivingfood2026/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Holiday Food Distribution & Closures | River City Food Bank",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-11-24",
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbar_001",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "program_name",
+      "claim_value": "River City Food Bank's Emergency Food Distribution has 2 locations: Midtown and Arden-Arcade. RCFB utilizes a Choice Food Model where each guest can select the items that best meet their needs.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "This record is the Arden-Arcade site."
+    },
+    {
+      "evidence_id": "ev_rcfbar_002",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "organization",
+      "claim_value": "River City Food Bank (RCFB)",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbar_003",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "geography[0]",
+      "claim_value": "Sacramento County",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Page: open 'to anyone experiencing food insecurity in Sacramento County'."
+    },
+    {
+      "evidence_id": "ev_rcfbar_004",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "eligibility_criteria[0]",
+      "claim_value": "All are welcome.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Page also: 'anyone experiencing food insecurity in Sacramento County'. Intake questions are optional."
+    },
+    {
+      "evidence_id": "ev_rcfbar_005",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "eligibility_criteria[1]",
+      "claim_value": "Each household may receive a full grocery offering once per week.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbar_006",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "eligibility_criteria[2]",
+      "claim_value": "If returning a second time the same week, you will only be able to access USDA items (e.g., canned and dry goods).",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbar_007",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "required_documents[0]",
+      "claim_value": "ID is helpful, but not required.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbar_008",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "application_method[0]",
+      "claim_value": "Walk in during distribution hours. Bring your own cart or bags to carry groceries.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "No appointment or application is described on the page."
+    },
+    {
+      "evidence_id": "ev_rcfbar_009",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "(The Center at St. Matthew's) 2300 Edison Ave. Sacramento, CA 95821",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbar_010",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "contact[1]",
+      "claim_value": "Wednesday & Friday: 10:30am - 1:30pm",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_rcfbar_011",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "contact[2]",
+      "claim_value": "Phone: 916-446-2627",
+      "source_url": "https://rivercityfoodbank.org/thanksgivingfood2026/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Holiday Food Distribution & Closures | River City Food Bank",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Listed in the site footer next to both distribution sites' hours and addresses."
+    },
+    {
+      "evidence_id": "ev_rcfbar_012",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "availability",
+      "claim_value": "These sites are open four days a week to provide healthy, nutritious food to anyone experiencing food insecurity in Sacramento County.",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Basis for availability = confirmed_open (published schedule). Closure dates are separate dated rows."
+    },
+    {
+      "evidence_id": "ev_rcfbar_013",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "availability",
+      "claim_value": "November 11 - Veterans Day (closed)",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-11-11",
+      "notes": "Year confirmed by the Oct-Dec 2026 calendar PDF (Nov 11 marked CLOSED)."
+    },
+    {
+      "evidence_id": "ev_rcfbar_014",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "availability",
+      "claim_value": "November 20 - Closed",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "conflicting",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-11-20",
+      "notes": "CONFLICT: the distribution page and the holiday banner say Nov 20 is closed, but the holiday page's closure list reads 'Friday, Nov. 20 - Distribution' and the Oct-Dec 2026 calendar PDF does not mark Nov 20 closed. Call 916-446-2627 before going."
+    },
+    {
+      "evidence_id": "ev_rcfbar_015",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "availability",
+      "claim_value": "November 25-27 - Thanksgiving Holiday (closed)",
+      "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Emergency Food Distribution | River City Food Bank (page modified Oct 29, 2026)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-11-25",
+      "notes": "Year confirmed by the calendar PDF (Nov 25-27 marked CLOSED)."
+    },
+    {
+      "evidence_id": "ev_rcfbar_016",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "availability",
+      "claim_value": "Thursday, December 24 through Friday, January 1, 2027 (holiday closure)",
+      "source_url": "https://rivercityfoodbank.org/thanksgivingfood2026/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Holiday Food Distribution & Closures | River City Food Bank",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-12-24",
+      "notes": "Holiday page states the years; the calendar PDF also marks Dec 24-31 CLOSED."
+    },
+    {
+      "evidence_id": "ev_rcfbar_017",
+      "program_id": "prog_food_rivercity_arden_sac_001",
+      "field_path": "availability",
+      "claim_value": "Holiday distribution: Saturday, November 21, 2026, 10:30am - 1:30pm, Arden Distribution (The Center at St. Matthew's)",
+      "source_url": "https://rivercityfoodbank.org/thanksgivingfood2026/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Holiday Food Distribution & Closures | River City Food Bank",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": "2026-11-21",
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sapantry_001",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "program_name",
+      "claim_value": "Through our Client Choice Food Pantry, families can shop with dignity and select the items they need most.",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sapantry_002",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "organization",
+      "claim_value": "The Salvation Army Sacramento Metro",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sapantry_003",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "geography[0]",
+      "claim_value": "Sacramento County",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "From the 'Who Qualifies' section."
+    },
+    {
+      "evidence_id": "ev_sapantry_004",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "eligibility_criteria[0]",
+      "claim_value": "Seniors, individuals with disabilities, low-income or no-income households, and homeless households in Sacramento County.",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "The page's 'Who Qualifies' section applies to both pantry and family services."
+    },
+    {
+      "evidence_id": "ev_sapantry_005",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "eligibility_criteria[1]",
+      "claim_value": "Income guidelines are based on The Emergency Food Assistance Program.",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "No dollar limits on the page; unknown income is not a mismatch."
+    },
+    {
+      "evidence_id": "ev_sapantry_006",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "Location: 3213 Orange Grove Ave., North Highlands, CA 95660",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sapantry_007",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "contact[1]",
+      "claim_value": "Food Pantry Schedule: Tuesday, Wednesday, Thursday 9AM - 1PM",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "A staff member's email is on the page; left out on purpose (personal address)."
+    },
+    {
+      "evidence_id": "ev_sapantry_008",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "contact[2]",
+      "claim_value": "North Highlands Family Services: (916) 678-4010",
+      "source_url": "https://sacramento.salvationarmy.org/sacramento_metro/family-services/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Family Services & Food Pantry | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Family services page. Same page: 'Food Boxes & Fresh Produce: Tuesday, Wednesday, Thursday from 9AM - 1PM'."
+    },
+    {
+      "evidence_id": "ev_sapantry_009",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "contact[3]",
+      "claim_value": "Food for Seniors: 60 years old +, 4th Monday & Thursday, 9AM - 1PM",
+      "source_url": "https://sacramento.salvationarmy.org/sacramento_metro/family-services/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Family Services & Food Pantry | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sapantry_010",
+      "program_id": "prog_food_salvationarmy_pantry_sac_001",
+      "field_path": "availability",
+      "claim_value": "Food Pantry Schedule: Tuesday, Wednesday, Thursday 9AM - 1PM",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Basis for availability = confirmed_open (published schedule)."
+    },
+    {
+      "evidence_id": "ev_sarent_001",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "program_name",
+      "claim_value": "Helping families stay housed means covering essential rental and utility costs keeping a roof over their heads.",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Scope here: rental assistance only (utility, move-in and motel help on the same page are out of scope for now)."
+    },
+    {
+      "evidence_id": "ev_sarent_002",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "organization",
+      "claim_value": "The Salvation Army Sacramento Metro",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sarent_003",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "geography[0]",
+      "claim_value": "Sacramento County",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sarent_004",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "eligibility_criteria[0]",
+      "claim_value": "Seniors, individuals with disabilities, low-income or no-income households, and homeless households in Sacramento County.",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sarent_005",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "eligibility_criteria[1]",
+      "claim_value": "Rental Assistance - Requires a 3-day pay or quit notice.",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Criterion for Agent 4: if has_written_eviction_notice is unknown, keep potential_match, never a mismatch."
+    },
+    {
+      "evidence_id": "ev_sarent_006",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "eligibility_criteria[2]",
+      "claim_value": "Income guidelines are based on The Emergency Food Assistance Program.",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "No dollar limits on the page."
+    },
+    {
+      "evidence_id": "ev_sarent_007",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "required_documents[0]",
+      "claim_value": "A 3-day pay or quit notice.",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sarent_008",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "North Highlands Family Services: 3213 Orange Grove Ave., North Highlands, CA 95660",
+      "source_url": "https://sacramento.salvationarmy.org/sacramento_metro/family-services/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Family Services & Food Pantry | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "The food pantry & social services page writes the rent-help address as '3213 Orange Grove Ave, Sacramento' (no ZIP); same street address."
+    },
+    {
+      "evidence_id": "ev_sarent_009",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "contact[1]",
+      "claim_value": "Rent & Utility Assistance Schedule: Monday, Tuesday, Wednesday, Thursday 9AM - 4PM",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "No application steps are published."
+    },
+    {
+      "evidence_id": "ev_sarent_010",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "contact[2]",
+      "claim_value": "North Highlands Family Services: (916) 678-4010",
+      "source_url": "https://sacramento.salvationarmy.org/sacramento_metro/family-services/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Family Services & Food Pantry | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sarent_011",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "eligibility_criteria[3]",
+      "claim_value": "Assistance programs are based on residence, income qualifications and availability of funding.",
+      "source_url": "https://sacramento.salvationarmy.org/sacramento_metro/family-services/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Family Services & Food Pantry | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sarent_012",
+      "program_id": "prog_housing_salvationarmy_rent_sac_001",
+      "field_path": "availability",
+      "claim_value": "Rent & Utility Assistance Schedule: Monday, Tuesday, Wednesday, Thursday 9AM - 4PM",
+      "source_url": "https://www.salvationarmyusa.org/usa-western-territory/del-oro/sacramento-metro/food-pantry-social-services/",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Food Pantry & Social Services | The Salvation Army Sacramento Metro",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Basis for availability = unknown: office hours are published, but the family services page says help depends on 'availability of funding' and no current status is given."
+    },
+    {
+      "evidence_id": "ev_sfbfs_001",
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "field_path": "program_name",
+      "claim_value": "Use the Food Finder tool below to locate a food distribution site near you. Our network of 112 partners are here to help.",
+      "source_url": "https://www.sacramentofoodbank.org/find-food",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Sacramento Food Bank & Family Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Access route to many sites across the county, not one site."
+    },
+    {
+      "evidence_id": "ev_sfbfs_002",
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "field_path": "organization",
+      "claim_value": "Sacramento Food Bank & Family Services",
+      "source_url": "https://www.sacramentofoodbank.org/find-food",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Sacramento Food Bank & Family Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sfbfs_003",
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "field_path": "geography[0]",
+      "claim_value": "Sacramento County",
+      "source_url": "https://www.sacramentofoodbank.org/find-food",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Sacramento Food Bank & Family Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "The page's holiday list covers 'holiday food distributions in Sacramento County'."
+    },
+    {
+      "evidence_id": "ev_sfbfs_004",
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "field_path": "eligibility_criteria[0]",
+      "claim_value": "It's always recommended that you contact the location before visiting to confirm hours, eligibility requirements.",
+      "source_url": "https://www.sacramentofoodbank.org/find-food",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Sacramento Food Bank & Family Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Eligibility is set by each distribution site."
+    },
+    {
+      "evidence_id": "ev_sfbfs_005",
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "field_path": "application_method[0]",
+      "claim_value": "Use the Food Finder on https://www.sacramentofoodbank.org/find-food to locate a distribution site near you.",
+      "source_url": "https://www.sacramentofoodbank.org/find-food",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Sacramento Food Bank & Family Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sfbfs_006",
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "Main line: (916) 456-1980",
+      "source_url": "https://www.sacramentofoodbank.org/find-food",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Sacramento Food Bank & Family Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_sfbfs_007",
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "field_path": "contact[1]",
+      "claim_value": "CalFresh Outreach: (916) 779-0052",
+      "source_url": "https://www.sacramentofoodbank.org/find-food",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Sacramento Food Bank & Family Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Help applying for CalFresh."
+    },
+    {
+      "evidence_id": "ev_sfbfs_008",
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "field_path": "contact[2]",
+      "claim_value": "Office: 1951 Bell Avenue, Sacramento, CA 95838",
+      "source_url": "https://www.sacramentofoodbank.org/find-food",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Sacramento Food Bank & Family Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Organization office, not a distribution site."
+    },
+    {
+      "evidence_id": "ev_sfbfs_009",
+      "program_id": "prog_food_sfbfs_foodfinder_sac_001",
+      "field_path": "availability",
+      "claim_value": "Due to rising demand, please plan for longer lines and wait times at all food distribution sites at this time.",
+      "source_url": "https://www.sacramentofoodbank.org/find-food",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Sacramento Food Bank & Family Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Basis for availability = confirmed_open: the finder and partner network are operating; each site's hours vary."
+    },
+    {
+      "evidence_id": "ev_egfbs_001",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "program_name",
+      "claim_value": "Elk Grove Food Bank Services serves food insecure individuals in the Elk Grove Region and south county. All services are provided at no cost.",
+      "source_url": "https://elkgrovefoodbank.org/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Elk Grove Food Bank Services (home page)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_egfbs_002",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "organization",
+      "claim_value": "Elk Grove Food Bank Services (EGFBS)",
+      "source_url": "https://elkgrovefoodbank.org/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Elk Grove Food Bank Services (home page)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_egfbs_003",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "geography[0]",
+      "claim_value": "Sacramento County",
+      "source_url": "https://elkgrovefoodbank.org/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Elk Grove Food Bank Services (home page)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Home page: 'the Elk Grove Region and south county'. Only the home-delivery Wellness Bag program lists ZIPs (95624, 95757, 95758, 95828, 95829)."
+    },
+    {
+      "evidence_id": "ev_egfbs_004",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "eligibility_criteria[0]",
+      "claim_value": "Our programs serve low-income families, children, seniors, chronically ill, migrant families, disabled, working poor, unemployed and the homeless.",
+      "source_url": "https://elkgrovefoodbank.org/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Elk Grove Food Bank Services (home page)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_egfbs_005",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "eligibility_criteria[1]",
+      "claim_value": "All services are provided at no cost.",
+      "source_url": "https://elkgrovefoodbank.org/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Elk Grove Food Bank Services (home page)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_egfbs_006",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "Physical address: 9888 Kent Street, Elk Grove, CA 95624",
+      "source_url": "https://elkgrovefoodbank.org/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Elk Grove Food Bank Services (home page)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_egfbs_007",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "contact[1]",
+      "claim_value": "Phone: 916-685-8453",
+      "source_url": "https://elkgrovefoodbank.org/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Elk Grove Food Bank Services (home page)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_egfbs_008",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "contact[2]",
+      "claim_value": "We serve our clients: Monday through Friday: 9:00 am to 2:00 pm; 1st Thursday of the month: open 12:30 pm to 2 pm; 4th Wednesday of the month: open 12:30 pm to 2 pm. Closed on most major holidays and Saturdays / Sundays.",
+      "source_url": "https://elkgrovefoodbank.org/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Elk Grove Food Bank Services (home page)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_egfbs_009",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "contact[3]",
+      "claim_value": "CalFresh Coordinator: (916) 685-8453 x 205",
+      "source_url": "https://elkgrovefoodbank.org/find-food/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Find Food | Elk Grove Food Bank Services",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Help applying for CalFresh."
+    },
+    {
+      "evidence_id": "ev_egfbs_010",
+      "program_id": "prog_food_elkgrove_foodbank_sac_001",
+      "field_path": "availability",
+      "claim_value": "We serve our clients: Monday through Friday: 9:00 am to 2:00 pm; 1st Thursday of the month: open 12:30 pm to 2 pm; 4th Wednesday of the month: open 12:30 pm to 2 pm. Closed on most major holidays and Saturdays / Sundays.",
+      "source_url": "https://elkgrovefoodbank.org/",
+      "checked_at": "2026-11-12T10:26:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Elk Grove Food Bank Services (home page)",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Basis for availability = confirmed_open (published hours). During extreme heat (forecast of 100 degrees) the warehouse and food distribution close at noon."
+    },
+    {
+      "evidence_id": "ev_lsnc_001",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "program_name",
+      "claim_value": "LSNC provides free civil representation to low-income clients.",
+      "source_url": "https://lsnc.net/node/18",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "How to Contact Us | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_lsnc_002",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "organization",
+      "claim_value": "Legal Services of Northern California, Sacramento office",
+      "source_url": "https://lsnc.net/office/sacramento",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Sacramento office | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_lsnc_003",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "geography[0]",
+      "claim_value": "Sacramento County",
+      "source_url": "https://lsnc.net/office/sacramento",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Sacramento office | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Office page: 'Serving low-income clients in Sacramento county.'"
+    },
+    {
+      "evidence_id": "ev_lsnc_004",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "eligibility_criteria[0]",
+      "claim_value": "Serving low-income clients in Sacramento county.",
+      "source_url": "https://lsnc.net/office/sacramento",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Sacramento office | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "No dollar limits on the page; unknown income is not a mismatch."
+    },
+    {
+      "evidence_id": "ev_lsnc_005",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "eligibility_criteria[1]",
+      "claim_value": "Service priorities include tenants rights, evictions and lock outs.",
+      "source_url": "https://lsnc.net/what-we-do",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Our Services | Programs | Priorities | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_lsnc_006",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "eligibility_criteria[2]",
+      "claim_value": "LSNC does not provide rental assistance or other monetary payments.",
+      "source_url": "https://lsnc.net/what-we-do",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Our Services | Programs | Priorities | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Legal help only; pair with a rent-help program."
+    },
+    {
+      "evidence_id": "ev_lsnc_007",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "application_method[0]",
+      "claim_value": "Call during intake hours: Monday, Tuesday, Thursday and Friday, 8:30 a.m. to 12 p.m., 1 p.m. to 5 p.m. or until full. The list can fill quickly; call when the office opens.",
+      "source_url": "https://lsnc.net/office/sacramento",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Sacramento office | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_lsnc_008",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "contact[0]",
+      "claim_value": "Phone: (916) 551-2150",
+      "source_url": "https://lsnc.net/office/sacramento",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Sacramento office | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_lsnc_009",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "contact[1]",
+      "claim_value": "After-hours intake (leave a message): (866) 815-5990",
+      "source_url": "https://lsnc.net/office/sacramento",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Sacramento office | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": null
+    },
+    {
+      "evidence_id": "ev_lsnc_010",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "contact[2]",
+      "claim_value": "First contact by email for people who are deaf, hard of hearing or have trouble using the phone: sacramento-office@lsnc.net",
+      "source_url": "https://lsnc.net/office/sacramento",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Sacramento office | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Office address, not a personal one."
+    },
+    {
+      "evidence_id": "ev_lsnc_011",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "contact[3]",
+      "claim_value": "Address: 515 - 12th Street, Sacramento, CA 95814",
+      "source_url": "https://lsnc.net/office/sacramento",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "needs_review",
+      "source_title": "Sacramento office | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "NEEDS REVIEW: the site footer and 'How to Contact Us' list the Executive Office at 517 - 12th Street; the Sacramento office page says 515. Call (916) 551-2150 to confirm the walk-in address."
+    },
+    {
+      "evidence_id": "ev_lsnc_012",
+      "program_id": "prog_housing_lsnc_sac_001",
+      "field_path": "availability",
+      "claim_value": "Intake: Monday, Tuesday, Thursday and Friday, 8:30 a.m. to 12 p.m., 1 p.m. to 5 p.m. or until full.",
+      "source_url": "https://lsnc.net/office/sacramento",
+      "checked_at": "2026-11-12T10:30:00-08:00",
+      "verification_status": "verified",
+      "source_title": "Sacramento office | Legal Services of Northern California",
+      "source_authority_scope": "local_provider_operating_intake",
+      "effective_date": null,
+      "notes": "Basis for availability = confirmed_open (published intake hours); help is not guaranteed."
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 We store short facts with links to the official pages; we do not copy page content.
 
-`navigator/kb/kb_sacramento.json` cites 21 source links on 9 sites (8 owners). `navigator/kb/sacramento_county_zips.json` adds 1 more site (same owner as `ha.saccounty.gov`). Each fact keeps its own `source_url` and `checked_at`.
+`navigator/kb/kb_sacramento.json` cites 32 source links on 15 sites (13 owners). `navigator/kb/sacramento_county_zips.json` adds 1 more site (same owner as `ha.saccounty.gov`). Each fact keeps its own `source_url` and `checked_at`.
 "Allowed?" means what the site's own terms say about re-using its information: **OK** = the terms allow it; **unclear** = no terms page was found, or the terms don't say. Unclear rows are for the team to decide, not guesses.
 
 | Site | Owner | What we took | Terms of use link | Allowed? | Checked on |
@@ -16,5 +16,11 @@ We store short facts with links to the official pages; we do not copy page conte
 | saintjohnsprogram.org | Saint John's Program for Real Change (nonprofit) | Housing Assistance Program: what it offers, eligibility, documents, how to apply, phone, mailing address, availability | Not found (the footer links a Privacy Policy; no terms page confirmed) | unclear | 2026-11-06 |
 | www.sacramentostepsforward.org | Sacramento Steps Forward (Continuum of Care lead agency) | Coordinated Access (2-1-1 press 8): eligibility, documents for financial help, phone numbers, hours; HHAP prevention funding note | Not found | unclear | 2026-11-06 |
 | www.211sacramento.org | 2-1-1 Sacramento | Text-your-ZIP and chat contact channel | Not found | unclear | 2026-11-06 |
+| rivercityfoodbank.org | River City Food Bank (RCFB) | Emergency food distribution: locations, hours, eligibility, phone, holiday schedule and calendar PDF (Oct-Dec 2026) | Not found (footer links a Privacy Policy; no terms page confirmed) | unclear | 2026-11-12 |
+| www.salvationarmyusa.org | The Salvation Army (Western Territory, Del Oro Division) | Sacramento Metro food pantry & social services: eligibility, location, hours; rent & utility assistance: criteria, schedule | Not found | unclear | 2026-11-12 |
+| sacramento.salvationarmy.org | The Salvation Army Sacramento Metro (same owner as salvationarmyusa.org) | North Highlands Family Services: food and produce schedule, phone; rent & utility funding-availability note | Not found | unclear | 2026-11-12 |
+| www.sacramentofoodbank.org | Sacramento Food Bank & Family Services (SFBFS) | Food Finder tool: access route, partner network description, phone numbers, holiday note | Not found (the footer links a Privacy Policy; no terms page confirmed) | unclear | 2026-11-12 |
+| elkgrovefoodbank.org | Elk Grove Food Bank Services (EGFBS) | Food distribution: service area, eligibility, location, hours, phone; CalFresh coordinator contact | Not found | unclear | 2026-11-12 |
+| lsnc.net | Legal Services of Northern California (LSNC) | Sacramento office: service area, phone, after-hours intake, email, address; intake hours; service priorities; scope note (legal help only, no monetary payments) | Not found | unclear | 2026-11-12 |
 
-**For the team:** 7 of the 9 sites have no confirmed terms page or no re-use statement. We only store short factual items (eligibility rules, phone numbers, hours, how to apply) with a link back to the source, and we don't copy page text, images or design. Decision needed: is that enough for the submission, or do we ask these owners for permission?
+**For the team:** 12 of the 15 sites have no confirmed terms page or no re-use statement. We only store short factual items (eligibility rules, phone numbers, hours, how to apply) with a link back to the source, and we don't copy page text, images or design. Decision needed: is that enough for the submission, or do we ask these owners for permission?
