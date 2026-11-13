@@ -8,7 +8,7 @@ import unittest
 from navigator.supervisor import builders as B
 from navigator.supervisor import checks
 from navigator.supervisor import contract as C
-from tests.fake_agents import FIXTURE_KB
+from tests.fake_agents import FIXTURE_KB, FIXTURE_ZIPS
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "navigator")
 KB = FIXTURE_KB
@@ -60,19 +60,22 @@ class TestFromAgent1(unittest.TestCase):
         self.assertEqual(self.st.fact("cash_on_hand_approx"), 300)
 
     def test_agent3_gets_four_need_fields_and_county_plus_zip(self):
-        req, issues = B.agent3_request(self.st)
-        self.assertEqual(issues, [])
+        zip_to_county, _ = B.load_zip_county(FIXTURE_ZIPS)
+        req, issues = B.agent3_request(self.st, zip_to_county)
+        self.assertEqual([i["code"] for i in issues], ["COUNTY_FROM_ZIP_LIST"])
         self.assertEqual(req["payload"]["geography"], ["Sacramento County", "95823"])
         for n in req["payload"]["needs"]:
             self.assertEqual(set(n), {"need_id", "category", "description", "urgency"})
 
     def test_unknown_zip_gives_warning_not_guess(self):
+        zip_to_county, _ = B.load_zip_county(FIXTURE_ZIPS)
         for f in self.st.case_facts:
             if f["field"] == "zip_code":
                 f["value"] = "00000"
-        req, issues = B.agent3_request(self.st)
+        req, issues = B.agent3_request(self.st, zip_to_county)
         self.assertEqual(req["payload"]["geography"], ["00000"])
         self.assertEqual(issues[0]["code"], "COUNTY_UNKNOWN")
+        self.assertNotIn("00000", issues[0]["message"])
 
 
 class TestWithKB(unittest.TestCase):
@@ -157,6 +160,75 @@ class TestWithKB(unittest.TestCase):
         self.assertIn("STALE_RESULT", {i["code"] for i in checks.s3_stale(old, self.st.case_version)})
 
 
+class TestZipCounty(unittest.TestCase):
+    """load_zip_county, geography, agent3_request ZIP behaviour."""
+
+    def setUp(self):
+        self.zip_to_county, self.load_issues = B.load_zip_county(FIXTURE_ZIPS)
+        self.st = new_state()
+        B.confirm_agent1(self.st, load("02_agent1_result_expected.json"))
+
+    def test_listed_zip_gives_county_no_county_unknown(self):
+        """95660 (in fixture) -> Sacramento County; COUNTY_FROM_ZIP_LIST info; no COUNTY_UNKNOWN."""
+        # Set zip_code to 95660
+        for f in self.st.case_facts:
+            if f["field"] == "zip_code":
+                f["value"] = "95660"
+        req, issues = B.agent3_request(self.st, self.zip_to_county)
+        geo = req["payload"]["geography"]
+        self.assertIn("Sacramento County", geo)
+        self.assertIn("95660", geo)
+        codes = {i["code"] for i in issues}
+        self.assertIn("COUNTY_FROM_ZIP_LIST", codes)
+        self.assertNotIn("COUNTY_UNKNOWN", codes)
+
+    def test_unlisted_zip_gives_county_unknown_no_zip_in_message(self):
+        """99999 (not in fixture) -> COUNTY_UNKNOWN; '99999' not in any issue message."""
+        for f in self.st.case_facts:
+            if f["field"] == "zip_code":
+                f["value"] = "99999"
+        req, issues = B.agent3_request(self.st, self.zip_to_county)
+        codes = {i["code"] for i in issues}
+        self.assertIn("COUNTY_UNKNOWN", codes)
+        for i in issues:
+            self.assertNotIn("99999", i["message"])
+
+    def test_user_county_fact_wins_over_list(self):
+        """When the user has a 'county' fact, it is used directly; no COUNTY_FROM_ZIP_LIST."""
+        self.st.case_facts.append({"fact_id": "f99", "field": "county",
+                                   "value": "Placer County",
+                                   "confirmation_status": "confirmed",
+                                   "source": "user_confirmed", "time_context": None})
+        req, issues = B.agent3_request(self.st, self.zip_to_county)
+        geo = req["payload"]["geography"]
+        self.assertIn("Placer County", geo)
+        codes = {i["code"] for i in issues}
+        self.assertNotIn("COUNTY_FROM_ZIP_LIST", codes)
+        self.assertNotIn("COUNTY_UNKNOWN", codes)
+
+    def test_unverified_list_not_used_zip_list_unavailable(self):
+        """verification_status != 'verified' -> empty dict + ZIP_LIST_UNAVAILABLE."""
+        import json, tempfile, os
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json",
+                                         delete=False, encoding="utf-8") as f:
+            json.dump({"county": "Sacramento County",
+                       "verification_status": "needs_review",
+                       "zips": ["95823"]}, f)
+            tmp = f.name
+        try:
+            d, issues = B.load_zip_county(tmp)
+            self.assertEqual(d, {})
+            self.assertTrue(any(i["code"] == "ZIP_LIST_UNAVAILABLE" for i in issues))
+        finally:
+            os.unlink(tmp)
+
+    def test_missing_file_no_exception_zip_list_unavailable(self):
+        """A missing file -> empty dict + ZIP_LIST_UNAVAILABLE; no exception."""
+        d, issues = B.load_zip_county("/nonexistent/path/zips.json")
+        self.assertEqual(d, {})
+        self.assertTrue(any(i["code"] == "ZIP_LIST_UNAVAILABLE" for i in issues))
+
+
 class TestCaseStateSeq(unittest.TestCase):
     """CaseState.next_seq and first_seq for dialog continuity."""
 
@@ -238,26 +310,62 @@ class TestMergeAnswerFacts(unittest.TestCase):
     def _result(self, claims):
         return {"result": {"factual_claims": claims}}
 
-    def test_claim_for_unasked_field_dropped_with_warning(self):
-        st = new_state()
-        issues = B.merge_answer_facts(st, self._result([
-            self._claim("zip_code", "95823"),
-            self._claim("household_size", 3),      # not in pending
-        ]), ["zip_code"])
-        self.assertEqual(len(st.case_facts), 1)
-        self.assertEqual(st.case_facts[0]["field"], "zip_code")
-        outside = [i for i in issues if i["code"] == "ANSWER_FACT_OUTSIDE_QUESTION"]
-        self.assertEqual(len(outside), 1)
-        self.assertEqual(outside[0]["related_ref"], "household_size")
-        # message must name the field only, not the value
-        self.assertNotIn("3", outside[0]["message"])
-
-    def test_new_value_replaces_old(self):
+    def test_asked_field_replaces_existing(self):
+        """A claim for a field in pending_fact_keys replaces the existing fact."""
         st = new_state()
         st.case_facts = [self._claim("zip_code", "00000", "f0")]
         B.merge_answer_facts(st, self._result([self._claim("zip_code", "95823")]), ["zip_code"])
         vals = [f["value"] for f in st.case_facts if f["field"] == "zip_code"]
         self.assertEqual(vals, ["95823"])
+        self.assertEqual(len(st.case_facts), 1)
+
+    def test_new_field_beyond_question_added_as_proposed(self):
+        """A claim for a new field not in pending → added as proposed with ANSWER_FACT_OUTSIDE_QUESTION (info)."""
+        st = new_state()
+        issues = B.merge_answer_facts(st, self._result([
+            self._claim("zip_code", "95823"),
+            self._claim("household_size", 3),   # not in pending, not yet a fact
+        ]), ["zip_code"])
+        fields = {f["field"] for f in st.case_facts}
+        self.assertIn("household_size", fields)
+        outside = [i for i in issues if i["code"] == "ANSWER_FACT_OUTSIDE_QUESTION"]
+        self.assertEqual(len(outside), 1)
+        self.assertEqual(outside[0]["severity"], "info")
+        self.assertEqual(outside[0]["related_ref"], "household_size")
+        # message must name the field only, not the value
+        self.assertNotIn("3", outside[0]["message"])
+
+    def test_existing_field_beyond_question_keeps_old_value_with_conflict(self):
+        """A claim for a field that already exists and is not in pending → ANSWER_FACT_CONFLICT (warning), old value kept."""
+        st = new_state()
+        st.case_facts = [self._claim("household_size", 4, "f0")]
+        issues = B.merge_answer_facts(st, self._result([
+            self._claim("zip_code", "95823"),
+            self._claim("household_size", 3),   # conflicts with existing fact
+        ]), ["zip_code"])
+        vals = [f["value"] for f in st.case_facts if f["field"] == "household_size"]
+        self.assertEqual(vals, [4])    # old value kept
+        conflict = [i for i in issues if i["code"] == "ANSWER_FACT_CONFLICT"]
+        self.assertEqual(len(conflict), 1)
+        self.assertEqual(conflict[0]["severity"], "warning")
+        self.assertEqual(conflict[0]["related_ref"], "household_size")
+        self.assertNotIn("3", conflict[0]["message"])
+        self.assertNotIn("4", conflict[0]["message"])
+
+    def test_two_claims_for_same_new_field_first_kept_second_conflicts(self):
+        """Two claims for the same new field in one answer: first is kept, second gives ANSWER_FACT_CONFLICT."""
+        st = new_state()
+        issues = B.merge_answer_facts(st, self._result([
+            self._claim("household_size", 3, "f1"),
+            self._claim("household_size", 5, "f2"),   # duplicate new field
+        ]), ["zip_code"])
+        vals = [f["value"] for f in st.case_facts if f["field"] == "household_size"]
+        self.assertEqual(vals, [3])    # first claim kept
+        outside = [i for i in issues if i["code"] == "ANSWER_FACT_OUTSIDE_QUESTION"]
+        conflict = [i for i in issues if i["code"] == "ANSWER_FACT_CONFLICT"]
+        self.assertEqual(len(outside), 1)
+        self.assertEqual(len(conflict), 1)
+        self.assertEqual(conflict[0]["related_ref"], "household_size")
 
     def test_income_zero_is_kept(self):
         """income '0' is a real answer (Julia's decision); it must not be dropped as falsy."""

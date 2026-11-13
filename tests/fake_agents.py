@@ -12,6 +12,10 @@ import time
 FIXTURE_KB = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "fixtures", "kb_supervisor_fixture.json"))
 
+# Path to the frozen ZIP fixture.  All Supervisor tests must use this, not the live ZIP list.
+FIXTURE_ZIPS = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "fixtures", "zips_fixture.json"))
+
 
 def _env(req, result, status="completed"):
     return {k: req[k] for k in ("request_id", "run_id", "case_id", "case_version", "correlation_id")} | {

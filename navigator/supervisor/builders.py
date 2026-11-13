@@ -5,13 +5,14 @@ AgentRequest from it, passing each agent only what it needs.
 """
 import datetime
 import json
+import os
 
 from navigator.supervisor import contract as C
 from navigator.supervisor.checks import mask_user_text
 
-# ZIP -> county for the demo area. The Supervisor adds the county (contract 3.2).
-# Extend only with ZIPs checked against an official source.
-ZIP_TO_COUNTY = {"95823": "Sacramento County"}
+_HERE = os.path.dirname(os.path.abspath(__file__))
+# Default path to the verified ZIP list (Silver's PR #19). Built from __file__, never from cwd.
+DEFAULT_ZIPS = os.path.join(_HERE, "..", "kb", "sacramento_county_zips.json")
 
 # Fields the plan shows; Agent 5 verifies them (contract 4.5)
 FIELDS_TO_VERIFY = ("eligibility_criteria", "required_documents", "application_method",
@@ -177,24 +178,37 @@ def agent1_answer_request(state, answer_text, pending_fact_keys, ref_date):
 def merge_answer_facts(state, result, pending_fact_keys):
     """Apply factual_claims from a parse_clarification_answer result to case state.
 
-    Only claims whose field is in pending_fact_keys are kept; any other field
-    is dropped with an ANSWER_FACT_OUTSIDE_QUESTION warning.
-    A kept claim replaces any existing fact with the same field.
+    Claims for a field in pending_fact_keys replace any existing fact with that field.
+    Claims for another field (beyond the question):
+      - if no such fact exists: add it as 'proposed' with ANSWER_FACT_OUTSIDE_QUESTION (info);
+        the fact counts as known, so Agent 2 will not ask for it again.
+      - if a fact for that field already exists: keep the old value and add
+        ANSWER_FACT_CONFLICT (warning). No user values in either message.
     confirmation_status stays 'proposed' until the user confirms.
     Returns issues.
     """
     issues = []
     pending_set = set(pending_fact_keys)
+    existing_fields = {f.get("field") for f in state.case_facts}
     for claim in result.get("result", {}).get("factual_claims", []):
         field = claim.get("field")
         if field not in pending_set:
-            issues.append({"code": "ANSWER_FACT_OUTSIDE_QUESTION", "severity": "warning",
-                           "message": f"Claim for field {field!r} is outside the asked keys; dropped",
-                           "related_ref": field})
+            if field in existing_fields:
+                issues.append({"code": "ANSWER_FACT_CONFLICT", "severity": "warning",
+                               "message": f"Claim for field {field!r} conflicts with an existing fact; existing value kept",
+                               "related_ref": field})
+            else:
+                # Add the volunteered fact so Agent 2 doesn't ask for it again
+                state.case_facts.append(dict(claim, confirmation_status="proposed"))
+                existing_fields.add(field)
+                issues.append({"code": "ANSWER_FACT_OUTSIDE_QUESTION", "severity": "info",
+                               "message": f"Claim for field {field!r} is outside the asked keys; added as proposed",
+                               "related_ref": field})
             continue
         # Replace any existing fact with the same field, then append the new one
         state.case_facts = [f for f in state.case_facts if f.get("field") != field]
         state.case_facts.append(dict(claim, confirmation_status="proposed"))
+        existing_fields.add(field)
     return issues
 
 
@@ -279,28 +293,66 @@ def agent7_request(state, stage, stage_result, evidence, upstream_request_id):
                         upstream_result_refs=[upstream_request_id])
 
 
+# ---------------------------------------------------------------- ZIP -> county list
+def load_zip_county(path):
+    """Load the verified ZIP -> county list from the given JSON file.
+
+    Returns (dict zip -> county, issues).
+    An unreadable, missing, or invalid file — or a file whose verification_status is not
+    'verified', county is empty, or zips is not a list of strings — returns an empty dict
+    and one ZIP_LIST_UNAVAILABLE warning. Never raises. No path or file content in messages.
+    """
+    try:
+        with open(path, encoding="utf-8-sig") as f:
+            data = json.load(f)
+        county = data.get("county", "")
+        status = data.get("verification_status", "")
+        zips = data.get("zips", [])
+        if (status != "verified" or not isinstance(county, str) or not county
+                or not isinstance(zips, list)
+                or not all(isinstance(z, str) for z in zips)):
+            return {}, [{"code": "ZIP_LIST_UNAVAILABLE", "severity": "warning",
+                         "message": "ZIP county list could not be used (validation failed)",
+                         "related_ref": None}]
+        return {z: county for z in zips}, []
+    except Exception:
+        return {}, [{"code": "ZIP_LIST_UNAVAILABLE", "severity": "warning",
+                     "message": "ZIP county list file could not be read",
+                     "related_ref": None}]
+
+
 # ---------------------------------------------------------------- Agent 3, 4, 5
-def geography(state):
-    """County + ZIP (contract 3.2). Returns (list, issues)."""
+def geography(state, zip_to_county):
+    """County + ZIP (contract 3.2). Returns (list, issues).
+
+    County source priority: user's own 'county' fact > zip_to_county list.
+    When the county comes from the list, COUNTY_FROM_ZIP_LIST (info) is added.
+    A ZIP with no county in the list gives COUNTY_UNKNOWN (warning). No ZIP in message.
+    """
     zip_code = state.fact("zip_code")
     county = state.fact("county")
-    if not county and zip_code:
-        county = ZIP_TO_COUNTY.get(str(zip_code))
     geo, issues = [], []
+    if not county and zip_code:
+        county = zip_to_county.get(str(zip_code))
+        if county:
+            issues.append({"code": "COUNTY_FROM_ZIP_LIST", "severity": "info",
+                           "message": "County derived from ZIP list; a ZIP area can cross the county line",
+                           "related_ref": "zip_code"})
     if county:
         geo.append(county)
     if zip_code:
         geo.append(str(zip_code))
     if zip_code and not county:
         issues.append({"code": "COUNTY_UNKNOWN", "severity": "warning",
-                       "message": f"No county on file for ZIP {zip_code}", "related_ref": "zip_code"})
+                       "message": "No county on file for the ZIP code given",
+                       "related_ref": "zip_code"})
     return geo, issues
 
 
-def agent3_request(state):
+def agent3_request(state, zip_to_county):
     needs = [{k: n.get(k) for k in ("need_id", "category", "description", "urgency")}
              for n in state.needs]
-    geo, issues = geography(state)
+    geo, issues = geography(state, zip_to_county)
     req = make_request(state, "agent_3", "retrieve_candidates",
                        {"needs": needs, "geography": geo, "retrieval_constraints": []})
     return req, issues
