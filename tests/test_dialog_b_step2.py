@@ -97,6 +97,7 @@ class TestMainStart(unittest.TestCase):
 class TestMainAnswerConfirm(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
 
     def _run_start(self):
         """Run start and return (resp, out_path)."""
