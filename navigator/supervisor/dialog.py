@@ -12,6 +12,7 @@ Requires Python 3.11+. Standard library only.
 import datetime
 import json
 import os
+import re
 
 from navigator.supervisor import builders as B
 from navigator.supervisor import checks
@@ -22,6 +23,17 @@ DIALOG_VERSION = "0.2"
 
 # Protects against an agent defect, not a design limit.
 LOOP_GUARD_TURNS = 8
+
+# locale: a language tag such as en-US, es, es-419 or zh-Hant-TW (letters, digits, hyphens).
+DEFAULT_LOCALE = "en-US"
+_LOCALE_RE = re.compile(r"[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*")
+_LOCALE_MAX_LEN = 35
+
+
+def _valid_locale(value):
+    """True for a short language tag such as en-US; False for anything else."""
+    return (isinstance(value, str) and len(value) <= _LOCALE_MAX_LEN
+            and _LOCALE_RE.fullmatch(value) is not None)
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.normpath(os.path.join(_HERE, "..", ".."))
@@ -768,6 +780,12 @@ def start(story_text, ref_date=None, locale="en-US",
     """
     run = None
     try:
+        if locale is None:
+            locale = DEFAULT_LOCALE
+        if not _valid_locale(locale):
+            return _failed(None, [{"code": "LOCALE_INVALID", "severity": "critical",
+                                   "message": "locale must be a language tag such as en-US",
+                                   "related_ref": None}])
         agents, kb_path, zips_path = _load_defaults(agents, kb_path, zips_path)
         if ref_date is None:
             ref_date = R._today()
@@ -1210,6 +1228,8 @@ def main(argv=None):
     # start
     ap.add_argument("--story-file", metavar="PATH")
     ap.add_argument("--ref-date",   metavar="YYYY-MM-DD")
+    ap.add_argument("--locale",     metavar="TAG",
+                    help="language tag such as en-US (default en-US)")
     # answer / confirm
     ap.add_argument("--case-in",    metavar="PATH")
     # answer
@@ -1248,7 +1268,9 @@ def main(argv=None):
                 ref_date = datetime.date.fromisoformat(a.ref_date)
             except ValueError:
                 return _err(f"--ref-date {a.ref_date!r} is not a valid ISO date (YYYY-MM-DD)")
-        resp = start(story_text, ref_date=ref_date, **kw)
+        if a.locale is not None and not _valid_locale(a.locale):
+            return _err(f"--locale {a.locale!r} is not a language tag such as en-US")
+        resp = start(story_text, ref_date=ref_date, locale=a.locale, **kw)
 
     # ---- answer ----
     elif a.command == "answer":

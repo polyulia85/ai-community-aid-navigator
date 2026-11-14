@@ -169,6 +169,7 @@ class _DialogHandler(http.server.BaseHTTPRequestHandler):
                 resp = D.start(
                     story_text=data.get("story_text", ""),
                     ref_date=data.get("ref_date"),
+                    locale=data.get("locale"),
                     **kw,
                 )
             elif self.path == "/answer":

@@ -8,8 +8,10 @@ import json
 import threading
 import unittest
 import urllib.error
+from unittest import mock
 import urllib.request
 
+from navigator.supervisor import dialog as D
 from navigator.supervisor.http_api import make_server
 from tests.fake_agents import (
     FIXTURE_KB, FIXTURE_ZIPS,
@@ -212,6 +214,20 @@ class TestHttpAPI(unittest.TestCase):
         except urllib.error.HTTPError as e:
             code, body = e.code, json.loads(e.read())
         self.assertEqual(code, 413)
+
+    def test_start_passes_locale(self):
+        with mock.patch.object(D, "start", wraps=D.start) as spy:
+            code, body = _post(f"{self.base}/start",
+                               {"story_text": STORY, "ref_date": "2026-11-15", "locale": "es-US"})
+        self.assertEqual(code, 200)
+        self.assertNotEqual(body["status"], "failed")
+        self.assertEqual(spy.call_args.kwargs["locale"], "es-US")
+
+    def test_start_bad_locale_is_failed_200(self):
+        code, body = _post(f"{self.base}/start", {"story_text": STORY, "locale": 123})
+        self.assertEqual(code, 200)
+        self.assertEqual(body["status"], "failed")
+        self.assertEqual([i["code"] for i in body["issues"]], ["LOCALE_INVALID"])
 
     def test_failed_status_still_200(self):
         """A 'failed' dialog response (bad case) is still HTTP 200."""

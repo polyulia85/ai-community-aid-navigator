@@ -8,6 +8,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
 from navigator.supervisor import dialog as D
 from tests.fake_agents import FIXTURE_KB, FIXTURE_ZIPS
@@ -84,6 +85,23 @@ class TestMainStart(unittest.TestCase):
         rc = D.main(["start", "--story-file", story_path,
                      "--ref-date", "not-a-date"] + flags)
         self.assertEqual(rc, 2)
+
+    def test_start_locale_is_passed(self):
+        flags, out = _shared_args(self.tmp)
+        story_path = _write_text(self.tmp, "story.txt", STORY)
+        with mock.patch.object(D, "start", wraps=D.start) as spy:
+            rc = D.main(["start", "--story-file", story_path,
+                         "--locale", "es-US"] + flags)
+        self.assertEqual(rc, 0)
+        self.assertEqual(spy.call_args.kwargs["locale"], "es-US")
+
+    def test_start_bad_locale_exit_2(self):
+        flags, out = _shared_args(self.tmp)
+        story_path = _write_text(self.tmp, "story.txt", STORY)
+        rc = D.main(["start", "--story-file", story_path,
+                     "--locale", "english please"] + flags)
+        self.assertEqual(rc, 2)
+        self.assertFalse(os.path.exists(out))
 
     def test_start_bad_agents_file(self):
         flags, out = _shared_args(self.tmp)
@@ -247,7 +265,8 @@ class TestMainAnswerConfirm(unittest.TestCase):
         flags, out = _shared_args(self.tmp)
         story_path = _write_text(self.tmp, "story.txt", STORY)
         D.main(["start", "--story-file", story_path, "--ref-date", "2026-11-15"] + flags)
-        raw = open(out, encoding="utf-8").read()
+        with open(out, encoding="utf-8") as f:
+            raw = f.read()
         # indent=2: each key starts on a new line
         self.assertIn("\n  ", raw)
         json.loads(raw)   # must parse without error

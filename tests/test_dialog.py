@@ -856,5 +856,47 @@ class TestPlanByNeed(unittest.TestCase):
         self.assertNotIn("need_002", pbn_ids)
 
 
+class TestLocale(unittest.TestCase):
+    """locale: passed to Agent 1 (understand_story); checked before any agent call."""
+
+    def _spy(self, seen):
+        def spy(req):
+            if req.get("task_type") == "understand_story":
+                seen.append(req["payload"].get("locale"))
+            return agent_1_dialog(req)
+        return spy
+
+    def test_locale_reaches_agent_1(self):
+        seen = []
+        r = _start(agents=_agents(agent_1=self._spy(seen)), locale="es-US")
+        self.assertNotEqual(r["status"], "failed")
+        self.assertEqual(seen, ["es-US"])
+
+    def test_default_and_none_send_en_us(self):
+        for kw in ({}, {"locale": None}):
+            with self.subTest(kw=kw):
+                seen = []
+                r = _start(agents=_agents(agent_1=self._spy(seen)), **kw)
+                self.assertNotEqual(r["status"], "failed")
+                self.assertEqual(seen, ["en-US"])
+
+    def test_invalid_locale_fails_before_agent_1(self):
+        for bad in (123, "", "english please", "en_US", "en-US\n", "e", "en-" + "x" * 40, ["en-US"]):
+            with self.subTest(locale=bad):
+                seen = []
+                r = _start(agents=_agents(agent_1=self._spy(seen)), locale=bad)
+                self.assertEqual(r["status"], "failed")
+                self.assertEqual([i["code"] for i in r["issues"]], ["LOCALE_INVALID"])
+                self.assertIsNone(r["case"])
+                self.assertEqual(seen, [])
+
+    def test_valid_tags_accepted(self):
+        for tag in ("en", "en-US", "es-419", "zh-Hant-TW"):
+            with self.subTest(locale=tag):
+                seen = []
+                _start(agents=_agents(agent_1=self._spy(seen)), locale=tag)
+                self.assertEqual(seen, [tag])
+
+
 if __name__ == "__main__":
     unittest.main()
