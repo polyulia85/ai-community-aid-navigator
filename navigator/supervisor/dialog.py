@@ -10,6 +10,7 @@ Paths are built from __file__ so this module is safe on a read-only file system.
 Requires Python 3.11+. Standard library only.
 """
 import datetime
+import json
 import os
 
 from navigator.supervisor import builders as B
@@ -25,6 +26,7 @@ LOOP_GUARD_TURNS = 8
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.normpath(os.path.join(_HERE, "..", ".."))
 _DEFAULT_AGENTS_JSON = os.path.join(_REPO_ROOT, "agents.json")
+DEFAULT_EMERGENCY = os.path.join(_HERE, "..", "kb", "emergency", "emergency_directory.json")
 
 # Exception types that dialog functions catch (same as Run.execute)
 _CATCH_EXC = R._INPUT_EXC + (R.AgentConfigError, OSError)
@@ -602,22 +604,117 @@ def _agent2_and_questions(run, ambiguity_flags, turn):
     return questions
 
 
+# ---------------------------------------------------------------- safety contacts (DIALOG 8)
+
+_EMERGENCY_CONTACTS_CACHE: dict = {}   # path -> (contacts, issues)
+
+_SAFETY_SUBCATEGORIES = ("emergency_services", "mental_health_crisis")
+_SUBCATEGORY_ORDER = {s: i for i, s in enumerate(_SAFETY_SUBCATEGORIES)}
+
+SAFETY_CONTACT_UNVERIFIED = "SAFETY_CONTACT_UNVERIFIED"
+
+
+def _emergency_contacts(path=None):
+    """Load verified safety contacts from the emergency directory.
+
+    Returns (contacts, issues).  Loads once per process (cached by path).
+    contacts: list of {name, value, hours, checked_at} for verified contact items
+              from emergency_services and mental_health_crisis records only,
+              9-1-1 first, then 988.
+    issues: [] on success; [SAFETY_CONTACT_UNVERIFIED warning] on any failure.
+    Never raises.
+    """
+    if path is None:
+        path = DEFAULT_EMERGENCY
+    path = os.path.normpath(path)
+    if path in _EMERGENCY_CONTACTS_CACHE:
+        return _EMERGENCY_CONTACTS_CACHE[path]
+
+    _unverified_issue = {
+        "code":        SAFETY_CONTACT_UNVERIFIED,
+        "severity":    "warning",
+        "message":     "Emergency contacts could not be loaded from the emergency directory",
+        "related_ref": None,
+    }
+
+    try:
+        with open(path, encoding="utf-8-sig") as f:
+            data = json.load(f)
+    except Exception:
+        result = ([], [_unverified_issue])
+        _EMERGENCY_CONTACTS_CACHE[path] = result
+        return result
+
+    try:
+        programs = data.get("program_records", [])
+        evidence = {e["evidence_id"]: e for e in data.get("evidence_records", [])}
+
+        # Select only the two allowed subcategories
+        selected = [p for p in programs
+                    if p.get("subcategory") in _SAFETY_SUBCATEGORIES]
+        # Sort: emergency_services (9-1-1) first, then mental_health_crisis (988)
+        selected.sort(key=lambda p: _SUBCATEGORY_ORDER.get(p.get("subcategory", ""), 99))
+
+        contacts = []
+        for prog in selected:
+            name = prog.get("program_name", "")
+            for item in prog.get("contact", []):
+                # Accept item only if every evidence_ref points to a verified evidence row
+                # with a field_path that starts with "contact"
+                refs = item.get("evidence_refs") or []
+                if not refs:
+                    continue
+                verified = all(
+                    evidence.get(ref, {}).get("verification_status") == "verified"
+                    and evidence.get(ref, {}).get("field_path", "").startswith("contact")
+                    for ref in refs
+                )
+                if not verified:
+                    continue
+                # checked_at: take the date part from the first evidence ref
+                ev0 = evidence.get(refs[0], {})
+                checked_at_full = ev0.get("checked_at", "")
+                checked_at = checked_at_full[:10] if checked_at_full else None
+                contacts.append({
+                    "name":       name,
+                    "value":      item.get("value"),
+                    "hours":      None,
+                    "checked_at": checked_at,
+                })
+
+        if not contacts:
+            result = ([], [_unverified_issue])
+            _EMERGENCY_CONTACTS_CACHE[path] = result
+            return result
+
+        result = (contacts, [])
+        _EMERGENCY_CONTACTS_CACHE[path] = result
+        return result
+
+    except Exception:
+        result = ([], [_unverified_issue])
+        _EMERGENCY_CONTACTS_CACHE[path] = result
+        return result
+
+
 # ---------------------------------------------------------------- safety notice
 
-def _safety_notice(safety_flags):
+def _safety_notice(safety_flags, _emergency_path=None):
     """Build a SafetyNotice dict or None. A safety risk shows a warning, never blocks the plan.
 
     Shape follows forms §5: {risk_type, message, contacts, blocks_plan}.
     The user's flag text is never copied into the notice.
+    contacts comes from the verified emergency directory (DIALOG 8).
     """
     if not any(isinstance(f, dict) and f.get("type") == "safety"
                for f in (safety_flags or [])):
         return None
+    contacts, _issues = _emergency_contacts(_emergency_path)
     return {
         "risk_type":   "safety",
         "message":     ("If you or someone with you is in danger right now, call 9-1-1. "
                         "You can keep going with your plan below."),
-        "contacts":    [],   # filled from verified emergency directory in DIALOG 8
+        "contacts":    contacts,
         "blocks_plan": False,
     }
 
@@ -715,6 +812,8 @@ def start(story_text, ref_date=None, locale="en-US",
                           limitations, skipped_keys=[])
 
         safety_notice = _safety_notice(safety_flags)
+        if safety_notice is not None:
+            run.supervisor_issues += _emergency_contacts()[1]
 
         if questions:
             return _clarification_response(run, questions, case, turn, limitations, safety_notice)
@@ -834,13 +933,18 @@ def answer(case, answers, agents=None, kb_path=None, zips_path=None, isolate=Fal
             case_out = _make_case(run, "awaiting_confirmation", answered_turns,
                                   ambiguity_flags, safety_flags, narrative_summary,
                                   [], limitations, skipped_keys=skipped_keys)
+            _loop_notice = _safety_notice(safety_flags)
+            if _loop_notice is not None:
+                run.supervisor_issues += _emergency_contacts()[1]
             return _confirmation_response(run, case_out, answered_turns, limitations,
-                                          _safety_notice(safety_flags), summ)
+                                          _loop_notice, summ)
 
         # Agent 2 → next questions
         questions = _agent2_and_questions(run, ambiguity_flags, new_turn)
 
         safety_notice = _safety_notice(safety_flags)
+        if safety_notice is not None:
+            run.supervisor_issues += _emergency_contacts()[1]
 
         if questions:
             case_out = _make_case(run, "clarifying", new_turn,
@@ -1013,7 +1117,11 @@ def confirm(case, corrections=None, rejected_need_ids=None, added_needs=None,
             "rejected_needs":   rejected,
             "safety_notice":    _safety_notice(safety_flags),
             "user_message":     None,
-            "issues":           run.supervisor_issues,
+            "issues":           run.supervisor_issues + (
+                                    _emergency_contacts()[1]
+                                    if any(isinstance(f, dict) and f.get("type") == "safety"
+                                           for f in (safety_flags or []))
+                                    else []),
             "case":             case_out,
         }
 
@@ -1066,3 +1174,156 @@ def _confirmation_response(run, case, turn, limitations, safety_notice, summary)
         "issues":         run.supervisor_issues,
         "case":           case,
     }
+
+
+# ---------------------------------------------------------------- command-line interface
+
+def main(argv=None):
+    """Entry point: python -m navigator.supervisor.dialog start|answer|confirm ...
+
+    start  --story-file F [--ref-date YYYY-MM-DD] --out R.json
+    answer --case-in PREV.json --answers-file A.json --out R.json
+    confirm --case-in PREV.json [--corrections-file C.json]
+            [--rejected need_002 ...] [--added-file N.json] --out R.json
+
+    All three accept: [--agents agents.json] [--kb PATH] [--zips PATH] [--no-isolate]
+    Exit 0 on success, 1 when status is "failed", 2 for argument/input errors.
+    """
+    import argparse
+    import sys
+
+    def _err(msg):
+        print(msg)
+        return 2
+
+    ap = argparse.ArgumentParser(prog="python -m navigator.supervisor.dialog",
+                                 description="Dialog mode command-line interface")
+    ap.add_argument("command", choices=["start", "answer", "confirm"])
+    # shared optional args
+    ap.add_argument("--agents",    default=None, metavar="PATH",
+                    help="agents.json (default: agents.json at repo root)")
+    ap.add_argument("--kb",        default=None, metavar="PATH")
+    ap.add_argument("--zips",      default=None, metavar="PATH")
+    ap.add_argument("--no-isolate", action="store_true")
+    ap.add_argument("--out",       required=True, metavar="PATH",
+                    help="output JSON file")
+    # start
+    ap.add_argument("--story-file", metavar="PATH")
+    ap.add_argument("--ref-date",   metavar="YYYY-MM-DD")
+    # answer / confirm
+    ap.add_argument("--case-in",    metavar="PATH")
+    # answer
+    ap.add_argument("--answers-file", metavar="PATH")
+    # confirm
+    ap.add_argument("--corrections-file", metavar="PATH")
+    ap.add_argument("--rejected",   nargs="*", metavar="NEED_ID", default=None)
+    ap.add_argument("--added-file", metavar="PATH")
+
+    a = ap.parse_args(argv)
+    isolate = not a.no_isolate
+
+    # Load agents (optional — defaults handled inside start/answer/confirm)
+    agents = None
+    if a.agents:
+        try:
+            agents = R.load_agents(a.agents)
+        except R.AgentConfigError as exc:
+            return _err(f"Cannot load agents: {exc}")
+
+    # Shared kwargs
+    kw = dict(agents=agents, kb_path=a.kb, zips_path=a.zips, isolate=isolate)
+
+    # ---- start ----
+    if a.command == "start":
+        if not a.story_file:
+            return _err("--story-file is required for start")
+        try:
+            with open(a.story_file, encoding="utf-8-sig") as f:
+                story_text = f.read()
+        except OSError as exc:
+            return _err(f"Cannot read story file: {exc}")
+        ref_date = None
+        if a.ref_date:
+            try:
+                ref_date = datetime.date.fromisoformat(a.ref_date)
+            except ValueError:
+                return _err(f"--ref-date {a.ref_date!r} is not a valid ISO date (YYYY-MM-DD)")
+        resp = start(story_text, ref_date=ref_date, **kw)
+
+    # ---- answer ----
+    elif a.command == "answer":
+        if not a.case_in:
+            return _err("--case-in is required for answer")
+        if not a.answers_file:
+            return _err("--answers-file is required for answer")
+        try:
+            with open(a.case_in, encoding="utf-8-sig") as f:
+                prev = json.load(f)
+        except (OSError, json.JSONDecodeError) as exc:
+            return _err(f"Cannot read case-in file: {exc}")
+        try:
+            with open(a.answers_file, encoding="utf-8-sig") as f:
+                answers = json.load(f)
+        except (OSError, json.JSONDecodeError) as exc:
+            return _err(f"Cannot read answers file: {exc}")
+        if not isinstance(prev, dict):
+            return _err("case-in file must hold a JSON object (a previous response)")
+        case = prev.get("case")
+        resp = answer(case, answers, **kw)
+
+    # ---- confirm ----
+    else:  # confirm
+        if not a.case_in:
+            return _err("--case-in is required for confirm")
+        try:
+            with open(a.case_in, encoding="utf-8-sig") as f:
+                prev = json.load(f)
+        except (OSError, json.JSONDecodeError) as exc:
+            return _err(f"Cannot read case-in file: {exc}")
+        if not isinstance(prev, dict):
+            return _err("case-in file must hold a JSON object (a previous response)")
+        case = prev.get("case")
+        corrections = None
+        if a.corrections_file:
+            try:
+                with open(a.corrections_file, encoding="utf-8-sig") as f:
+                    corrections = json.load(f)
+            except (OSError, json.JSONDecodeError) as exc:
+                return _err(f"Cannot read corrections file: {exc}")
+        added_needs = None
+        if a.added_file:
+            try:
+                with open(a.added_file, encoding="utf-8-sig") as f:
+                    added_needs = json.load(f)
+            except (OSError, json.JSONDecodeError) as exc:
+                return _err(f"Cannot read added-needs file: {exc}")
+        resp = confirm(case, corrections=corrections,
+                       rejected_need_ids=a.rejected,
+                       added_needs=added_needs, **kw)
+
+    # Write output
+    try:
+        with open(a.out, "w", encoding="utf-8") as f:
+            json.dump(resp, f, indent=2, ensure_ascii=False)
+    except OSError as exc:
+        return _err(f"Cannot write output file: {exc}")
+
+    # Print one summary line
+    status = resp.get("status", "unknown")
+    turn   = resp.get("turn", 0)
+    if status == "needs_clarification":
+        detail = f"{len(resp.get('questions', []))} question(s)"
+    elif status == "needs_confirmation":
+        detail = f"{len((resp.get('summary') or {}).get('needs', []))} need(s)"
+    elif status == "completed":
+        detail = f"{len((resp.get('plan') or {}).get('action_cards', []))} card(s)"
+    else:
+        detail = ""
+    print(f"status={status} turn={turn}" + (f" {detail}" if detail else ""))
+
+    return 0 if status != "failed" else 1
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())
