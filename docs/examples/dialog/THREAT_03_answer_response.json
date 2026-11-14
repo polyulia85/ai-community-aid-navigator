@@ -1,0 +1,154 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_confirmation",
+  "case_id": "case-0ed0bb39",
+  "case_version": 3,
+  "turn": 2,
+  "limitations": [],
+  "questions": [],
+  "summary": {
+    "narrative": "My ex-partner said he will hurt me and the kids if I don't leave the apartment. I need help with housing.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "housing_assistance",
+        "label": "Housing",
+        "description": "Housing problem reported",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "original_quote": "I need help with housing."
+      }
+    ],
+    "facts": [
+      {
+        "field": "zip_code",
+        "label": "ZIP code",
+        "value": "95823",
+        "display_value": "95823"
+      },
+      {
+        "field": "household_gross_monthly_income",
+        "label": "Monthly household income (before taxes)",
+        "value": 1000,
+        "display_value": "$1,000"
+      }
+    ],
+    "unknown": [
+      {
+        "field": "triggering_circumstances",
+        "label": "What happened",
+        "why": "not_understood"
+      }
+    ]
+  },
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": {
+    "risk_type": "safety",
+    "message": "If you or someone with you is in danger right now, call 9-1-1. You can keep going with your plan below.",
+    "contacts": [
+      {
+        "name": "9-1-1 Emergency",
+        "value": "9-1-1",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Call or text 988.",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Spanish: call 988 and press 2, or text AYUDA to 988.",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Veterans, service members and their loved ones: call 988 and press 1 (Veterans Crisis Line).",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Deaf and Hard of Hearing people have 24/7/365 access to 988 Videophone.",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      }
+    ],
+    "blocks_plan": false
+  },
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-0ed0bb39",
+    "run_id": "run-0ed0bb39",
+    "correlation_id": "corr-0ed0bb39",
+    "case_version": 3,
+    "stage": "awaiting_confirmation",
+    "turn": 2,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 8,
+    "narrative_summary": "My ex-partner said he will hurt me and the kids if I don't leave the apartment. I need help with housing.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "housing_assistance",
+        "description": "Housing problem reported",
+        "original_quote": "I need help with housing.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95823",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_household_gross_monthly_income_001",
+        "field": "household_gross_monthly_income",
+        "value": 1000,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      }
+    ],
+    "already_asked": [
+      "triggering_circumstances",
+      "zip_code",
+      "household_gross_monthly_income"
+    ],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "My ex-partner said he will hurt me and the kids if I don't leave the apartment. I need help with housing.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [
+      {
+        "type": "safety",
+        "quote": "partner said he will hurt me",
+        "note": "Threat of physical harm reported"
+      }
+    ],
+    "pending_questions": [],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": [
+      "triggering_circumstances"
+    ]
+  }
+}

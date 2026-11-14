@@ -75,6 +75,7 @@ FORBIDDEN_FIELDS = {
 # Structure: RESULT_REQUIRED[role_id][task_type] = {
 #   "result": [top-level keys that must be present in result{}],
 #   "lists":  [which of those keys must be a list],
+#   "optional_lists": [list keys that may be absent; when present they must be lists and their items are checked],
 #   <list_key>: [required keys of each item in that list],
 # }
 # Rules (contract §2.4):
@@ -104,6 +105,12 @@ RESULT_REQUIRED = {
             "lists":  ["factual_claims"],
             "factual_claims": ["fact_id", "field", "value",
                                "confirmation_status", "source", "time_context"],
+            # PROPOSED for contracts v1.2 (CR-014): proposed_needs is optional.
+            "optional_lists": ["proposed_needs"],
+            "proposed_needs": ["need_id", "category", "description",
+                               "original_quote", "confirmation_status",
+                               "user_reported", "urgency", "urgency_reason",
+                               "user_priority"],
         },
     },
     "agent_2": {

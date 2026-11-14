@@ -1,0 +1,84 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_clarification",
+  "case_id": "case-06878e7c",
+  "case_version": 1,
+  "turn": 1,
+  "limitations": [],
+  "questions": [
+    {
+      "question_id": "q1-1",
+      "fact_key": "triggering_circumstances",
+      "text": "I'm sorry your family is going through a difficult time. Could you tell me a little more about what happened that led to these financial difficulties?",
+      "can_skip": true,
+      "necessity_level": "helpful",
+      "reason": "Understanding what caused the hardship determines applicable crisis and emergency programs"
+    }
+  ],
+  "summary": null,
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-06878e7c",
+    "run_id": "run-06878e7c",
+    "correlation_id": "corr-06878e7c",
+    "case_version": 1,
+    "stage": "clarifying",
+    "turn": 1,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 3,
+    "narrative_summary": "I have problems with housing and food. I need help.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "food_assistance",
+        "description": "Food problem reported",
+        "original_quote": "I have problems with housing and food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Food problem reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "Housing problem reported",
+        "original_quote": "I have problems with housing and food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [],
+    "already_asked": [],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "I have problems with housing and food. I need help.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [],
+    "pending_questions": [
+      {
+        "question_id": "q1-1",
+        "fact_key": "triggering_circumstances",
+        "text": "I'm sorry your family is going through a difficult time. Could you tell me a little more about what happened that led to these financial difficulties?",
+        "can_skip": true,
+        "necessity_level": "helpful",
+        "reason": "Understanding what caused the hardship determines applicable crisis and emergency programs"
+      }
+    ],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

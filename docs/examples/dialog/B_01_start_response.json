@@ -1,0 +1,100 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_clarification",
+  "case_id": "case-3765a854",
+  "case_version": 1,
+  "turn": 1,
+  "limitations": [],
+  "questions": [
+    {
+      "question_id": "q1-1",
+      "fact_key": "zip_code",
+      "text": "What is your Sacramento ZIP code? This helps us find the right local programs in your area.",
+      "can_skip": true,
+      "necessity_level": "required_for_decision",
+      "reason": "ZIP code is required to match geographic eligibility for local programs"
+    },
+    {
+      "question_id": "q1-2",
+      "fact_key": "household_gross_monthly_income",
+      "text": "What is your approximate gross monthly household income?",
+      "can_skip": false,
+      "necessity_level": "required_for_decision",
+      "reason": "Required to determine eligibility thresholds across community assistance programs"
+    }
+  ],
+  "summary": null,
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-3765a854",
+    "run_id": "run-3765a854",
+    "correlation_id": "corr-3765a854",
+    "case_version": 1,
+    "stage": "clarifying",
+    "turn": 1,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 3,
+    "narrative_summary": "My landlord gave me a 3-day notice to pay or quit yesterday and threatened to lock us out if we don't leave.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "housing_assistance",
+        "description": "Facing eviction notice",
+        "original_quote": "My landlord gave me a 3-day notice to pay or quit yesterday and threatened to lock us out if we don't leave.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "immediate",
+        "urgency_reason": "Eviction notice reported",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_has_written_eviction_notice_001",
+        "field": "has_written_eviction_notice",
+        "value": true,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_eviction_notice_type_002",
+        "field": "eviction_notice_type",
+        "value": "3_day_pay_or_quit",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      }
+    ],
+    "already_asked": [],
+    "ambiguity_flags": [],
+    "safety_flags": [],
+    "pending_questions": [
+      {
+        "question_id": "q1-1",
+        "fact_key": "zip_code",
+        "text": "What is your Sacramento ZIP code? This helps us find the right local programs in your area.",
+        "can_skip": true,
+        "necessity_level": "required_for_decision",
+        "reason": "ZIP code is required to match geographic eligibility for local programs"
+      },
+      {
+        "question_id": "q1-2",
+        "fact_key": "household_gross_monthly_income",
+        "text": "What is your approximate gross monthly household income?",
+        "can_skip": false,
+        "necessity_level": "required_for_decision",
+        "reason": "Required to determine eligibility thresholds across community assistance programs"
+      }
+    ],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

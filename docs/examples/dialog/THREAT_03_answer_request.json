@@ -1,0 +1,77 @@
+{
+  "case": {
+    "case_id": "case-0ed0bb39",
+    "run_id": "run-0ed0bb39",
+    "correlation_id": "corr-0ed0bb39",
+    "case_version": 2,
+    "stage": "clarifying",
+    "turn": 2,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 5,
+    "narrative_summary": "My ex-partner said he will hurt me and the kids if I don't leave the apartment. I need help with housing.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "housing_assistance",
+        "description": "Housing problem reported",
+        "original_quote": "I need help with housing.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [],
+    "already_asked": [
+      "triggering_circumstances"
+    ],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "My ex-partner said he will hurt me and the kids if I don't leave the apartment. I need help with housing.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [
+      {
+        "type": "safety",
+        "quote": "partner said he will hurt me",
+        "note": "Threat of physical harm reported"
+      }
+    ],
+    "pending_questions": [
+      {
+        "question_id": "q2-1",
+        "fact_key": "zip_code",
+        "text": "What is your Sacramento ZIP code? This helps us find the right local programs in your area.",
+        "can_skip": true,
+        "necessity_level": "required_for_decision",
+        "reason": "ZIP code is required to match geographic eligibility for local programs"
+      },
+      {
+        "question_id": "q2-2",
+        "fact_key": "household_gross_monthly_income",
+        "text": "What is your approximate gross monthly household income?",
+        "can_skip": false,
+        "necessity_level": "required_for_decision",
+        "reason": "Required to determine eligibility thresholds across community assistance programs"
+      }
+    ],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": [
+      "triggering_circumstances"
+    ]
+  },
+  "answers": [
+    {
+      "question_id": "q2-1",
+      "answer_text": "95823"
+    },
+    {
+      "question_id": "q2-2",
+      "answer_text": "About $1,000 a month."
+    }
+  ]
+}

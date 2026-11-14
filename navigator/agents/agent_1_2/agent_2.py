@@ -142,7 +142,7 @@ def handle_agent_2(request_dict: Dict[str, Any]) -> Dict[str, Any]:
             "reason": "Understanding what caused the hardship determines applicable crisis and emergency programs",
             "applicable_program_ids": [],
             "verified_rule_ref": None,
-            "necessity_level": "helpful_for_discovery",
+            "necessity_level": "helpful",
             "can_skip": True,
         })
         seen_keys.add("triggering_circumstances")

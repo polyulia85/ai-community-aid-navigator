@@ -1,0 +1,70 @@
+{
+  "case": {
+    "case_id": "case-3765a854",
+    "run_id": "run-3765a854",
+    "correlation_id": "corr-3765a854",
+    "case_version": 2,
+    "stage": "awaiting_confirmation",
+    "turn": 1,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 6,
+    "narrative_summary": "My landlord gave me a 3-day notice to pay or quit yesterday and threatened to lock us out if we don't leave.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "housing_assistance",
+        "description": "Facing eviction notice",
+        "original_quote": "My landlord gave me a 3-day notice to pay or quit yesterday and threatened to lock us out if we don't leave.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "immediate",
+        "urgency_reason": "Eviction notice reported",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_has_written_eviction_notice_001",
+        "field": "has_written_eviction_notice",
+        "value": true,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_eviction_notice_type_002",
+        "field": "eviction_notice_type",
+        "value": "3_day_pay_or_quit",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95823",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_household_gross_monthly_income_001",
+        "field": "household_gross_monthly_income",
+        "value": 1000,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      }
+    ],
+    "already_asked": [
+      "zip_code",
+      "household_gross_monthly_income"
+    ],
+    "ambiguity_flags": [],
+    "safety_flags": [],
+    "pending_questions": [],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

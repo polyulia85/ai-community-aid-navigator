@@ -1,0 +1,67 @@
+{
+  "case": {
+    "case_id": "case-c3dc0609",
+    "run_id": "run-c3dc0609",
+    "correlation_id": "corr-c3dc0609",
+    "case_version": 2,
+    "stage": "awaiting_confirmation",
+    "turn": 1,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 6,
+    "narrative_summary": "I lost my job yesterday and need help with rent.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "income_assistance",
+        "description": "Household income lost or severely reduced",
+        "original_quote": "I lost my job yesterday and need help with rent.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Income loss or unemployment reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "Rent assistance needed",
+        "original_quote": "I lost my job yesterday and need help with rent.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Rent assistance needed",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_employment_status_001",
+        "field": "employment_status",
+        "value": "laid_off",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "at time of report"
+      },
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95823",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      }
+    ],
+    "already_asked": [
+      "zip_code",
+      "household_gross_monthly_income"
+    ],
+    "ambiguity_flags": [],
+    "safety_flags": [],
+    "pending_questions": [],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": [
+      "household_gross_monthly_income"
+    ]
+  }
+}

@@ -1,0 +1,396 @@
+{
+  "dialog_version": "0.2",
+  "status": "completed",
+  "case_id": "case-0ed0bb39",
+  "case_version": 4,
+  "turn": 2,
+  "limitations": [],
+  "questions": [],
+  "summary": null,
+  "plan": {
+    "plan_version": "plan_v1",
+    "action_cards": [
+      {
+        "card_id": "card_01",
+        "source_action_ids": [
+          "act_01"
+        ],
+        "related_need_ids": [
+          "need_001"
+        ],
+        "program_id": "prog_housing_coordaccess_sac_001",
+        "action_title": "Ask about help to stay in your home: Sacramento Steps Forward with 2-1-1 Sacramento, Sacramento Coordinated Access System (2-1-1, press 8)",
+        "reason": "This program may be relevant to your situation because it helps tenants at risk of losing their housing.",
+        "next_step": "Contact the provider to ask what help is available and what documents to bring, such as any notice from your landlord. Call 2-1-1 and press 8 (checked Oct 22). Toll-free: 1-844-546-1464 (checked Oct 22).",
+        "priority_reason": "Getting this contact early gives you the most options.",
+        "order_group": "parallel",
+        "dependency_card_ids": [],
+        "source_refs": [
+          "ev_cas_003",
+          "ev_cas_006",
+          "ev_cas_007",
+          "ev_cas_008",
+          "ev_cas_009"
+        ],
+        "uncertainty_notes": [],
+        "official_deadline": null,
+        "user_target_date": null,
+        "processing_estimate": null,
+        "progress_status": "not_started",
+        "contacts": [
+          {
+            "label": "How to apply",
+            "value": "Call 2-1-1 and press 8. 2-1-1 assesses the needs and circumstances of callers and schedules appointments with approved PSAP agencies.",
+            "hours": null,
+            "checked_at": "2026-10-22",
+            "evidence_refs": [
+              "ev_cas_006"
+            ]
+          },
+          {
+            "label": "Contact",
+            "value": "Toll-free: 1-844-546-1464. If 2-1-1 is hard to reach: 916-498-1000, still pressing 8.",
+            "hours": null,
+            "checked_at": "2026-10-22",
+            "evidence_refs": [
+              "ev_cas_007"
+            ]
+          },
+          {
+            "label": "Contact",
+            "value": "Coordinated Access hours: Monday through Saturday, 7:00 a.m. to 7:00 p.m.",
+            "hours": "Monday through Saturday, 7:00 a.m. to 7:00 p.m.",
+            "checked_at": "2026-10-22",
+            "evidence_refs": [
+              "ev_cas_008"
+            ]
+          },
+          {
+            "label": "Contact",
+            "value": "2-1-1 Sacramento: text your ZIP code to 898-211, or use the online chat.",
+            "hours": null,
+            "checked_at": "2026-10-22",
+            "evidence_refs": [
+              "ev_cas_009"
+            ]
+          }
+        ]
+      },
+      {
+        "card_id": "card_02",
+        "source_action_ids": [
+          "act_02"
+        ],
+        "related_need_ids": [
+          "need_001"
+        ],
+        "program_id": "prog_housing_lsnc_sac_001",
+        "action_title": "Get free legal advice about your housing: Legal Services of Northern California (LSNC), Free legal help for tenants (Sacramento office)",
+        "reason": "This program may be relevant to your situation because it offers legal help with housing problems.",
+        "next_step": "Contact the provider to ask for advice about your housing situation. Phone: (916) 551-2150 (checked Nov 12).",
+        "priority_reason": "Legal advice early can protect your options.",
+        "order_group": "parallel",
+        "dependency_card_ids": [],
+        "source_refs": [
+          "ev_lsnc_003",
+          "ev_lsnc_008",
+          "ev_lsnc_009",
+          "ev_lsnc_010"
+        ],
+        "uncertainty_notes": [],
+        "official_deadline": null,
+        "user_target_date": null,
+        "processing_estimate": null,
+        "progress_status": "not_started",
+        "contacts": [
+          {
+            "label": "Contact",
+            "value": "Phone: (916) 551-2150",
+            "hours": null,
+            "checked_at": "2026-11-12",
+            "evidence_refs": [
+              "ev_lsnc_008"
+            ]
+          },
+          {
+            "label": "Contact",
+            "value": "After-hours intake (leave a message): (866) 815-5990",
+            "hours": null,
+            "checked_at": "2026-11-12",
+            "evidence_refs": [
+              "ev_lsnc_009"
+            ]
+          },
+          {
+            "label": "Contact",
+            "value": "First contact by email for people who are deaf, hard of hearing or have trouble using the phone: sacramento-office@lsnc.net",
+            "hours": null,
+            "checked_at": "2026-11-12",
+            "evidence_refs": [
+              "ev_lsnc_010"
+            ]
+          }
+        ]
+      },
+      {
+        "card_id": "card_03",
+        "source_action_ids": [
+          "act_03"
+        ],
+        "related_need_ids": [
+          "need_001"
+        ],
+        "program_id": "prog_housing_saintjohns_sac_001",
+        "action_title": "Ask about rent help: Saint John's Program for Real Change, Housing Assistance Program",
+        "reason": "This program may be relevant to your situation because it offers help with rent in Sacramento.",
+        "next_step": "Contact the provider to confirm requirements and whether assistance is currently available. Apply online: https://wkf.ms/4tjLVzi (checked Nov 2). Phone: (916) 453-1482 (checked Oct 25).",
+        "priority_reason": "Contacting this program early gives the most time to arrange help.",
+        "order_group": "parallel",
+        "dependency_card_ids": [],
+        "source_refs": [
+          "ev_sjhap_003",
+          "ev_sjhap_020",
+          "ev_sjhap_016",
+          "ev_sjhap_017"
+        ],
+        "uncertainty_notes": [],
+        "official_deadline": null,
+        "user_target_date": null,
+        "processing_estimate": null,
+        "progress_status": "not_started",
+        "contacts": [
+          {
+            "label": "How to apply",
+            "value": "Apply online: https://wkf.ms/4tjLVzi",
+            "hours": null,
+            "checked_at": "2026-11-02",
+            "evidence_refs": [
+              "ev_sjhap_020"
+            ]
+          },
+          {
+            "label": "Contact",
+            "value": "Phone: (916) 453-1482.",
+            "hours": null,
+            "checked_at": "2026-10-25",
+            "evidence_refs": [
+              "ev_sjhap_016"
+            ]
+          },
+          {
+            "label": "Contact",
+            "value": "Mailing address: 2443 Fair Oaks Blvd, #369, Sacramento, CA 95825.",
+            "hours": null,
+            "checked_at": "2026-10-25",
+            "evidence_refs": [
+              "ev_sjhap_017"
+            ]
+          }
+        ]
+      },
+      {
+        "card_id": "card_04",
+        "source_action_ids": [
+          "act_04"
+        ],
+        "related_need_ids": [
+          "need_001"
+        ],
+        "program_id": "prog_housing_salvationarmy_rent_sac_001",
+        "action_title": "Ask about rent help: The Salvation Army Sacramento Metro, Rent & Utility Assistance (rental assistance)",
+        "reason": "This program may be relevant to your situation because it offers help with rent in Sacramento.",
+        "next_step": "Contact the provider to confirm requirements and whether assistance is currently available. North Highlands Family Services: (916) 678-4010 (checked Nov 12).",
+        "priority_reason": "Contacting this program early gives the most time to arrange help.",
+        "order_group": "parallel",
+        "dependency_card_ids": [],
+        "source_refs": [
+          "ev_sarent_003",
+          "ev_sarent_008",
+          "ev_sarent_009",
+          "ev_sarent_010"
+        ],
+        "uncertainty_notes": [
+          "Current availability of this program is unknown. Confirm with the provider."
+        ],
+        "official_deadline": null,
+        "user_target_date": null,
+        "processing_estimate": null,
+        "progress_status": "not_started",
+        "contacts": [
+          {
+            "label": "Contact",
+            "value": "North Highlands Family Services: 3213 Orange Grove Ave., North Highlands, CA 95660",
+            "hours": null,
+            "checked_at": "2026-11-12",
+            "evidence_refs": [
+              "ev_sarent_008"
+            ]
+          },
+          {
+            "label": "Contact",
+            "value": "Rent & Utility Assistance Schedule: Monday, Tuesday, Wednesday, Thursday 9AM - 4PM",
+            "hours": "Monday, Tuesday, Wednesday, Thursday 9AM - 4PM",
+            "checked_at": "2026-11-12",
+            "evidence_refs": [
+              "ev_sarent_009"
+            ]
+          },
+          {
+            "label": "Contact",
+            "value": "North Highlands Family Services: (916) 678-4010",
+            "hours": null,
+            "checked_at": "2026-11-12",
+            "evidence_refs": [
+              "ev_sarent_010"
+            ]
+          }
+        ]
+      }
+    ],
+    "potential_options": [],
+    "coverage_gaps": [],
+    "withheld_card_ids": [],
+    "withheld_cards": []
+  },
+  "plan_by_need": [
+    {
+      "need_id": "need_001",
+      "category": "housing_assistance",
+      "label": "Housing",
+      "urgency": "high",
+      "urgency_reason": "Housing problem reported",
+      "card_ids": [
+        "card_01",
+        "card_02",
+        "card_03",
+        "card_04"
+      ],
+      "gap_notes": []
+    }
+  ],
+  "final_validation": {
+    "verdict": "PASS",
+    "repair_rounds_used": 0,
+    "flags": [],
+    "passed_card_ids": [
+      "card_01",
+      "card_02",
+      "card_03",
+      "card_04"
+    ]
+  },
+  "rejected_needs": [],
+  "safety_notice": {
+    "risk_type": "safety",
+    "message": "If you or someone with you is in danger right now, call 9-1-1. You can keep going with your plan below.",
+    "contacts": [
+      {
+        "name": "9-1-1 Emergency",
+        "value": "9-1-1",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Call or text 988.",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Spanish: call 988 and press 2, or text AYUDA to 988.",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Veterans, service members and their loved ones: call 988 and press 1 (Veterans Crisis Line).",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Deaf and Hard of Hearing people have 24/7/365 access to 988 Videophone.",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      }
+    ],
+    "blocks_plan": false
+  },
+  "user_message": null,
+  "issues": [
+    {
+      "code": "COUNTY_FROM_ZIP_LIST",
+      "severity": "info",
+      "message": "County derived from ZIP list; a ZIP area can cross the county line",
+      "related_ref": "zip_code"
+    }
+  ],
+  "case": {
+    "case_id": "case-0ed0bb39",
+    "run_id": "run-0ed0bb39",
+    "correlation_id": "corr-0ed0bb39",
+    "case_version": 4,
+    "stage": "completed",
+    "turn": 2,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 18,
+    "narrative_summary": "My ex-partner said he will hurt me and the kids if I don't leave the apartment. I need help with housing.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "housing_assistance",
+        "description": "Housing problem reported",
+        "original_quote": "I need help with housing.",
+        "user_reported": true,
+        "confirmation_status": "confirmed",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95823",
+        "confirmation_status": "confirmed",
+        "source": "user_confirmed",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_household_gross_monthly_income_001",
+        "field": "household_gross_monthly_income",
+        "value": 1000,
+        "confirmation_status": "confirmed",
+        "source": "user_confirmed",
+        "time_context": "current"
+      }
+    ],
+    "already_asked": [
+      "triggering_circumstances",
+      "zip_code",
+      "household_gross_monthly_income"
+    ],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "My ex-partner said he will hurt me and the kids if I don't leave the apartment. I need help with housing.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [
+      {
+        "type": "safety",
+        "quote": "partner said he will hurt me",
+        "note": "Threat of physical harm reported"
+      }
+    ],
+    "pending_questions": [],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": [
+      "triggering_circumstances"
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "dialog_version": "0.2",
+  "status": "failed",
+  "case_id": "x",
+  "case_version": null,
+  "turn": 0,
+  "limitations": [],
+  "questions": [],
+  "summary": null,
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": "Something went wrong on our side. Your answers are saved. Please try again.",
+  "issues": [
+    {
+      "code": "CASE_INVALID",
+      "severity": "critical",
+      "message": "case is missing required field 'run_id'",
+      "related_ref": "run_id"
+    }
+  ],
+  "case": {
+    "case_id": "x"
+  }
+}

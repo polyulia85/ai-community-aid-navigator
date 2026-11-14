@@ -1,0 +1,202 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_confirmation",
+  "case_id": "case-9be83948",
+  "case_version": 4,
+  "turn": 3,
+  "limitations": [],
+  "questions": [],
+  "summary": {
+    "narrative": "My landlord changed the locks yesterday and locked us out of our apartment. We have nowhere to stay and no food.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "food_assistance",
+        "label": "Food",
+        "description": "Household is running low on food or groceries",
+        "urgency": "immediate",
+        "urgency_reason": "Acute food shortage reported",
+        "original_quote": "We have nowhere to stay and no food."
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "label": "Housing",
+        "description": "No stable overnight shelter",
+        "urgency": "immediate",
+        "urgency_reason": "Lack of stable overnight shelter reported",
+        "original_quote": "We have nowhere to stay and no food."
+      },
+      {
+        "need_id": "need_003",
+        "category": "income_assistance",
+        "label": "Income",
+        "description": "Work hours or pay reduced",
+        "urgency": "high",
+        "urgency_reason": "Work hours reduced",
+        "original_quote": "My hours were cut at work last month and I couldn't pay rent."
+      }
+    ],
+    "facts": [
+      {
+        "field": "eviction_notice_type",
+        "label": "Type of eviction notice",
+        "value": "lockout",
+        "display_value": "lockout"
+      },
+      {
+        "field": "triggering_circumstances",
+        "label": "What happened",
+        "value": "reduced_hours",
+        "display_value": "reduced hours"
+      },
+      {
+        "field": "employment_status",
+        "label": "Work situation",
+        "value": "reduced_hours",
+        "display_value": "reduced hours"
+      },
+      {
+        "field": "zip_code",
+        "label": "ZIP code",
+        "value": "95823",
+        "display_value": "95823"
+      },
+      {
+        "field": "household_gross_monthly_income",
+        "label": "Monthly household income (before taxes)",
+        "value": 800,
+        "display_value": "$800"
+      },
+      {
+        "field": "household_size",
+        "label": "People in your household",
+        "value": 3,
+        "display_value": "3"
+      }
+    ],
+    "unknown": []
+  },
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-9be83948",
+    "run_id": "run-9be83948",
+    "correlation_id": "corr-9be83948",
+    "case_version": 4,
+    "stage": "awaiting_confirmation",
+    "turn": 3,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 10,
+    "narrative_summary": "My landlord changed the locks yesterday and locked us out of our apartment. We have nowhere to stay and no food.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "food_assistance",
+        "description": "Household is running low on food or groceries",
+        "original_quote": "We have nowhere to stay and no food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "immediate",
+        "urgency_reason": "Acute food shortage reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "No stable overnight shelter",
+        "original_quote": "We have nowhere to stay and no food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "immediate",
+        "urgency_reason": "Lack of stable overnight shelter reported",
+        "user_priority": null,
+        "subcategory": "emergency_shelter"
+      },
+      {
+        "need_id": "need_003",
+        "category": "income_assistance",
+        "description": "Work hours or pay reduced",
+        "original_quote": "My hours were cut at work last month and I couldn't pay rent.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Work hours reduced",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_eviction_notice_type_001",
+        "field": "eviction_notice_type",
+        "value": "lockout",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_triggering_circumstances_001",
+        "field": "triggering_circumstances",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "recent"
+      },
+      {
+        "fact_id": "fact_employment_status_002",
+        "field": "employment_status",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      },
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95823",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_household_gross_monthly_income_001",
+        "field": "household_gross_monthly_income",
+        "value": 800,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      },
+      {
+        "fact_id": "fact_household_size_001",
+        "field": "household_size",
+        "value": 3,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      }
+    ],
+    "already_asked": [
+      "triggering_circumstances",
+      "zip_code",
+      "household_gross_monthly_income",
+      "household_size"
+    ],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "My landlord changed the locks yesterday and locked us out of our apartment. We have nowhere to stay and no food.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [],
+    "pending_questions": [],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

@@ -1,0 +1,232 @@
+[
+  {
+    "scenario": "J",
+    "level": "INFO",
+    "text": "3 question turn(s); asked: triggering_circumstances, zip_code, household_gross_monthly_income, household_size"
+  },
+  {
+    "scenario": "J",
+    "level": "INFO",
+    "text": "summary needs: ['food_assistance', 'housing_assistance', 'income_assistance']"
+  },
+  {
+    "scenario": "J",
+    "level": "INFO",
+    "text": "cards: 11 released, 0 withheld; verdict PASS; issues ['COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "J660",
+    "level": "INFO",
+    "text": "3 question turn(s); asked: triggering_circumstances, zip_code, household_gross_monthly_income, household_size"
+  },
+  {
+    "scenario": "J660",
+    "level": "INFO",
+    "text": "summary needs: ['food_assistance', 'housing_assistance', 'income_assistance']"
+  },
+  {
+    "scenario": "J660",
+    "level": "INFO",
+    "text": "cards: 11 released, 0 withheld; verdict PASS; issues ['COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "A",
+    "level": "INFO",
+    "text": "3 question turn(s); asked: triggering_circumstances, zip_code, household_gross_monthly_income, household_size"
+  },
+  {
+    "scenario": "A",
+    "level": "INFO",
+    "text": "summary needs: ['food_assistance', 'housing_assistance', 'income_assistance']"
+  },
+  {
+    "scenario": "A",
+    "level": "INFO",
+    "text": "cards: 11 released, 0 withheld; verdict PASS; issues ['COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "B",
+    "level": "INFO",
+    "text": "1 question turn(s); asked: zip_code, household_gross_monthly_income"
+  },
+  {
+    "scenario": "B",
+    "level": "INFO",
+    "text": "summary needs: ['housing_assistance']"
+  },
+  {
+    "scenario": "B",
+    "level": "INFO",
+    "text": "cards: 4 released, 0 withheld; verdict PASS; issues ['COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "C",
+    "level": "INFO",
+    "text": "2 question turn(s); asked: zip_code, household_gross_monthly_income, household_size"
+  },
+  {
+    "scenario": "C",
+    "level": "INFO",
+    "text": "summary needs: ['medical_health_coverage', 'housing_assistance', 'food_assistance']"
+  },
+  {
+    "scenario": "C",
+    "level": "INFO",
+    "text": "cards: 10 released, 0 withheld; verdict PASS; issues ['COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "D",
+    "level": "INFO",
+    "text": "1 question turn(s); asked: zip_code, household_gross_monthly_income"
+  },
+  {
+    "scenario": "D",
+    "level": "INFO",
+    "text": "summary needs: ['income_assistance', 'housing_assistance']"
+  },
+  {
+    "scenario": "D",
+    "level": "INFO",
+    "text": "unknown: ['household_gross_monthly_income']"
+  },
+  {
+    "scenario": "D",
+    "level": "INFO",
+    "text": "cards: 5 released, 0 withheld; verdict PASS; issues ['COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "SKIPZIP",
+    "level": "INFO",
+    "text": "3 question turn(s); asked: triggering_circumstances, zip_code, household_gross_monthly_income, household_size"
+  },
+  {
+    "scenario": "SKIPZIP",
+    "level": "INFO",
+    "text": "summary needs: ['food_assistance', 'housing_assistance', 'income_assistance']"
+  },
+  {
+    "scenario": "SKIPZIP",
+    "level": "INFO",
+    "text": "unknown: ['zip_code']"
+  },
+  {
+    "scenario": "SKIPZIP",
+    "level": "INFO",
+    "text": "cards: 0 released, 0 withheld; verdict PASS; issues ['GEOGRAPHY_MISSING']"
+  },
+  {
+    "scenario": "SKIPZIP",
+    "level": "PASS",
+    "text": "3 need(s) with no card name the skipped ZIP first"
+  },
+  {
+    "scenario": "EDIT",
+    "level": "INFO",
+    "text": "3 question turn(s); asked: triggering_circumstances, zip_code, household_gross_monthly_income, household_size"
+  },
+  {
+    "scenario": "EDIT",
+    "level": "INFO",
+    "text": "summary needs: ['food_assistance', 'housing_assistance', 'income_assistance']"
+  },
+  {
+    "scenario": "EDIT",
+    "level": "INFO",
+    "text": "cards: 7 released, 0 withheld; verdict PASS; issues ['PII_MASKED', 'COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "PII",
+    "level": "INFO",
+    "text": "3 question turn(s); asked: triggering_circumstances, zip_code, household_gross_monthly_income, household_size"
+  },
+  {
+    "scenario": "PII",
+    "level": "INFO",
+    "text": "summary needs: ['food_assistance', 'housing_assistance', 'income_assistance']"
+  },
+  {
+    "scenario": "PII",
+    "level": "INFO",
+    "text": "cards: 11 released, 0 withheld; verdict PASS; issues ['COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "LOCKOUT",
+    "level": "INFO",
+    "text": "3 question turn(s); asked: triggering_circumstances, zip_code, household_gross_monthly_income, household_size"
+  },
+  {
+    "scenario": "LOCKOUT",
+    "level": "INFO",
+    "text": "summary needs: ['food_assistance', 'housing_assistance', 'income_assistance']"
+  },
+  {
+    "scenario": "LOCKOUT",
+    "level": "INFO",
+    "text": "cards: 11 released, 0 withheld; verdict PASS; issues ['COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "LOCKOUT",
+    "level": "WARN",
+    "text": "the plan does not contain 'police non-emergency' yet"
+  },
+  {
+    "scenario": "THREAT",
+    "level": "PASS",
+    "text": "safety_notice with verified 9-1-1 and 988 at the first response"
+  },
+  {
+    "scenario": "THREAT",
+    "level": "INFO",
+    "text": "2 question turn(s); asked: triggering_circumstances, zip_code, household_gross_monthly_income"
+  },
+  {
+    "scenario": "THREAT",
+    "level": "INFO",
+    "text": "summary needs: ['housing_assistance']"
+  },
+  {
+    "scenario": "THREAT",
+    "level": "INFO",
+    "text": "unknown: ['triggering_circumstances']"
+  },
+  {
+    "scenario": "THREAT",
+    "level": "INFO",
+    "text": "cards: 4 released, 0 withheld; verdict PASS; issues ['COUNTY_FROM_ZIP_LIST']"
+  },
+  {
+    "scenario": "ERR",
+    "level": "PASS",
+    "text": "confirm while clarifying -> ['WRONG_STAGE']"
+  },
+  {
+    "scenario": "ERR",
+    "level": "PASS",
+    "text": "broken case -> ['CASE_INVALID']"
+  },
+  {
+    "scenario": "ERR",
+    "level": "PASS",
+    "text": "unknown question_id -> ['UNKNOWN_QUESTION_ID']"
+  },
+  {
+    "scenario": "ERR",
+    "level": "PASS",
+    "text": "GET /health -> 200 {\"status\": \"ok\", \"dialog_version\": \"0.2\"}"
+  },
+  {
+    "scenario": "ERR",
+    "level": "PASS",
+    "text": "bad JSON -> 400"
+  },
+  {
+    "scenario": "ERR",
+    "level": "PASS",
+    "text": "unknown path -> 404"
+  },
+  {
+    "scenario": "ERR",
+    "level": "PASS",
+    "text": "70 KB body -> 413"
+  }
+]

@@ -1,0 +1,137 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_clarification",
+  "case_id": "case-39c4fca2",
+  "case_version": 2,
+  "turn": 2,
+  "limitations": [],
+  "questions": [
+    {
+      "question_id": "q2-1",
+      "fact_key": "zip_code",
+      "text": "What is your Sacramento ZIP code? This helps us find the right local programs in your area.",
+      "can_skip": true,
+      "necessity_level": "required_for_decision",
+      "reason": "ZIP code is required to match geographic eligibility for local programs"
+    },
+    {
+      "question_id": "q2-2",
+      "fact_key": "household_gross_monthly_income",
+      "text": "What is your approximate gross monthly household income?",
+      "can_skip": false,
+      "necessity_level": "required_for_decision",
+      "reason": "Required to determine eligibility thresholds across community assistance programs"
+    }
+  ],
+  "summary": null,
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [
+    {
+      "code": "ANSWER_FACT_OUTSIDE_QUESTION",
+      "severity": "info",
+      "message": "Claim for field 'employment_status' is outside the asked keys; added as proposed",
+      "related_ref": "employment_status"
+    }
+  ],
+  "case": {
+    "case_id": "case-39c4fca2",
+    "run_id": "run-39c4fca2",
+    "correlation_id": "corr-39c4fca2",
+    "case_version": 2,
+    "stage": "clarifying",
+    "turn": 2,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 5,
+    "narrative_summary": "I have problems with housing and food. I need help.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "food_assistance",
+        "description": "Food problem reported",
+        "original_quote": "I have problems with housing and food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Food problem reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "Housing problem reported",
+        "original_quote": "I have problems with housing and food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_003",
+        "category": "income_assistance",
+        "description": "Work hours or pay reduced",
+        "original_quote": "My hours were cut at work last month and I couldn't pay rent.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Work hours reduced",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_triggering_circumstances_001",
+        "field": "triggering_circumstances",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "recent"
+      },
+      {
+        "fact_id": "fact_employment_status_002",
+        "field": "employment_status",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      }
+    ],
+    "already_asked": [
+      "triggering_circumstances"
+    ],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "I have problems with housing and food. I need help.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [],
+    "pending_questions": [
+      {
+        "question_id": "q2-1",
+        "fact_key": "zip_code",
+        "text": "What is your Sacramento ZIP code? This helps us find the right local programs in your area.",
+        "can_skip": true,
+        "necessity_level": "required_for_decision",
+        "reason": "ZIP code is required to match geographic eligibility for local programs"
+      },
+      {
+        "question_id": "q2-2",
+        "fact_key": "household_gross_monthly_income",
+        "text": "What is your approximate gross monthly household income?",
+        "can_skip": false,
+        "necessity_level": "required_for_decision",
+        "reason": "Required to determine eligibility thresholds across community assistance programs"
+      }
+    ],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

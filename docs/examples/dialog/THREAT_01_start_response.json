@@ -1,0 +1,115 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_clarification",
+  "case_id": "case-0ed0bb39",
+  "case_version": 1,
+  "turn": 1,
+  "limitations": [],
+  "questions": [
+    {
+      "question_id": "q1-1",
+      "fact_key": "triggering_circumstances",
+      "text": "I'm sorry your family is going through a difficult time. Could you tell me a little more about what happened that led to these financial difficulties?",
+      "can_skip": true,
+      "necessity_level": "helpful",
+      "reason": "Understanding what caused the hardship determines applicable crisis and emergency programs"
+    }
+  ],
+  "summary": null,
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": {
+    "risk_type": "safety",
+    "message": "If you or someone with you is in danger right now, call 9-1-1. You can keep going with your plan below.",
+    "contacts": [
+      {
+        "name": "9-1-1 Emergency",
+        "value": "9-1-1",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Call or text 988.",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Spanish: call 988 and press 2, or text AYUDA to 988.",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Veterans, service members and their loved ones: call 988 and press 1 (Veterans Crisis Line).",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      },
+      {
+        "name": "988 Suicide & Crisis Lifeline",
+        "value": "Deaf and Hard of Hearing people have 24/7/365 access to 988 Videophone.",
+        "hours": null,
+        "checked_at": "2026-11-06"
+      }
+    ],
+    "blocks_plan": false
+  },
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-0ed0bb39",
+    "run_id": "run-0ed0bb39",
+    "correlation_id": "corr-0ed0bb39",
+    "case_version": 1,
+    "stage": "clarifying",
+    "turn": 1,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 3,
+    "narrative_summary": "My ex-partner said he will hurt me and the kids if I don't leave the apartment. I need help with housing.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "housing_assistance",
+        "description": "Housing problem reported",
+        "original_quote": "I need help with housing.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [],
+    "already_asked": [],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "My ex-partner said he will hurt me and the kids if I don't leave the apartment. I need help with housing.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [
+      {
+        "type": "safety",
+        "quote": "partner said he will hurt me",
+        "note": "Threat of physical harm reported"
+      }
+    ],
+    "pending_questions": [
+      {
+        "question_id": "q1-1",
+        "fact_key": "triggering_circumstances",
+        "text": "I'm sorry your family is going through a difficult time. Could you tell me a little more about what happened that led to these financial difficulties?",
+        "can_skip": true,
+        "necessity_level": "helpful",
+        "reason": "Understanding what caused the hardship determines applicable crisis and emergency programs"
+      }
+    ],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

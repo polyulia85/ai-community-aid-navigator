@@ -1,12 +1,12 @@
-﻿# Task: Supervisor v0.2.3 â€” two fixes in `navigator/supervisor/`
+﻿# Task: Supervisor v0.2.3 — two fixes in `navigator/supervisor/`
 
 Context
-- This repository is the AI Community Aid Navigator. The Supervisor (`navigator/supervisor/run.py`, `builders.py`, `checks.py`, `contract.py`) runs Agents 1â€“10 through shared JSON contracts (`docs/contracts/SHARED_CONTRACTS.md`, v1.1).
+- This repository is the AI Community Aid Navigator. The Supervisor (`navigator/supervisor/run.py`, `builders.py`, `checks.py`, `contract.py`) runs Agents 1–10 through shared JSON contracts (`docs/contracts/SHARED_CONTRACTS.md`, v1.1).
 - Python standard library only. Do not add dependencies. Do not change any agent code under `navigator/agents/` and do not change the KB.
 - Tests: `python -m unittest discover -s tests -t .` (56 tests pass now). Fake agents live in `tests/fake_agents.py` and `tests/agents_fake.json`.
 - Before editing, read `run.py` (method `Run.execute`, the "Agent 10 + repair rounds" block), `builders.py` (`agent1_request`, `agent8_request`, `agent10_request`) and `tests/test_run.py`.
 
-FIX 1 â€” Repair rounds must not lose cards
+FIX 1 — Repair rounds must not lose cards
 
 Current behavior: after an Agent 10 FLAG, the Supervisor calls Agent 8 again with `payload.repair_flags` and then takes the whole plan from the last Agent 8 result. Agent 8 (team implementation) returns ONLY the repaired cards in a repair round and lists them in `repaired_card_ids`. Result: if one card is flagged, the final plan contains only that card; if it stays flagged, the plan is empty. Contract 5.3 says only the flagged card may be withheld; the rest of the plan must be released.
 
@@ -21,7 +21,7 @@ Required behavior:
 4. After the last round, withhold only the cards still flagged with `blocks_release` (existing logic) and release the rest of the merged plan.
 5. Put the merge in one small helper function (for example `merge_repaired_plan(current_plan, repair_result) -> (new_plan, issues)`) so it can be unit-tested on its own.
 
-FIX 2 â€” Pass a reference date to Agent 1
+FIX 2 — Pass a reference date to Agent 1
 
 Agent 1 resolves dates such as "rent is due November 1" against a reference date. It reads `payload.ref_date` (ISO `YYYY-MM-DD`); if absent it uses the computer's current date, so runs give different results on different days.
 
@@ -33,23 +33,23 @@ Required behavior:
 5. Do not change anything else in the Agent 1 request.
 
 Tests to add (unittest, in the existing style; fake agents added to `tests/fake_agents.py`)
-1. Agent 10 flags `card_02` once, then passes; Agent 8 in repair mode returns only `card_02` (with changed text) plus `repaired_card_ids: ["card_02"]` â†’ final plan has ALL original cards in the original order, `card_02` has the new text, nothing withheld.
-2. Agent 10 always flags `card_02`; Agent 8 in repair mode returns only `card_02` â†’ after 2 repair rounds `card_02` is withheld and every other card is released.
-3. Agent 8 in repair mode returns a full plan without `repaired_card_ids` â†’ works as before (existing test `test_flagged_card_withheld_after_two_repair_rounds` must still pass unchanged).
+1. Agent 10 flags `card_02` once, then passes; Agent 8 in repair mode returns only `card_02` (with changed text) plus `repaired_card_ids: ["card_02"]` → final plan has ALL original cards in the original order, `card_02` has the new text, nothing withheld.
+2. Agent 10 always flags `card_02`; Agent 8 in repair mode returns only `card_02` → after 2 repair rounds `card_02` is withheld and every other card is released.
+3. Agent 8 in repair mode returns a full plan without `repaired_card_ids` → works as before (existing test `test_flagged_card_withheld_after_two_repair_rounds` must still pass unchanged).
 4. In repair rounds, the request sent to Agent 10 contains all cards of the merged plan.
-5. Repair result with an unknown `card_id` â†’ card not added, issue `REPAIR_UNKNOWN_CARD` in `supervisor_issues`.
-6. Repair result missing a card listed in `repaired_card_ids` â†’ old card kept, issue `REPAIR_CARD_MISSING`.
+5. Repair result with an unknown `card_id` → card not added, issue `REPAIR_UNKNOWN_CARD` in `supervisor_issues`.
+6. Repair result missing a card listed in `repaired_card_ids` → old card kept, issue `REPAIR_CARD_MISSING`.
 7. Unit tests for the merge helper on its own (order kept, only listed cards replaced).
-8. `ref_date` passed to `Run` â†’ Agent 1 payload contains exactly that date; report contains it.
-9. No `ref_date` given â†’ Agent 1 payload contains today's date in ISO format.
-10. CLI `--ref-date 2026-13-40` â†’ exit code 2 and a one-line error.
+8. `ref_date` passed to `Run` → Agent 1 payload contains exactly that date; report contains it.
+9. No `ref_date` given → Agent 1 payload contains today's date in ISO format.
+10. CLI `--ref-date 2026-13-40` → exit code 2 and a one-line error.
 
 Documentation
 - `navigator/supervisor/README.md`: version v0.2.3 (Nov 1, 2026); in "What it does" describe the merge of repaired cards and `ref_date`; add `--ref-date` to "Other options"; in "Known limits" remove the sentence about `repair_flags` not being covered by tests, and write that `ref_date` and the repair-round rule are PROPOSED for contracts v1.2.
 - Update the test count everywhere it appears in `navigator/supervisor/README.md`.
 
 Constraints
-- Do not change the meaning of any existing check (S0â€“S9), the retry rules, the timeout or process isolation.
+- Do not change the meaning of any existing check (S0–S9), the retry rules, the timeout or process isolation.
 - Keep the code style of the existing files: short functions, comments in plain English.
 - Show me the diff of each file before applying it. Do not run any command that installs packages or reaches the network.
 - At the end, run `python -m unittest discover -s tests -t .` and show the summary line, then run:
@@ -62,17 +62,17 @@ Constraints
 
 ---
 
-### ðŸ‘¤ User
+### 👤 User
 
-Task: Supervisor v0.2.3 â€” two fixes in `navigator/supervisor/`
+Task: Supervisor v0.2.3 — two fixes in `navigator/supervisor/`
 
 Context
-- This repository is the AI Community Aid Navigator. The Supervisor (`navigator/supervisor/run.py`, `builders.py`, `checks.py`, `contract.py`) runs Agents 1â€“10 through shared JSON contracts (`docs/contracts/SHARED_CONTRACTS.md`, v1.1).
+- This repository is the AI Community Aid Navigator. The Supervisor (`navigator/supervisor/run.py`, `builders.py`, `checks.py`, `contract.py`) runs Agents 1–10 through shared JSON contracts (`docs/contracts/SHARED_CONTRACTS.md`, v1.1).
 - Python standard library only. Do not add dependencies. Do not change any agent code under `navigator/agents/` and do not change the KB.
 - Tests: `python -m unittest discover -s tests -t .` (56 tests pass now). Fake agents live in `tests/fake_agents.py` and `tests/agents_fake.json`.
 - Before editing, read `run.py` (method `Run.execute`, the "Agent 10 + repair rounds" block), `builders.py` (`agent1_request`, `agent8_request`, `agent10_request`) and `tests/test_run.py`.
 
-FIX 1 â€” Repair rounds must not lose cards
+FIX 1 — Repair rounds must not lose cards
 
 Current behavior: after an Agent 10 FLAG, the Supervisor calls Agent 8 again with `payload.repair_flags` and then takes the whole plan from the last Agent 8 result. Agent 8 (team implementation) returns ONLY the repaired cards in a repair round and lists them in `repaired_card_ids`. Result: if one card is flagged, the final plan contains only that card; if it stays flagged, the plan is empty. Contract 5.3 says only the flagged card may be withheld; the rest of the plan must be released.
 
@@ -87,7 +87,7 @@ Required behavior:
 4. After the last round, withhold only the cards still flagged with `blocks_release` (existing logic) and release the rest of the merged plan.
 5. Put the merge in one small helper function (for example `merge_repaired_plan(current_plan, repair_result) -> (new_plan, issues)`) so it can be unit-tested on its own.
 
-FIX 2 â€” Pass a reference date to Agent 1
+FIX 2 — Pass a reference date to Agent 1
 
 Agent 1 resolves dates such as "rent is due November 1" against a reference date. It reads `payload.ref_date` (ISO `YYYY-MM-DD`); if absent it uses the computer's current date, so runs give different results on different days.
 
@@ -99,23 +99,23 @@ Required behavior:
 5. Do not change anything else in the Agent 1 request.
 
 Tests to add (unittest, in the existing style; fake agents added to `tests/fake_agents.py`)
-1. Agent 10 flags `card_02` once, then passes; Agent 8 in repair mode returns only `card_02` (with changed text) plus `repaired_card_ids: ["card_02"]` â†’ final plan has ALL original cards in the original order, `card_02` has the new text, nothing withheld.
-2. Agent 10 always flags `card_02`; Agent 8 in repair mode returns only `card_02` â†’ after 2 repair rounds `card_02` is withheld and every other card is released.
-3. Agent 8 in repair mode returns a full plan without `repaired_card_ids` â†’ works as before (existing test `test_flagged_card_withheld_after_two_repair_rounds` must still pass unchanged).
+1. Agent 10 flags `card_02` once, then passes; Agent 8 in repair mode returns only `card_02` (with changed text) plus `repaired_card_ids: ["card_02"]` → final plan has ALL original cards in the original order, `card_02` has the new text, nothing withheld.
+2. Agent 10 always flags `card_02`; Agent 8 in repair mode returns only `card_02` → after 2 repair rounds `card_02` is withheld and every other card is released.
+3. Agent 8 in repair mode returns a full plan without `repaired_card_ids` → works as before (existing test `test_flagged_card_withheld_after_two_repair_rounds` must still pass unchanged).
 4. In repair rounds, the request sent to Agent 10 contains all cards of the merged plan.
-5. Repair result with an unknown `card_id` â†’ card not added, issue `REPAIR_UNKNOWN_CARD` in `supervisor_issues`.
-6. Repair result missing a card listed in `repaired_card_ids` â†’ old card kept, issue `REPAIR_CARD_MISSING`.
+5. Repair result with an unknown `card_id` → card not added, issue `REPAIR_UNKNOWN_CARD` in `supervisor_issues`.
+6. Repair result missing a card listed in `repaired_card_ids` → old card kept, issue `REPAIR_CARD_MISSING`.
 7. Unit tests for the merge helper on its own (order kept, only listed cards replaced).
-8. `ref_date` passed to `Run` â†’ Agent 1 payload contains exactly that date; report contains it.
-9. No `ref_date` given â†’ Agent 1 payload contains today's date in ISO format.
-10. CLI `--ref-date 2026-13-40` â†’ exit code 2 and a one-line error.
+8. `ref_date` passed to `Run` → Agent 1 payload contains exactly that date; report contains it.
+9. No `ref_date` given → Agent 1 payload contains today's date in ISO format.
+10. CLI `--ref-date 2026-13-40` → exit code 2 and a one-line error.
 
 Documentation
 - `navigator/supervisor/README.md`: version v0.2.3 (Nov 1, 2026); in "What it does" describe the merge of repaired cards and `ref_date`; add `--ref-date` to "Other options"; in "Known limits" remove the sentence about `repair_flags` not being covered by tests, and write that `ref_date` and the repair-round rule are PROPOSED for contracts v1.2.
 - Update the test count everywhere it appears in `navigator/supervisor/README.md`.
 
 Constraints
-- Do not change the meaning of any existing check (S0â€“S9), the retry rules, the timeout or process isolation.
+- Do not change the meaning of any existing check (S0–S9), the retry rules, the timeout or process isolation.
 - Keep the code style of the existing files: short functions, comments in plain English.
 - Show me the diff of each file before applying it. Do not run any command that installs packages or reaches the network.
 - At the end, run `python -m unittest discover -s tests -t .` and show the summary line, then run:
@@ -124,13 +124,13 @@ Constraints
 
 ---
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: update_todo_list
+> 🔧 called: update_todo_list
 
 
 
-> ðŸ”§ **update_todo_list** â€” 
+> 🔧 **update_todo_list** — 
 [-] Read and understand existing codebase (run.py, builders.py, checks.py, contract.py, test_run.py, fake_agents.py)
 [ ] Plan all changes needed for Fix 1 (repair rounds) and Fix 2 (ref_date)
 [ ] Implement Fix 1: merge_repaired_plan helper + repair round logic in run.py
@@ -142,45 +142,45 @@ Constraints
 [ ] Delete run_report_check.json
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: read_file, read_file, read_file
+> 🔧 called: read_file, read_file, read_file
 
 Let me read all the relevant files in parallel:
 
-> ðŸ”§ **read_file** â€” tests\test_run.py
+> 🔧 **read_file** — tests\test_run.py
 
-> ðŸ”§ **read_file** â€” navigator\supervisor\builders.py
+> 🔧 **read_file** — navigator\supervisor\builders.py
 
-> ðŸ”§ **read_file** â€” navigator\supervisor\run.py
+> 🔧 **read_file** — navigator\supervisor\run.py
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: read_file, read_file, read_file
+> 🔧 called: read_file, read_file, read_file
 
 
 
-> ðŸ”§ **read_file** â€” all fake agent functions, agent_1, agent_8, agent_10, agent_10_always_flags_card_02, ALL dict
+> 🔧 **read_file** — all fake agent functions, agent_1, agent_8, agent_10, agent_10_always_flags_card_02, ALL dict
 
-> ðŸ”§ **read_file** â€” checks S0-S9, issue function, mask_user_text
+> 🔧 **read_file** — checks S0-S9, issue function, mask_user_text
 
-> ðŸ”§ **read_file** â€” ROLES, TASK_TYPES, SCHEMA_VERSION, TIMEOUT_SECONDS, ENUMS
+> 🔧 **read_file** — ROLES, TASK_TYPES, SCHEMA_VERSION, TIMEOUT_SECONDS, ENUMS
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: read_file
+> 🔧 called: read_file
 
 Now let me read the README to understand what needs updating:
 
-> ðŸ”§ **read_file** â€” navigator\supervisor\README.md
+> 🔧 **read_file** — navigator\supervisor\README.md
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: update_todo_list
+> 🔧 called: update_todo_list
 
 
 
-> ðŸ”§ **update_todo_list** â€” 
+> 🔧 **update_todo_list** — 
 [x] Read and understand existing codebase (run.py, builders.py, checks.py, contract.py, test_run.py, fake_agents.py)
 [-] Plan all changes needed for Fix 1 (repair rounds) and Fix 2 (ref_date)
 [ ] Implement Fix 1: merge_repaired_plan helper + repair round logic in run.py
@@ -192,26 +192,26 @@ Now let me read the README to understand what needs updating:
 [ ] Delete run_report_check.json
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: update_todo_list
+> 🔧 called: update_todo_list
 
 Now I have a full picture. Let me plan the changes carefully:
 
-**Fix 1 â€” changes needed:**
+**Fix 1 — changes needed:**
 1. `run.py`: Add `merge_repaired_plan(current_plan, repair_result) -> (new_plan, issues)` helper
 2. `run.py`: In `execute()`, keep `current_plan` dict; pass merged plan to `agent10_request`; after each repair round, merge into `current_plan`; at end filter only withheld cards
 3. `builders.py`: `agent10_request` receives a `plan` dict (not raw agent8_result); update it to accept this
 4. `tests/fake_agents.py`: Add repair-mode Agent 8 variants that return `repaired_card_ids`
-5. `tests/test_run.py`: Add tests 1â€“7
+5. `tests/test_run.py`: Add tests 1–7
 
-**Fix 2 â€” changes needed:**
+**Fix 2 — changes needed:**
 1. `builders.py`: `agent1_request` accepts `ref_date` param, adds it to payload
 2. `run.py`: `Run.__init__` accepts `ref_date` param; `execute` passes it to `agent1_request`; `report` includes it
 3. `run.py`: CLI adds `--ref-date`, validates, passes to `Run`, saves in report
-4. `tests/test_run.py`: Add tests 8â€“10
+4. `tests/test_run.py`: Add tests 8–10
 
-> ðŸ”§ **update_todo_list** â€” 
+> 🔧 **update_todo_list** — 
 [x] Read and understand existing codebase (run.py, builders.py, checks.py, contract.py, test_run.py, fake_agents.py)
 [x] Plan all changes needed for Fix 1 (repair rounds) and Fix 2 (ref_date)
 [-] Implement Fix 1: merge_repaired_plan helper + repair round logic in run.py + agent10_request in builders.py
@@ -223,44 +223,44 @@ Now I have a full picture. Let me plan the changes carefully:
 [ ] Delete run_report_check.json
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: apply_diff
+> 🔧 called: apply_diff
 
 Now I'll implement Fix 1 in `builders.py` and `run.py`. Let me show what I'm changing:
 
 **`builders.py` changes:**
-- `agent10_request` currently takes `agent8_req, agent8_result` and reads `plan = agent8_result["result"]`. Change it to take `agent8_req, plan` where `plan` is the current plan dict (same keys as before â€” `plan_version`, `action_cards`, etc.)
+- `agent10_request` currently takes `agent8_req, agent8_result` and reads `plan = agent8_result["result"]`. Change it to take `agent8_req, plan` where `plan` is the current plan dict (same keys as before — `plan_version`, `action_cards`, etc.)
 
 **`run.py` changes:**
 - Add `merge_repaired_plan()` function
 - In `execute()`: keep `current_plan` from first accepted Agent 8; pass `current_plan` to `agent10_request`; after repair round, merge into `current_plan`; collect `supervisor_issues` from merge; final plan filters on `current_plan` not `r8`
 
-> ðŸ”§ **apply_diff** â€” navigator\supervisor\builders.py
+> 🔧 **apply_diff** — navigator\supervisor\builders.py
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: apply_diff
+> 🔧 called: apply_diff
 
-Now update `run.py` â€” add the `merge_repaired_plan` helper and fix the Agent 10 + repair rounds block:
+Now update `run.py` — add the `merge_repaired_plan` helper and fix the Agent 10 + repair rounds block:
 
-> ðŸ”§ **apply_diff** â€” navigator\supervisor\run.py
+> 🔧 **apply_diff** — navigator\supervisor\run.py
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: apply_diff
+> 🔧 called: apply_diff
 
-Now implement Fix 2 â€” `ref_date` in `builders.py`, `run.py` (Run class + CLI):
+Now implement Fix 2 — `ref_date` in `builders.py`, `run.py` (Run class + CLI):
 
-> ðŸ”§ **apply_diff** â€” navigator\supervisor\builders.py
+> 🔧 **apply_diff** — navigator\supervisor\builders.py
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: apply_diff
+> 🔧 called: apply_diff
 
-Now update `run.py` for Fix 2 â€” `Run.__init__` accepts `ref_date`, passes it to `agent1_request`, `report` includes it, and CLI gets `--ref-date`:
+Now update `run.py` for Fix 2 — `Run.__init__` accepts `ref_date`, passes it to `agent1_request`, `report` includes it, and CLI gets `--ref-date`:
 
-> ðŸ”§ **apply_diff** â€” <<<<<<< SEARCH
+> 🔧 **apply_diff** — <<<<<<< SEARCH
 :start_line:8
 -------
 import argparse
@@ -375,13 +375,13 @@ class Run:
 >>>>>>> REPLACE
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: apply_diff
+> 🔧 called: apply_diff
 
 Now update the CLI in `run.py` to add `--ref-date`:
 
-> ðŸ”§ **apply_diff** â€” <<<<<<< SEARCH
+> 🔧 **apply_diff** — <<<<<<< SEARCH
 :start_line:419
 -------
 def main(argv=None):
@@ -477,13 +477,13 @@ def main(argv=None):
 >>>>>>> REPLACE
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: update_todo_list
+> 🔧 called: update_todo_list
 
 
 
-> ðŸ”§ **update_todo_list** â€” 
+> 🔧 **update_todo_list** — 
 [x] Read and understand existing codebase (run.py, builders.py, checks.py, contract.py, test_run.py, fake_agents.py)
 [x] Plan all changes needed for Fix 1 (repair rounds) and Fix 2 (ref_date)
 [x] Implement Fix 1: merge_repaired_plan helper + repair round logic in run.py + agent10_request in builders.py
@@ -495,17 +495,17 @@ def main(argv=None):
 [ ] Delete run_report_check.json
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: apply_diff
+> 🔧 called: apply_diff
 
 Now add the new fake agents for the tests. I need:
-1. `agent_8_repair_card02` â€” returns only `card_02` (repaired text) + `repaired_card_ids: ["card_02"]`
-2. `agent_10_flags_card02_once` â€” flags on round 0 only, passes on round 1
-3. `agent_8_repair_unknown_card` â€” returns an unknown card in repaired result
-4. `agent_8_repair_missing_card` â€” lists a card in `repaired_card_ids` but doesn't return it
+1. `agent_8_repair_card02` — returns only `card_02` (repaired text) + `repaired_card_ids: ["card_02"]`
+2. `agent_10_flags_card02_once` — flags on round 0 only, passes on round 1
+3. `agent_8_repair_unknown_card` — returns an unknown card in repaired result
+4. `agent_8_repair_missing_card` — lists a card in `repaired_card_ids` but doesn't return it
 
-> ðŸ”§ **apply_diff** â€” <<<<<<< SEARCH
+> 🔧 **apply_diff** — <<<<<<< SEARCH
 :start_line:77
 -------
 def agent_10_always_flags_card_02(req):
@@ -588,13 +588,13 @@ def agent_8_repair_missing_listed_card(req):
 >>>>>>> REPLACE
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: apply_diff
+> 🔧 called: apply_diff
 
 Now add all 10 tests to `test_run.py`. Let me check the current test file again to ensure I write tests in the right style:
 
-> ðŸ”§ **apply_diff** â€” <<<<<<< SEARCH
+> 🔧 **apply_diff** — <<<<<<< SEARCH
 :start_line:1
 -------
 """Tests for the Supervisor runner with fake agents. Run from the repo root:  python -m unittest -v"""
@@ -808,7 +808,7 @@ class TestRunner(unittest.TestCase):
         self.assertIn("card_02", seen_cards[1])
 
     def test_repair_unknown_card_id_not_added_issue_raised(self):
-        """Test 5: Repair result with an unknown card_id â†’ card not added, REPAIR_UNKNOWN_CARD warning."""
+        """Test 5: Repair result with an unknown card_id → card not added, REPAIR_UNKNOWN_CARD warning."""
         rep = run_with(agent_8=F.agent_8_repair_unknown_card,
                        agent_10=F.agent_10_flags_card02_once)
         self.assertEqual(rep["outcome"], "completed")
@@ -818,7 +818,7 @@ class TestRunner(unittest.TestCase):
         self.assertIn("REPAIR_UNKNOWN_CARD", sup_codes(rep))
 
     def test_repair_missing_listed_card_keeps_old_card_issue_raised(self):
-        """Test 6: Repair result missing a card listed in repaired_card_ids â†’ old card kept,
+        """Test 6: Repair result missing a card listed in repaired_card_ids → old card kept,
         REPAIR_CARD_MISSING warning in supervisor_issues."""
         rep = run_with(agent_8=F.agent_8_repair_missing_listed_card,
                        agent_10=F.agent_10_flags_card02_once)
@@ -828,7 +828,7 @@ class TestRunner(unittest.TestCase):
         self.assertIn("REPAIR_CARD_MISSING", sup_codes(rep))
 
     def test_merge_helper_order_and_replacement(self):
-        """Test 7: Unit-test merge_repaired_plan directly â€” order kept, only listed cards replaced."""
+        """Test 7: Unit-test merge_repaired_plan directly — order kept, only listed cards replaced."""
         current = {
             "plan_version": "1",
             "action_cards": [
@@ -864,7 +864,7 @@ class TestRunner(unittest.TestCase):
     # ---------------------------------------------------------------- Fix 2 tests (ref_date)
 
     def test_ref_date_passed_to_run_appears_in_agent1_payload_and_report(self):
-        """Test 8: ref_date passed to Run â†’ Agent 1 payload has exactly that date; report has it."""
+        """Test 8: ref_date passed to Run → Agent 1 payload has exactly that date; report has it."""
         fixed = datetime.date(2026, 12, 1)
         seen = {}
         def spy(req):
@@ -874,7 +874,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(rep["ref_date"], "2026-12-01")
 
     def test_no_ref_date_uses_todays_date(self):
-        """Test 9: No ref_date given â†’ Agent 1 payload contains today's ISO date."""
+        """Test 9: No ref_date given → Agent 1 payload contains today's ISO date."""
         today = datetime.date.today().isoformat()
         seen = {}
         def spy(req):
@@ -883,7 +883,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(seen["ref_date"], today)
 
     def test_cli_invalid_ref_date_exits_code_2(self):
-        """Test 10: CLI --ref-date 2026-13-40 â†’ exit code 2 and a one-line error."""
+        """Test 10: CLI --ref-date 2026-13-40 → exit code 2 and a one-line error."""
         import io
         from contextlib import redirect_stdout
         buf = io.StringIO()
@@ -901,13 +901,13 @@ if __name__ == "__main__":
 >>>>>>> REPLACE
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: update_todo_list
+> 🔧 called: update_todo_list
 
 Now update the README:
 
-> ðŸ”§ **update_todo_list** â€” 
+> 🔧 **update_todo_list** — 
 [x] Read and understand existing codebase (run.py, builders.py, checks.py, contract.py, test_run.py, fake_agents.py)
 [x] Plan all changes needed for Fix 1 (repair rounds) and Fix 2 (ref_date)
 [x] Implement Fix 1: merge_repaired_plan helper + repair round logic in run.py + agent10_request in builders.py
@@ -919,21 +919,21 @@ Now update the README:
 [ ] Delete run_report_check.json
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: write_file
-
-
-
-> ðŸ”§ **write_file** â€” navigator\supervisor\README.md
-
-### ðŸ¤– Assistant
-
-> ðŸ”§ called: update_todo_list
+> 🔧 called: write_file
 
 
 
-> ðŸ”§ **update_todo_list** â€” 
+> 🔧 **write_file** — navigator\supervisor\README.md
+
+### 🤖 Assistant
+
+> 🔧 called: update_todo_list
+
+
+
+> 🔧 **update_todo_list** — 
 [x] Read and understand existing codebase (run.py, builders.py, checks.py, contract.py, test_run.py, fake_agents.py)
 [x] Plan all changes needed for Fix 1 (repair rounds) and Fix 2 (ref_date)
 [x] Implement Fix 1: merge_repaired_plan helper + repair round logic in run.py + agent10_request in builders.py
@@ -945,29 +945,29 @@ Now update the README:
 [ ] Delete run_report_check.json
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: execute_command
+> 🔧 called: execute_command
 
 
 
-> ðŸ”§ **execute_command** â€” python -m unittest discover -s tests -t . 2>&1
+> 🔧 **execute_command** — python -m unittest discover -s tests -t . 2>&1
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: execute_command
+> 🔧 called: execute_command
 
-Wait â€” exit code 1 from PowerShell's handling of stderr, but the test output says `OK` and `66 tests`. Let me verify:
+Wait — exit code 1 from PowerShell's handling of stderr, but the test output says `OK` and `66 tests`. Let me verify:
 
-> ðŸ”§ **execute_command** â€” python -m unittest discover -s tests -t .; echo "Exit: $LASTEXITCODE"
+> 🔧 **execute_command** — python -m unittest discover -s tests -t .; echo "Exit: $LASTEXITCODE"
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: update_todo_list
+> 🔧 called: update_todo_list
 
 All 66 tests pass. Now run the CLI smoke test:
 
-> ðŸ”§ **update_todo_list** â€” 
+> 🔧 **update_todo_list** — 
 [x] Read and understand existing codebase (run.py, builders.py, checks.py, contract.py, test_run.py, fake_agents.py)
 [x] Plan all changes needed for Fix 1 (repair rounds) and Fix 2 (ref_date)
 [x] Implement Fix 1: merge_repaired_plan helper + repair round logic in run.py + agent10_request in builders.py
@@ -979,37 +979,37 @@ All 66 tests pass. Now run the CLI smoke test:
 [ ] Delete run_report_check.json
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: execute_command
+> 🔧 called: execute_command
 
 
 
-> ðŸ”§ **execute_command** â€” python -m navigator.supervisor.run --agents tests/agents_fake.json --ref-date 2026-12-01 --out run_report_check.json --no-isolate
+> 🔧 **execute_command** — python -m navigator.supervisor.run --agents tests/agents_fake.json --ref-date 2026-12-01 --out run_report_check.json --no-isolate
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: execute_command
+> 🔧 called: execute_command
 
 The CLI smoke test works. Let me also verify `ref_date` appears in the report:
 
-> ðŸ”§ **execute_command** â€” python -c "import json; r=json.load(open('run_report_check.json')); print('ref_date:', r.get('ref_date')); import json; q1 = next(s for s in r['steps'] if s['role_id']=='agent_1'); print('first step accepted:', q1['accepted'])"
+> 🔧 **execute_command** — python -c "import json; r=json.load(open('run_report_check.json')); print('ref_date:', r.get('ref_date')); import json; q1 = next(s for s in r['steps'] if s['role_id']=='agent_1'); print('first step accepted:', q1['accepted'])"
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: execute_command
+> 🔧 called: execute_command
 
 Now delete the report file:
 
-> ðŸ”§ **execute_command** â€” Remove-Item run_report_check.json
+> 🔧 **execute_command** — Remove-Item run_report_check.json
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
-> ðŸ”§ called: update_todo_list
+> 🔧 called: update_todo_list
 
 
 
-> ðŸ”§ **update_todo_list** â€” 
+> 🔧 **update_todo_list** — 
 [x] Read and understand existing codebase (run.py, builders.py, checks.py, contract.py, test_run.py, fake_agents.py)
 [x] Plan all changes needed for Fix 1 (repair rounds) and Fix 2 (ref_date)
 [x] Implement Fix 1: merge_repaired_plan helper + repair round logic in run.py + agent10_request in builders.py
@@ -1021,13 +1021,13 @@ Now delete the report file:
 [x] Delete run_report_check.json
 
 
-### ðŸ¤– Assistant
+### 🤖 Assistant
 
 All done. Here's a complete summary of every change made.
 
 ---
 
-## Summary of changes â€” Supervisor v0.2.3
+## Summary of changes — Supervisor v0.2.3
 
 ### [`navigator/supervisor/builders.py`](navigator/supervisor/builders.py)
 
@@ -1035,7 +1035,7 @@ All done. Here's a complete summary of every change made.
 |---|---|
 | `import datetime` added | needed for `ref_date` default |
 | [`agent1_request()`](navigator/supervisor/builders.py) | new `ref_date=None` param; defaults to `datetime.date.today()`; converts date object to ISO string; adds `"ref_date"` key to the Agent 1 payload |
-| [`agent10_request()`](navigator/supervisor/builders.py) | renamed 4th param `agent8_result` â†’ `current_plan`; reads plan fields directly from it instead of from `agent8_result["result"]`; callers now pass the Supervisor's merged plan, not the raw Agent 8 result |
+| [`agent10_request()`](navigator/supervisor/builders.py) | renamed 4th param `agent8_result` → `current_plan`; reads plan fields directly from it instead of from `agent8_result["result"]`; callers now pass the Supervisor's merged plan, not the raw Agent 8 result |
 
 ### [`navigator/supervisor/run.py`](navigator/supervisor/run.py)
 
@@ -1046,25 +1046,25 @@ All done. Here's a complete summary of every change made.
 | [`Run.__init__`](navigator/supervisor/run.py) | new `ref_date=None` param; stored as `self.ref_date` (defaults to `datetime.date.today()`) |
 | [`Run.execute()`](navigator/supervisor/run.py) | passes `ref_date=self.ref_date` to `agent1_request`; initialises `current_plan` from first Agent 8 result; passes `current_plan` (not raw `r8`) to `agent10_request`; after each repair round calls `merge_repaired_plan`, accumulates issues; final plan built from `current_plan` |
 | [`Run.report()`](navigator/supervisor/run.py) | adds `"ref_date": self.ref_date.isoformat()` at top level |
-| [`main()`](navigator/supervisor/run.py) | new `--ref-date YYYY-MM-DD` option; validates with `datetime.date.fromisoformat`; invalid value â†’ one-line error + exit code 2; passes `ref_date` to `Run` |
+| [`main()`](navigator/supervisor/run.py) | new `--ref-date YYYY-MM-DD` option; validates with `datetime.date.fromisoformat`; invalid value → one-line error + exit code 2; passes `ref_date` to `Run` |
 
 ### [`tests/fake_agents.py`](tests/fake_agents.py)
 
 Four new fake agents:
-- [`agent_10_flags_card02_once`](tests/fake_agents.py) â€” flags on round 0 only, passes thereafter
-- [`agent_8_repair_card02`](tests/fake_agents.py) â€” repair mode: returns only `card_02` (repaired text) + `repaired_card_ids: ["card_02"]`; non-repair calls fall through to `agent_8`
-- [`agent_8_repair_unknown_card`](tests/fake_agents.py) â€” repair mode: returns `card_99` (not in plan) + `repaired_card_ids: ["card_02"]`
-- [`agent_8_repair_missing_listed_card`](tests/fake_agents.py) â€” repair mode: lists `card_02` in `repaired_card_ids` but returns no cards
+- [`agent_10_flags_card02_once`](tests/fake_agents.py) — flags on round 0 only, passes thereafter
+- [`agent_8_repair_card02`](tests/fake_agents.py) — repair mode: returns only `card_02` (repaired text) + `repaired_card_ids: ["card_02"]`; non-repair calls fall through to `agent_8`
+- [`agent_8_repair_unknown_card`](tests/fake_agents.py) — repair mode: returns `card_99` (not in plan) + `repaired_card_ids: ["card_02"]`
+- [`agent_8_repair_missing_listed_card`](tests/fake_agents.py) — repair mode: lists `card_02` in `repaired_card_ids` but returns no cards
 
 ### [`tests/test_run.py`](tests/test_run.py)
 
-10 new tests (tests 1â€“10 from the spec), plus `sup_codes()` helper. Full suite: **66 tests, all pass**.
+10 new tests (tests 1–10 from the spec), plus `sup_codes()` helper. Full suite: **66 tests, all pass**.
 
 | # | Test name | What it checks |
 |---|---|---|
 | 1 | `test_repair_round_keeps_all_cards_when_only_one_flagged` | all cards kept in order, `card_02` has repaired text, nothing withheld |
 | 2 | `test_repair_round_withholds_only_flagged_card_after_max_rounds` | `card_02` withheld, `card_01` released |
-| 3 | `test_repair_no_repaired_card_ids_field_is_full_replacement` | merge helper unit test: no `repaired_card_ids` â†’ full replacement |
+| 3 | `test_repair_no_repaired_card_ids_field_is_full_replacement` | merge helper unit test: no `repaired_card_ids` → full replacement |
 | 4 | `test_repair_agent10_receives_full_merged_plan` | round 0 and round 1 both carry all cards |
 | 5 | `test_repair_unknown_card_id_not_added_issue_raised` | `card_99` not added, `REPAIR_UNKNOWN_CARD` warning |
 | 6 | `test_repair_missing_listed_card_keeps_old_card_issue_raised` | old `card_02` kept, `REPAIR_CARD_MISSING` warning |

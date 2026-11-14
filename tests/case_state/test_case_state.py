@@ -22,6 +22,7 @@ PLAN = {"plan_version": 1, "action_cards": [
 class CaseStateTests(unittest.TestCase):
     def setUp(self):
         self.db = store.connect()
+        self.addCleanup(self.db.close)
         store.create_case(self.db, "case-001", T0)
 
     def test_every_change_bumps_the_version_and_is_logged(self):

@@ -6,14 +6,14 @@ from unittest import mock
 from navigator.supervisor import contract as C
 from navigator.supervisor import run as R
 from tests import fake_agents as F
-from tests.fake_agents import FIXTURE_KB
+from tests.fake_agents import FIXTURE_KB, FIXTURE_ZIPS
 
 STORY = "I was laid off. Rent is due November 1. ZIP 95823."
 
 
 def run_with(**overrides):
     agents = dict(F.ALL, **overrides)
-    return R.Run(agents, FIXTURE_KB).execute(STORY)
+    return R.Run(agents, FIXTURE_KB, zips_path=FIXTURE_ZIPS).execute(STORY)
 
 
 def codes(rep):
@@ -53,7 +53,7 @@ class TestRunner(unittest.TestCase):
 
     def test_missing_agent(self):
         agents = dict(F.ALL); del agents["agent_5"]
-        rep = R.Run(agents, FIXTURE_KB).execute(STORY)
+        rep = R.Run(agents, FIXTURE_KB, zips_path=FIXTURE_ZIPS).execute(STORY)
         self.assertEqual(rep["outcome"], "stopped_at_agent_5")
         self.assertIn("AGENT_NOT_CONNECTED", codes(rep))
 
@@ -66,7 +66,7 @@ class TestRunner(unittest.TestCase):
         seen = {}
         def spy(req):
             seen["text"] = req["payload"]["story_text"]; return F.agent_1(req)
-        rep = R.Run(dict(F.ALL, agent_1=spy), FIXTURE_KB).execute(STORY + " SSN 123-45-6789")
+        rep = R.Run(dict(F.ALL, agent_1=spy), FIXTURE_KB, zips_path=FIXTURE_ZIPS).execute(STORY + " SSN 123-45-6789")
         self.assertNotIn("123-45-6789", seen["text"])
         self.assertIn("PII_MASKED", {i["code"] for i in rep["supervisor_issues"]})
 
@@ -248,7 +248,7 @@ class TestRunner(unittest.TestCase):
         seen = {}
         def spy(req):
             seen["ref_date"] = req["payload"].get("ref_date"); return F.agent_1(req)
-        rep = R.Run(dict(F.ALL, agent_1=spy), FIXTURE_KB, ref_date=fixed).execute(STORY)
+        rep = R.Run(dict(F.ALL, agent_1=spy), FIXTURE_KB, zips_path=FIXTURE_ZIPS, ref_date=fixed).execute(STORY)
         self.assertEqual(seen["ref_date"], "2026-12-01")
         self.assertEqual(rep["ref_date"], "2026-12-01")
 
@@ -259,7 +259,7 @@ class TestRunner(unittest.TestCase):
         def spy(req):
             seen["ref_date"] = req["payload"].get("ref_date"); return F.agent_1(req)
         with mock.patch("navigator.supervisor.run._today", return_value=frozen):
-            rep = R.Run(dict(F.ALL, agent_1=spy), FIXTURE_KB).execute(STORY)
+            rep = R.Run(dict(F.ALL, agent_1=spy), FIXTURE_KB, zips_path=FIXTURE_ZIPS).execute(STORY)
         self.assertEqual(seen["ref_date"], "2026-11-15")
         self.assertEqual(rep["ref_date"], "2026-11-15")
 
@@ -305,7 +305,7 @@ class TestRunner(unittest.TestCase):
                       agent_6=spy("agent_6", F.agent_6),
                       agent_8=spy("agent_8", F.agent_8_repair_card02),
                       agent_10=spy("agent_10", F.agent_10_flags_card02_once))
-        rep = R.Run(agents, FIXTURE_KB, ref_date=fixed).execute(STORY)
+        rep = R.Run(agents, FIXTURE_KB, zips_path=FIXTURE_ZIPS, ref_date=fixed).execute(STORY)
         self.assertEqual(rep["outcome"], "completed")
         self.assertEqual(rep["ref_date"], "2026-11-15")
         # agent_1: exactly one call, ref_date correct

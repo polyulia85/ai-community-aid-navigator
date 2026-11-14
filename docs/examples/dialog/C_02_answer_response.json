@@ -1,0 +1,138 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_clarification",
+  "case_id": "case-113e08ab",
+  "case_version": 2,
+  "turn": 2,
+  "limitations": [],
+  "questions": [
+    {
+      "question_id": "q2-1",
+      "fact_key": "household_size",
+      "text": "How many people are currently living in your household, including yourself?",
+      "can_skip": true,
+      "necessity_level": "required_for_decision",
+      "reason": "Household size affects eligibility thresholds for food and assistance programs"
+    }
+  ],
+  "summary": null,
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [
+    {
+      "code": "ANSWER_FACT_OUTSIDE_QUESTION",
+      "severity": "info",
+      "message": "Claim for field 'rent_due_date' is outside the asked keys; added as proposed",
+      "related_ref": "rent_due_date"
+    },
+    {
+      "code": "ANSWER_FACT_OUTSIDE_QUESTION",
+      "severity": "info",
+      "message": "Claim for field 'rent_amount_monthly' is outside the asked keys; added as proposed",
+      "related_ref": "rent_amount_monthly"
+    }
+  ],
+  "case": {
+    "case_id": "case-113e08ab",
+    "run_id": "run-113e08ab",
+    "correlation_id": "corr-113e08ab",
+    "case_version": 2,
+    "stage": "clarifying",
+    "turn": 2,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 6,
+    "narrative_summary": "I was doing okay until my daughter had an emergency asthma hospitalization last week, and now the hospital bill took all my rent money.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "medical_health_coverage",
+        "description": "Medical bills or urgent healthcare expenses reported",
+        "original_quote": "I was doing okay until my daughter had an emergency asthma hospitalization last week, and now the hospital bill took all my rent money.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Unplanned emergency medical expenses impacting basic stability",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "Rent assistance needed",
+        "original_quote": "I was doing okay until my daughter had an emergency asthma hospitalization last week, and now the hospital bill took all my rent money.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Rent assistance needed",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_003",
+        "category": "food_assistance",
+        "description": "Household is running low on food or groceries",
+        "original_quote": "Our income is $1,200. Rent is $1,200 due on November 1st, and we have no groceries left for the kids.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "immediate",
+        "urgency_reason": "Acute food shortage reported",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95823",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_rent_due_date_001",
+        "field": "rent_due_date",
+        "value": "2026-11-01",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "user-stated date, not an official deadline"
+      },
+      {
+        "fact_id": "fact_household_gross_monthly_income_002",
+        "field": "household_gross_monthly_income",
+        "value": 1200,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      },
+      {
+        "fact_id": "fact_rent_amount_monthly_003",
+        "field": "rent_amount_monthly",
+        "value": 1200,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      }
+    ],
+    "already_asked": [
+      "zip_code",
+      "household_gross_monthly_income"
+    ],
+    "ambiguity_flags": [],
+    "safety_flags": [],
+    "pending_questions": [
+      {
+        "question_id": "q2-1",
+        "fact_key": "household_size",
+        "text": "How many people are currently living in your household, including yourself?",
+        "can_skip": true,
+        "necessity_level": "required_for_decision",
+        "reason": "Household size affects eligibility thresholds for food and assistance programs"
+      }
+    ],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

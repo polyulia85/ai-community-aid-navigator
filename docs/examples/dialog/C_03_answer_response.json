@@ -1,0 +1,180 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_confirmation",
+  "case_id": "case-113e08ab",
+  "case_version": 3,
+  "turn": 2,
+  "limitations": [],
+  "questions": [],
+  "summary": {
+    "narrative": "I was doing okay until my daughter had an emergency asthma hospitalization last week, and now the hospital bill took all my rent money.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "medical_health_coverage",
+        "label": "Health care",
+        "description": "Medical bills or urgent healthcare expenses reported",
+        "urgency": "high",
+        "urgency_reason": "Unplanned emergency medical expenses impacting basic stability",
+        "original_quote": "I was doing okay until my daughter had an emergency asthma hospitalization last week, and now the hospital bill took all my rent money."
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "label": "Housing",
+        "description": "Rent assistance needed",
+        "urgency": "high",
+        "urgency_reason": "Rent assistance needed",
+        "original_quote": "I was doing okay until my daughter had an emergency asthma hospitalization last week, and now the hospital bill took all my rent money."
+      },
+      {
+        "need_id": "need_003",
+        "category": "food_assistance",
+        "label": "Food",
+        "description": "Household is running low on food or groceries",
+        "urgency": "immediate",
+        "urgency_reason": "Acute food shortage reported",
+        "original_quote": "Our income is $1,200. Rent is $1,200 due on November 1st, and we have no groceries left for the kids."
+      }
+    ],
+    "facts": [
+      {
+        "field": "zip_code",
+        "label": "ZIP code",
+        "value": "95823",
+        "display_value": "95823"
+      },
+      {
+        "field": "rent_due_date",
+        "label": "Rent due date",
+        "value": "2026-11-01",
+        "display_value": "Nov 1, 2026"
+      },
+      {
+        "field": "household_gross_monthly_income",
+        "label": "Monthly household income (before taxes)",
+        "value": 1200,
+        "display_value": "$1,200"
+      },
+      {
+        "field": "rent_amount_monthly",
+        "label": "Monthly rent",
+        "value": 1200,
+        "display_value": "$1,200"
+      },
+      {
+        "field": "household_size",
+        "label": "People in your household",
+        "value": 3,
+        "display_value": "3"
+      }
+    ],
+    "unknown": []
+  },
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-113e08ab",
+    "run_id": "run-113e08ab",
+    "correlation_id": "corr-113e08ab",
+    "case_version": 3,
+    "stage": "awaiting_confirmation",
+    "turn": 2,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 8,
+    "narrative_summary": "I was doing okay until my daughter had an emergency asthma hospitalization last week, and now the hospital bill took all my rent money.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "medical_health_coverage",
+        "description": "Medical bills or urgent healthcare expenses reported",
+        "original_quote": "I was doing okay until my daughter had an emergency asthma hospitalization last week, and now the hospital bill took all my rent money.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Unplanned emergency medical expenses impacting basic stability",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "Rent assistance needed",
+        "original_quote": "I was doing okay until my daughter had an emergency asthma hospitalization last week, and now the hospital bill took all my rent money.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Rent assistance needed",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_003",
+        "category": "food_assistance",
+        "description": "Household is running low on food or groceries",
+        "original_quote": "Our income is $1,200. Rent is $1,200 due on November 1st, and we have no groceries left for the kids.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "immediate",
+        "urgency_reason": "Acute food shortage reported",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95823",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_rent_due_date_001",
+        "field": "rent_due_date",
+        "value": "2026-11-01",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "user-stated date, not an official deadline"
+      },
+      {
+        "fact_id": "fact_household_gross_monthly_income_002",
+        "field": "household_gross_monthly_income",
+        "value": 1200,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      },
+      {
+        "fact_id": "fact_rent_amount_monthly_003",
+        "field": "rent_amount_monthly",
+        "value": 1200,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      },
+      {
+        "fact_id": "fact_household_size_001",
+        "field": "household_size",
+        "value": 3,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      }
+    ],
+    "already_asked": [
+      "zip_code",
+      "household_gross_monthly_income",
+      "household_size"
+    ],
+    "ambiguity_flags": [],
+    "safety_flags": [],
+    "pending_questions": [],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

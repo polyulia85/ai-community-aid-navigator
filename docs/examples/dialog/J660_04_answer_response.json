@@ -1,0 +1,187 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_confirmation",
+  "case_id": "case-a5602ee5",
+  "case_version": 4,
+  "turn": 3,
+  "limitations": [],
+  "questions": [],
+  "summary": {
+    "narrative": "I have problems with housing and food. I need help.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "food_assistance",
+        "label": "Food",
+        "description": "Food problem reported",
+        "urgency": "high",
+        "urgency_reason": "Food problem reported",
+        "original_quote": "I have problems with housing and food."
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "label": "Housing",
+        "description": "Housing problem reported",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "original_quote": "I have problems with housing and food."
+      },
+      {
+        "need_id": "need_003",
+        "category": "income_assistance",
+        "label": "Income",
+        "description": "Work hours or pay reduced",
+        "urgency": "high",
+        "urgency_reason": "Work hours reduced",
+        "original_quote": "My hours were cut at work last month and I couldn't pay rent."
+      }
+    ],
+    "facts": [
+      {
+        "field": "triggering_circumstances",
+        "label": "What happened",
+        "value": "reduced_hours",
+        "display_value": "reduced hours"
+      },
+      {
+        "field": "employment_status",
+        "label": "Work situation",
+        "value": "reduced_hours",
+        "display_value": "reduced hours"
+      },
+      {
+        "field": "zip_code",
+        "label": "ZIP code",
+        "value": "95660",
+        "display_value": "95660"
+      },
+      {
+        "field": "household_gross_monthly_income",
+        "label": "Monthly household income (before taxes)",
+        "value": 800,
+        "display_value": "$800"
+      },
+      {
+        "field": "household_size",
+        "label": "People in your household",
+        "value": 3,
+        "display_value": "3"
+      }
+    ],
+    "unknown": []
+  },
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-a5602ee5",
+    "run_id": "run-a5602ee5",
+    "correlation_id": "corr-a5602ee5",
+    "case_version": 4,
+    "stage": "awaiting_confirmation",
+    "turn": 3,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 10,
+    "narrative_summary": "I have problems with housing and food. I need help.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "food_assistance",
+        "description": "Food problem reported",
+        "original_quote": "I have problems with housing and food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Food problem reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "Housing problem reported",
+        "original_quote": "I have problems with housing and food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_003",
+        "category": "income_assistance",
+        "description": "Work hours or pay reduced",
+        "original_quote": "My hours were cut at work last month and I couldn't pay rent.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Work hours reduced",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_triggering_circumstances_001",
+        "field": "triggering_circumstances",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "recent"
+      },
+      {
+        "fact_id": "fact_employment_status_002",
+        "field": "employment_status",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      },
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95660",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_household_gross_monthly_income_001",
+        "field": "household_gross_monthly_income",
+        "value": 800,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      },
+      {
+        "fact_id": "fact_household_size_001",
+        "field": "household_size",
+        "value": 3,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      }
+    ],
+    "already_asked": [
+      "triggering_circumstances",
+      "zip_code",
+      "household_gross_monthly_income",
+      "household_size"
+    ],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "I have problems with housing and food. I need help.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [],
+    "pending_questions": [],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

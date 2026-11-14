@@ -1,0 +1,132 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_clarification",
+  "case_id": "case-e9d55a84",
+  "case_version": 3,
+  "turn": 3,
+  "limitations": [],
+  "questions": [
+    {
+      "question_id": "q3-1",
+      "fact_key": "household_size",
+      "text": "How many people are currently living in your household, including yourself?",
+      "can_skip": true,
+      "necessity_level": "required_for_decision",
+      "reason": "Household size affects eligibility thresholds for food and assistance programs"
+    }
+  ],
+  "summary": null,
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-e9d55a84",
+    "run_id": "run-e9d55a84",
+    "correlation_id": "corr-e9d55a84",
+    "case_version": 3,
+    "stage": "clarifying",
+    "turn": 3,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 8,
+    "narrative_summary": "Hi, I need help with food and rent. I'm having financial problems and I'm worried about how my family will get through next month.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "food_assistance",
+        "description": "Food problem reported",
+        "original_quote": "Hi, I need help with food and rent.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Food problem reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "Rent assistance needed",
+        "original_quote": "Hi, I need help with food and rent.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Rent assistance needed",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_003",
+        "category": "income_assistance",
+        "description": "Work hours or pay reduced",
+        "original_quote": "My company cut my hours from 40 to 15 hours a week starting two weeks ago, so my paycheck dropped drastically.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Work hours reduced",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_triggering_circumstances_001",
+        "field": "triggering_circumstances",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "recent"
+      },
+      {
+        "fact_id": "fact_employment_status_002",
+        "field": "employment_status",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      },
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95823",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_household_gross_monthly_income_001",
+        "field": "household_gross_monthly_income",
+        "value": 900,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      }
+    ],
+    "already_asked": [
+      "triggering_circumstances",
+      "zip_code",
+      "household_gross_monthly_income"
+    ],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "Hi, I need help with food and rent. I'm having financial problems and I'm worried about how my family will get through next month.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [],
+    "pending_questions": [
+      {
+        "question_id": "q3-1",
+        "fact_key": "household_size",
+        "text": "How many people are currently living in your household, including yourself?",
+        "can_skip": true,
+        "necessity_level": "required_for_decision",
+        "reason": "Household size affects eligibility thresholds for food and assistance programs"
+      }
+    ],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_clarification",
+  "case_id": "case-a5602ee5",
+  "case_version": 3,
+  "turn": 3,
+  "limitations": [],
+  "questions": [
+    {
+      "question_id": "q3-1",
+      "fact_key": "household_size",
+      "text": "How many people are currently living in your household, including yourself?",
+      "can_skip": true,
+      "necessity_level": "required_for_decision",
+      "reason": "Household size affects eligibility thresholds for food and assistance programs"
+    }
+  ],
+  "summary": null,
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-a5602ee5",
+    "run_id": "run-a5602ee5",
+    "correlation_id": "corr-a5602ee5",
+    "case_version": 3,
+    "stage": "clarifying",
+    "turn": 3,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 8,
+    "narrative_summary": "I have problems with housing and food. I need help.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "food_assistance",
+        "description": "Food problem reported",
+        "original_quote": "I have problems with housing and food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Food problem reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "Housing problem reported",
+        "original_quote": "I have problems with housing and food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Housing problem reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_003",
+        "category": "income_assistance",
+        "description": "Work hours or pay reduced",
+        "original_quote": "My hours were cut at work last month and I couldn't pay rent.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "high",
+        "urgency_reason": "Work hours reduced",
+        "user_priority": null
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_triggering_circumstances_001",
+        "field": "triggering_circumstances",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "recent"
+      },
+      {
+        "fact_id": "fact_employment_status_002",
+        "field": "employment_status",
+        "value": "reduced_hours",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      },
+      {
+        "fact_id": "fact_zip_code_001",
+        "field": "zip_code",
+        "value": "95660",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      },
+      {
+        "fact_id": "fact_household_gross_monthly_income_001",
+        "field": "household_gross_monthly_income",
+        "value": 800,
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": "current"
+      }
+    ],
+    "already_asked": [
+      "triggering_circumstances",
+      "zip_code",
+      "household_gross_monthly_income"
+    ],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "I have problems with housing and food. I need help.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [],
+    "pending_questions": [
+      {
+        "question_id": "q3-1",
+        "fact_key": "household_size",
+        "text": "How many people are currently living in your household, including yourself?",
+        "can_skip": true,
+        "necessity_level": "required_for_decision",
+        "reason": "Household size affects eligibility thresholds for food and assistance programs"
+      }
+    ],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}

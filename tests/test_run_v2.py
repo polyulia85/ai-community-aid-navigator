@@ -13,7 +13,7 @@ from navigator.supervisor import checks
 from navigator.supervisor import contract as C
 from navigator.supervisor import run as R
 from tests import fake_agents as F
-from tests.fake_agents import FIXTURE_KB
+from tests.fake_agents import FIXTURE_KB, FIXTURE_ZIPS
 
 STORY = "I was laid off. Rent is due November 1. ZIP 95823."
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -21,7 +21,7 @@ ROOT = os.path.dirname(HERE)
 
 
 def run_with(**overrides):
-    return R.Run(dict(F.ALL, **overrides), FIXTURE_KB).execute(STORY)
+    return R.Run(dict(F.ALL, **overrides), FIXTURE_KB, zips_path=FIXTURE_ZIPS).execute(STORY)
 
 
 def codes(items):
@@ -30,13 +30,13 @@ def codes(items):
 
 class TestAgent2Updates(unittest.TestCase):
     def test_need_updates_applied(self):
-        r = R.Run(dict(F.ALL, agent_2=F.agent_2), FIXTURE_KB)
+        r = R.Run(dict(F.ALL, agent_2=F.agent_2), FIXTURE_KB, zips_path=FIXTURE_ZIPS)
         r.execute(STORY)
         urg = {n["need_id"]: n["urgency"] for n in r.state.needs}
         self.assertEqual(urg["need_002"], "immediate")
 
     def test_unknown_need_rejects_agent2_but_run_continues(self):
-        r = R.Run(dict(F.ALL, agent_2=F.agent_2_unknown_need), FIXTURE_KB)
+        r = R.Run(dict(F.ALL, agent_2=F.agent_2_unknown_need), FIXTURE_KB, zips_path=FIXTURE_ZIPS)
         rep = r.execute(STORY)
         self.assertEqual(rep["outcome"], "completed")                      # Agent 2 is a soft step
         a2 = [s for s in rep["steps"] if s["role_id"] == "agent_2"]
@@ -125,7 +125,7 @@ def ref(name):
 class TestProcessIsolation(unittest.TestCase):
     def test_full_cycle_in_processes(self):
         agents = {role: ref(fn.__name__) for role, fn in F.ALL.items()}
-        rep = R.Run(agents, FIXTURE_KB, isolate=True).execute(STORY)
+        rep = R.Run(agents, FIXTURE_KB, isolate=True, zips_path=FIXTURE_ZIPS).execute(STORY)
         self.assertEqual(rep["outcome"], "completed")
 
     def test_timeout_really_stops_the_agent(self):
@@ -133,7 +133,7 @@ class TestProcessIsolation(unittest.TestCase):
         agents["agent_3"] = ref("very_slow_agent")          # sleeps 30 s
         t0 = time.monotonic()
         with mock.patch.object(C, "TIMEOUT_SECONDS", 1):
-            rep = R.Run(agents, FIXTURE_KB, isolate=True).execute(STORY)
+            rep = R.Run(agents, FIXTURE_KB, isolate=True, zips_path=FIXTURE_ZIPS).execute(STORY)
         self.assertLess(time.monotonic() - t0, 20)          # 2 tries x 1 s + process start, not 2 x 30 s
         self.assertEqual(rep["outcome"], "stopped_at_agent_3")
         self.assertIn("TIMEOUT", {i["code"] for s in rep["steps"] for i in s["issues"]})
@@ -142,7 +142,7 @@ class TestProcessIsolation(unittest.TestCase):
     def test_crash_in_process_is_reported(self):
         agents = {role: ref(fn.__name__) for role, fn in F.ALL.items()}
         agents["agent_4"] = ref("crashing_agent")
-        rep = R.Run(agents, FIXTURE_KB, isolate=True).execute(STORY)
+        rep = R.Run(agents, FIXTURE_KB, isolate=True, zips_path=FIXTURE_ZIPS).execute(STORY)
         self.assertEqual(rep["outcome"], "stopped_at_agent_4")
         msgs = [i["message"] for s in rep["steps"] for i in s["issues"] if i["code"] == "AGENT_EXCEPTION"]
         self.assertTrue(msgs and "ValueError" in msgs[0])
@@ -224,7 +224,7 @@ class TestFix5FakeAgentsPassS1(unittest.TestCase):
         return wrapper
 
     def _run(self, agents):
-        return R.Run(agents, FIXTURE_KB,
+        return R.Run(agents, FIXTURE_KB, zips_path=FIXTURE_ZIPS,
                      ref_date=datetime.date(2026, 11, 15)).execute(STORY)
 
     def test_all_listed_fake_agents_pass(self):
@@ -324,6 +324,51 @@ class TestFix5FakeAgentsPassS1(unittest.TestCase):
                 schema_invalid = [i for i in issues if i["code"] == "SCHEMA_INVALID"]
                 self.assertEqual(schema_invalid, [],
                                  f"{name} produced SCHEMA_INVALID: {schema_invalid}")
+
+
+class TestDialog1AmbiguityFlags(unittest.TestCase):
+    """DIALOG 1: ambiguity_flags forwarded from Agent 1 to Agent 2."""
+
+    def test_flags_given_payload_has_them(self):
+        """(a) flags given -> Agent 2 payload has them unchanged."""
+        from navigator.supervisor import builders as B
+        flag = {"field": "triggering_circumstances", "quote": "hard times", "note": "unspecified_hardship_cause"}
+        st = B.CaseState("c1", "r1", "x1")
+        req = B.agent2_request(st, ambiguity_flags=[flag])
+        self.assertEqual(req["payload"]["ambiguity_flags"], [flag])
+
+    def test_empty_list_no_key(self):
+        """(b) empty list -> no ambiguity_flags key in payload."""
+        from navigator.supervisor import builders as B
+        st = B.CaseState("c2", "r2", "x2")
+        req = B.agent2_request(st, ambiguity_flags=[])
+        self.assertNotIn("ambiguity_flags", req["payload"])
+
+    def test_none_no_key(self):
+        """(b) None -> no ambiguity_flags key in payload."""
+        from navigator.supervisor import builders as B
+        st = B.CaseState("c3", "r3", "x3")
+        req = B.agent2_request(st, ambiguity_flags=None)
+        self.assertNotIn("ambiguity_flags", req["payload"])
+
+    def test_execute_passes_flags_from_agent1(self):
+        """(c) fake Agent 1 returns one flag -> Agent 2 request carries it in execute()."""
+        flag = {"field": "triggering_circumstances", "quote": "I was laid off.", "note": "unspecified_hardship_cause"}
+        received = {}
+
+        def agent_1_with_flag(req):
+            r = F.agent_1(req)
+            r["result"]["ambiguity_flags"] = [flag]
+            return r
+
+        def spy2(req):
+            received["payload"] = req["payload"]
+            return F.agent_2(req)
+
+        R.Run(dict(F.ALL, agent_1=agent_1_with_flag, agent_2=spy2), FIXTURE_KB,
+              zips_path=FIXTURE_ZIPS).execute(STORY)
+        self.assertIn("ambiguity_flags", received["payload"])
+        self.assertEqual(received["payload"]["ambiguity_flags"], [flag])
 
 
 if __name__ == "__main__":

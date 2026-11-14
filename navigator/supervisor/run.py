@@ -3,7 +3,7 @@
 Usage (from the repo root):
     python -m navigator.supervisor.run --agents agents.json
     python -m navigator.supervisor.run --agents agents.json --demo-broken      # Supervisor rejects sample 03
-Options: --kb PATH  --story-file PATH  --correct field=value  --out run_report.json  --no-isolate
+Options: --kb PATH  --zips PATH  --story-file PATH  --correct field=value  --out run_report.json  --no-isolate
 """
 import argparse
 import concurrent.futures
@@ -240,21 +240,25 @@ _INPUT_EXC = (KeyError, TypeError, ValueError, AttributeError, IndexError)
 
 # ---------------------------------------------------------------- one checked call
 class Run:
-    def __init__(self, agents, kb_path, ids=None, isolate=False, ref_date=None):
+    def __init__(self, agents, kb_path, ids=None, isolate=False, ref_date=None, zips_path=None):
         """agents: role -> AgentRef (from agents.json) or a plain function (tests).
 
         isolate=True runs every AgentRef in its own process (a timeout really stops it).
         ref_date: a datetime.date used as the reference date for Agents 1, 6, 8 and 10.  Defaults
         to today's date at the moment the run starts.
+        zips_path: path to the ZIP -> county JSON file (None -> DEFAULT_ZIPS from builders.py).
         """
         self.agents = agents
         self.isolate = isolate
         self.programs, self.evidence = B.load_kb(kb_path)
+        # Load ZIP -> county list; keep any load issues with supervisor issues
+        zips_path = zips_path if zips_path is not None else B.DEFAULT_ZIPS
+        self.zip_to_county, zip_issues = B.load_zip_county(zips_path)
         rid = uuid.uuid4().hex[:8]
         case_id, run_id, corr_id = ids or (f"case-{rid}", f"run-{rid}", f"corr-{rid}")
         self.state = B.CaseState(case_id, run_id, corr_id)
         self.steps = []        # run report rows
-        self.supervisor_issues = []
+        self.supervisor_issues = list(zip_issues)
         self.agent7_findings = []
         self._loaded = {}
         self._last_r10 = None        # last accepted Agent 10 result (FIX 6)
@@ -361,8 +365,9 @@ class Run:
         B.confirm_agent1(st, r1, corrections)            # user confirms the summary (simulated here)
 
         self._stage = "agent_2"
+        ambiguity_flags = r1["result"].get("ambiguity_flags") or []
         if "agent_2" in self.agents:                     # soft step: it improves data, nothing depends on it
-            r2 = self.call(B.agent2_request(st))
+            r2 = self.call(B.agent2_request(st, ambiguity_flags=ambiguity_flags))
             if r2:
                 self.supervisor_issues += B.apply_need_updates(st, r2)
                 if r2.get("clarification_requests"):
@@ -370,8 +375,13 @@ class Run:
                         "CLARIFICATION_PENDING", "info",
                         f"{len(r2['clarification_requests'])} question(s) for the user; demo continues without an answer"))
 
+        return self._plan_body()
+
+    def _plan_body(self):
+        """Agents 3-10 and repair rounds. Called from _execute_body and from dialog.confirm."""
+        st = self.state
         self._stage = "agent_3"
-        q3, geo_issues = B.agent3_request(st)
+        q3, geo_issues = B.agent3_request(st, self.zip_to_county)
         self.supervisor_issues += geo_issues
         r3 = self.call(q3)
         if r3 is None:
@@ -540,6 +550,8 @@ def main(argv=None):
                     help="run agents inside this process (faster; a timed-out agent keeps running)")
     ap.add_argument("--ref-date", metavar="YYYY-MM-DD",
                     help="reference date for Agents 1, 6, 8 and 10 (ISO format); defaults to today")
+    ap.add_argument("--zips", default=None, metavar="PATH",
+                    help="ZIP -> county JSON file (default: navigator/kb/sacramento_county_zips.json)")
     ap.add_argument("--out", default="run_report.json")
     a = ap.parse_args(argv)
 
@@ -572,7 +584,8 @@ def main(argv=None):
 
     # Demo uses the IDs of sample 01, so only the two planted faults of sample 03 show
     ids = ("case-demo-001", "run-0001", "corr-0001") if a.demo_broken else None
-    rep = Run(agents, a.kb, ids, isolate=not a.no_isolate, ref_date=ref_date).execute(story, corrections)
+    rep = Run(agents, a.kb, ids, isolate=not a.no_isolate, ref_date=ref_date,
+              zips_path=a.zips).execute(story, corrections)
     with open(a.out, "w", encoding="utf-8") as f:
         json.dump(rep, f, indent=2, ensure_ascii=False)
     print_summary(rep)

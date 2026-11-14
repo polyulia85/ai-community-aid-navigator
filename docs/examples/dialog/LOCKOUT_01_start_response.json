@@ -1,0 +1,94 @@
+{
+  "dialog_version": "0.2",
+  "status": "needs_clarification",
+  "case_id": "case-9be83948",
+  "case_version": 1,
+  "turn": 1,
+  "limitations": [],
+  "questions": [
+    {
+      "question_id": "q1-1",
+      "fact_key": "triggering_circumstances",
+      "text": "I'm sorry your family is going through a difficult time. Could you tell me a little more about what happened that led to these financial difficulties?",
+      "can_skip": true,
+      "necessity_level": "helpful",
+      "reason": "Understanding what caused the hardship determines applicable crisis and emergency programs"
+    }
+  ],
+  "summary": null,
+  "plan": null,
+  "plan_by_need": null,
+  "final_validation": null,
+  "rejected_needs": [],
+  "safety_notice": null,
+  "user_message": null,
+  "issues": [],
+  "case": {
+    "case_id": "case-9be83948",
+    "run_id": "run-9be83948",
+    "correlation_id": "corr-9be83948",
+    "case_version": 1,
+    "stage": "clarifying",
+    "turn": 1,
+    "ref_date": "2026-11-14",
+    "next_request_seq": 3,
+    "narrative_summary": "My landlord changed the locks yesterday and locked us out of our apartment. We have nowhere to stay and no food.",
+    "needs": [
+      {
+        "need_id": "need_001",
+        "category": "food_assistance",
+        "description": "Household is running low on food or groceries",
+        "original_quote": "We have nowhere to stay and no food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "immediate",
+        "urgency_reason": "Acute food shortage reported",
+        "user_priority": null
+      },
+      {
+        "need_id": "need_002",
+        "category": "housing_assistance",
+        "description": "No stable overnight shelter",
+        "original_quote": "We have nowhere to stay and no food.",
+        "user_reported": true,
+        "confirmation_status": "proposed",
+        "urgency": "immediate",
+        "urgency_reason": "Lack of stable overnight shelter reported",
+        "user_priority": null,
+        "subcategory": "emergency_shelter"
+      }
+    ],
+    "case_facts": [
+      {
+        "fact_id": "fact_eviction_notice_type_001",
+        "field": "eviction_notice_type",
+        "value": "lockout",
+        "confirmation_status": "proposed",
+        "source": "user_statement",
+        "time_context": null
+      }
+    ],
+    "already_asked": [],
+    "ambiguity_flags": [
+      {
+        "field": "triggering_circumstances",
+        "quote": "My landlord changed the locks yesterday and locked us out of our apartment. We have nowhere to stay and no food.",
+        "note": "unspecified_hardship_cause"
+      }
+    ],
+    "safety_flags": [],
+    "pending_questions": [
+      {
+        "question_id": "q1-1",
+        "fact_key": "triggering_circumstances",
+        "text": "I'm sorry your family is going through a difficult time. Could you tell me a little more about what happened that led to these financial difficulties?",
+        "can_skip": true,
+        "necessity_level": "helpful",
+        "reason": "Understanding what caused the hardship determines applicable crisis and emergency programs"
+      }
+    ],
+    "limitations": [],
+    "skipped_keys": [],
+    "unread_keys": []
+  }
+}
