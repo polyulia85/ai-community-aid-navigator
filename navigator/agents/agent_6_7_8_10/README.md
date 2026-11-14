@@ -1,4 +1,4 @@
-# Agents 6, 7, 8, 10: Action Plan and Validation (mock component v0.15)
+# Agents 6, 7, 8, 10: Action Plan and Validation (mock component v0.16)
 Owner: Hisham | Contracts: SHARED_CONTRACTS_v1.1 + Slav's Agent 7/10 notes | Status: local mock, not yet IBM integrated
 
 ## What it does
@@ -101,7 +101,7 @@ Each appended item is followed by `"(checked Mon D)."` using the portable date h
 | --- | --- | --- |
 | **1** Date in eviction_notice_type not surfaced | When Agent 2 records `eviction_notice_type` as free text including a date (e.g. "Writ of possession, sheriff lockout Nov 11"), that date was ignored. | New `_parse_date_from_text(text, ref_date_str)` helper extracts the first date token (month-name + day, M/D, or ISO). If the date falls before `ref_date` it advances by one year. When a housing-category action has no other `user_date`, the parsed date is set as `user_target_date` (never `official_deadline`). The rationale appends "The date you gave is …" once. The action is added to `_action_rent_date` so the date is excluded from the cross-need sort key (cannot reorder housing before food). |
 
-## PR #14 fixes (v0.15 — Slav Nov 12)
+## PR #14 fixes (v0.16 — Slav Nov 12)
 
 | # | Root cause | Fix |
 | --- | --- | --- |
@@ -127,7 +127,7 @@ Each appended item is followed by `"(checked Mon D)."` using the portable date h
 1. `python3 tests/agent_6_7_8_10/run_tests.py`
 2. Expected last line: `69 of 69 checks passed`
 3. `python3 -I -m unittest discover -s tests -t .`
-4. Expected: all tests pass (357 as of v0.15)
+4. Expected: all tests pass (364 as of v0.16)
 
 Tested on macOS, Python 3.14.3.  Standard Python 3 only — no extra packages.
 

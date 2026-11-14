@@ -162,29 +162,34 @@ def _extract_hours(text):
     return str(text)[m.start():].strip()
 
 
-# Street address pattern: a number followed by a street name component, or starts with "(" location name
+# Street address pattern: a number followed by a street name component, or "Location:" prefix.
 _STREET_ADDR_RE = re.compile(
-    r"^\s*\(?.{0,60}\)\s*\d+\s+\w|"       # "(Location Name) 123 Street"
-    r"^\s*\d+\s+\w.{0,30}\b(st|ave|blvd|dr|rd|way|lane|ln|court|ct|street|avenue|boulevard|drive|road)\b|"
-    r"\b(p\.?o\.?\s*box|po box)\b",
+    r"^\s*Location\s*:"                    # "Location: 3213 Orange Grove Ave."
+    r"|^\s*\(?.{0,60}\)\s*\d+\s+\w"       # "(Location Name) 123 Street"
+    r"|^\s*\d+\s+\w.{0,30}\b(st|ave|blvd|dr|rd|way|lane|ln|court|ct|street|avenue|boulevard|drive|road)\b"
+    r"|\b(p\.?o\.?\s*box|po box)\b",
     re.I)
 
-# Hours-only pattern: value is ONLY an opening-hours expression (no phone, URL, or action verbs).
-# Must start with a day name or day abbreviation (Mon, Tue, Monday, Tue-Fri, etc.),
-# and must NOT contain action verbs like "call", "press", "contact", "visit".
+# Hours/schedule pattern: value describes a schedule or opening hours.
+# Covers:
+#   - "Tuesday & Thursday: 10:30am - 1:30pm"  (starts with day name)
+#   - "Food Pantry Schedule: Tuesday, Wednesday, Thursday 9AM - 1PM"  (contains "Schedule:")
+#   - "Food for Seniors: 60 years old +, 4th Monday & Thursday, 9AM - 1PM"  (contains schedule keywords)
 _HOURS_ONLY_RE = re.compile(
     r"^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)"
-    r"[\w&, /\-:\.]*\d{1,2}(:\d{2})?\s*(am|pm|a\.m\.|p\.m\.)",
+    r"[\w&, /\-:\.]*\d{1,2}(:\d{2})?\s*(am|pm|a\.m\.|p\.m\.)"
+    r"|Schedule\s*:"
+    r"|\b\d+(st|nd|rd|th)\s+(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)",
     re.I)
 _HOURS_ACTION_VERBS_RE = re.compile(r"\b(call|press|contact|visit|apply|text)\b", re.I)
 
 
 def _contact_label(fp, raw_val):
-    """Return the correct label for a contacts[] item (Fix 4).
+    """Return the correct label for a contacts[] item.
 
     - application_method* → "How to apply" (unchanged)
-    - contact* containing a street address → "Address"
-    - contact* containing only opening-hours text → "Hours"
+    - contact* containing a street address or "Location:" prefix → "Address"
+    - contact* describing a schedule or opening hours → "Hours"
     - everything else → "Contact"
     """
     if fp.startswith("application_method"):
@@ -192,7 +197,7 @@ def _contact_label(fp, raw_val):
     v = str(raw_val).strip()
     if _STREET_ADDR_RE.search(v):
         return "Address"
-    if (_HOURS_ONLY_RE.match(v)
+    if (_HOURS_ONLY_RE.search(v)
             and not re.search(r"\(?\d{3}\)?[\s.\-]\d{3}[\s.\-]\d{4}", v)
             and not _HOURS_ACTION_VERBS_RE.search(v)):
         return "Hours"
@@ -1013,10 +1018,14 @@ def _extract_closure_reason(raw):
     return None
 
 
-def _closure_rows_for_card(claims, program_id, ref_date_str):
-    """Return uncertainty_note strings for availability rows that mention a date (Fix 3).
+def _closure_rows_for_card(evidence_records, program_id, ref_date_str):
+    """Return uncertainty_note strings for availability evidence rows that mention a date.
 
-    For each checked_claim with field_path "availability" for program_id:
+    Reads from evidence_records (not checked_claims): Agent 5 merges a program's
+    availability into one merged checked_claims item, so the individual dated rows
+    only survive in the evidence_records list.  Each EvidenceRecord with
+    field_path "availability" is treated as one candidate row.
+
     - Skip if verification_status not in ("verified", "conflicting").
     - Parse dates from claim_value (or effective_date). Use year from text, else ref_date's year.
     - Skip rows whose date range ended before ref_date (past).
@@ -1024,7 +1033,7 @@ def _closure_rows_for_card(claims, program_id, ref_date_str):
     - Build a note per row:
         verified: "Closed Nov 25-27 (Thanksgiving holiday) (checked Nov 12)."
                   "Closed Dec 24 - Jan 1 (holiday closure) (checked Nov 12)."
-                  "Extra holiday distribution: Tue Nov 24, 10:30am - 1:30pm (checked Nov 12)."
+                  "Extra holiday distribution: Sat Nov 21, 10:30am - 1:30pm (checked Nov 12)."
         conflicting: "Sources differ on whether this site is open on Nov 20. Call before you go."
 
     Returns a list of strings (one per row).
@@ -1039,7 +1048,7 @@ def _closure_rows_for_card(claims, program_id, ref_date_str):
     from datetime import date as _date
 
     notes = []
-    for c in claims:
+    for c in evidence_records:
         if c.get("program_id") != program_id:
             continue
         if not str(c.get("field_path", "")).startswith("availability"):
@@ -1240,14 +1249,16 @@ def agent_8(request):
         result = {"plan_version": str(p.get("plan_version", "plan_v1")), "action_cards": cards,
                   "potential_options": [], "coverage_gaps": [], "repaired_card_ids": sorted(flagged)}
         return _envelope(request, "completed", result, evidence_refs=sorted({r for c in cards for r in c["source_refs"]}))
-    # Fix 3: add pantry closure notes to each card after all cards are assembled.
-    claims_all = p.get("checked_claims", [])
+    # Fix 3: add pantry closure notes from evidence_records (not checked_claims).
+    # Agent 5 merges all availability rows into one merged checked_claims item;
+    # the individual dated rows survive only in evidence_records.
+    ev_records_all = p.get("evidence_records") or []
     if ref_date_str:
         for c in cards:
             pid = c.get("program_id")
             if not pid:
                 continue
-            closure_notes = _closure_rows_for_card(claims_all, pid, ref_date_str)
+            closure_notes = _closure_rows_for_card(ev_records_all, pid, ref_date_str)
             if closure_notes:
                 existing = list(c.get("uncertainty_notes") or [])
                 existing.extend(n for n in closure_notes if n not in existing)

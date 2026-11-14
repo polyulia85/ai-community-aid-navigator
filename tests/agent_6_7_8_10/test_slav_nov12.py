@@ -198,44 +198,85 @@ _POLICE_DIR_FIXTURE = {
 }
 
 # ---------------------------------------------------------------------------
-# River City closure claims fixture (mimics KB evidence rows)
+# River City Arden evidence_records fixture (the 6 availability rows from KB).
+# _closure_rows_for_card now reads from evidence_records, not checked_claims.
+# A single merged checked_claims item is provided to simulate Agent 5 output.
 # ---------------------------------------------------------------------------
 
-_RCFB_PROG = "prog_food_rivercity_midtown_sac_001"
-_RCFB_CLAIMS = [
+_RCFB_ARDEN_PROG = "prog_food_rivercity_arden_sac_001"
+
+# The single merged checked_claims item that Agent 5 produces (conflicting, no date).
+_RCFB_ARDEN_MERGED_CLAIM = {
+    "program_id": _RCFB_ARDEN_PROG,
+    "field_path": "availability",
+    "claim_value": None,          # merged — no useful text
+    "verification_status": "conflicting",
+    "evidence_refs": ["ev_rcfbar_012", "ev_rcfbar_013", "ev_rcfbar_014",
+                      "ev_rcfbar_015", "ev_rcfbar_016", "ev_rcfbar_017"],
+    "checked_at": "2026-11-12T10:30:00-08:00",
+    "issue": None,
+}
+
+# The 6 individual EvidenceRecord rows (copied from KB).
+_RCFB_ARDEN_EV_RECORDS = [
     # General availability — no date, should be skipped.
-    {"program_id": _RCFB_PROG, "field_path": "availability",
-     "claim_value": "Open four days a week.", "verification_status": "verified",
-     "evidence_refs": ["ev_rcfbmt_012"], "checked_at": "2026-11-12T10:30:00-08:00",
-     "effective_date": None, "issue": None},
+    {"evidence_id": "ev_rcfbar_012", "program_id": _RCFB_ARDEN_PROG,
+     "field_path": "availability",
+     "claim_value": "These sites are open four days a week to provide healthy, nutritious food.",
+     "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+     "checked_at": "2026-11-12T10:30:00-08:00",
+     "verification_status": "verified", "source_title": "RCFB",
+     "source_authority_scope": "local_provider_operating_intake",
+     "effective_date": None, "notes": None},
     # Nov 11 — past, skip.
-    {"program_id": _RCFB_PROG, "field_path": "availability",
-     "claim_value": "November 11 - Veterans Day (closed)", "verification_status": "verified",
-     "evidence_refs": ["ev_rcfbmt_013"], "checked_at": "2026-11-12T10:30:00-08:00",
-     "effective_date": "2026-11-11", "issue": None},
+    {"evidence_id": "ev_rcfbar_013", "program_id": _RCFB_ARDEN_PROG,
+     "field_path": "availability",
+     "claim_value": "November 11 - Veterans Day (closed)",
+     "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+     "checked_at": "2026-11-12T10:30:00-08:00",
+     "verification_status": "verified", "source_title": "RCFB",
+     "source_authority_scope": "local_provider_operating_intake",
+     "effective_date": "2026-11-11", "notes": None},
     # Nov 20 — conflicting.
-    {"program_id": _RCFB_PROG, "field_path": "availability",
-     "claim_value": "November 20 - Closed", "verification_status": "conflicting",
-     "evidence_refs": ["ev_rcfbmt_014"], "checked_at": "2026-11-12T10:30:00-08:00",
-     "effective_date": "2026-11-20", "issue": None},
+    {"evidence_id": "ev_rcfbar_014", "program_id": _RCFB_ARDEN_PROG,
+     "field_path": "availability",
+     "claim_value": "November 20 - Closed",
+     "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+     "checked_at": "2026-11-12T10:30:00-08:00",
+     "verification_status": "conflicting", "source_title": "RCFB",
+     "source_authority_scope": "local_provider_operating_intake",
+     "effective_date": "2026-11-20", "notes": None},
     # Nov 25-27 — Thanksgiving closure.
-    {"program_id": _RCFB_PROG, "field_path": "availability",
-     "claim_value": "November 25-27 - Thanksgiving Holiday (closed)", "verification_status": "verified",
-     "evidence_refs": ["ev_rcfbmt_015"], "checked_at": "2026-11-12T10:30:00-08:00",
-     "effective_date": "2026-11-25", "issue": None},
+    {"evidence_id": "ev_rcfbar_015", "program_id": _RCFB_ARDEN_PROG,
+     "field_path": "availability",
+     "claim_value": "November 25-27 - Thanksgiving Holiday (closed)",
+     "source_url": "https://rivercityfoodbank.org/emergency-food-distribution/",
+     "checked_at": "2026-11-12T10:30:00-08:00",
+     "verification_status": "verified", "source_title": "RCFB",
+     "source_authority_scope": "local_provider_operating_intake",
+     "effective_date": "2026-11-25", "notes": None},
     # Dec 24 - Jan 1, 2027.
-    {"program_id": _RCFB_PROG, "field_path": "availability",
+    {"evidence_id": "ev_rcfbar_016", "program_id": _RCFB_ARDEN_PROG,
+     "field_path": "availability",
      "claim_value": "Thursday, December 24 through Friday, January 1, 2027 (holiday closure)",
-     "verification_status": "verified",
-     "evidence_refs": ["ev_rcfbmt_016"], "checked_at": "2026-11-12T10:26:00-08:00",
-     "effective_date": "2026-12-24", "issue": None},
-    # Nov 24 extra distribution.
-    {"program_id": _RCFB_PROG, "field_path": "availability",
-     "claim_value": "Holiday distribution: Tuesday, November 24, 2026, 10:30am - 1:30pm, Midtown Distribution",
-     "verification_status": "verified",
-     "evidence_refs": ["ev_rcfbmt_017"], "checked_at": "2026-11-12T10:26:00-08:00",
-     "effective_date": "2026-11-24", "issue": None},
+     "source_url": "https://rivercityfoodbank.org/thanksgivingfood2026/",
+     "checked_at": "2026-11-12T10:26:00-08:00",
+     "verification_status": "verified", "source_title": "RCFB Holiday",
+     "source_authority_scope": "local_provider_operating_intake",
+     "effective_date": "2026-12-24", "notes": None},
+    # Nov 21 (Sat) extra distribution — Arden site.
+    {"evidence_id": "ev_rcfbar_017", "program_id": _RCFB_ARDEN_PROG,
+     "field_path": "availability",
+     "claim_value": "Holiday distribution: Saturday, November 21, 2026, 10:30am - 1:30pm, Arden Distribution",
+     "source_url": "https://rivercityfoodbank.org/thanksgivingfood2026/",
+     "checked_at": "2026-11-12T10:26:00-08:00",
+     "verification_status": "verified", "source_title": "RCFB Holiday",
+     "source_authority_scope": "local_provider_operating_intake",
+     "effective_date": "2026-11-21", "notes": None},
 ]
+
+# Keep old midtown name for backward compat in a couple of old tests (now unused by _get_notes).
+_RCFB_PROG = _RCFB_ARDEN_PROG
 
 
 # ---------------------------------------------------------------------------
@@ -473,10 +514,30 @@ class TestLockoutDetection(unittest.TestCase):
         needs = [_need("need_h", "housing_assistance", "housing_legal_aid")]
         matches = [_match("PROG-LEGAL", ["need_h"], subcategory="housing_legal_aid")]
         actions = [_action("act_01", "need_h", "PROG-LEGAL")]
-        # No lockout fact, no lockout keywords in needs
         result = self._lockout_plan(needs, matches, actions)
         card = result["result"]["action_cards"][0]
         self.assertNotIn("locked out", card["next_step"].lower())
+
+    def test_lockout_from_allowed_case_facts_only(self):
+        """Lockout detected from allowed_case_facts only; need text says 'nowhere to stay tonight'
+        (a displaced-now keyword, not a lockout keyword) — still fires via the fact."""
+        needs = [_need("need_h", "housing_assistance", "housing_legal_aid",
+                       description="nowhere to stay tonight")]
+        matches = [_match("PROG-LEGAL", ["need_h"], subcategory="housing_legal_aid")]
+        actions = [_action("act_01", "need_h", "PROG-LEGAL")]
+        # Lockout comes only from allowed_case_facts (eviction_notice_type = "lockout")
+        facts = [{"fact_id": "f1", "field": "eviction_notice_type",
+                  "value": "lockout", "confirmation_status": "confirmed",
+                  "source": "user_statement", "time_context": None}]
+        result = self._lockout_plan(needs, matches, actions, allowed_case_facts=facts)
+        card = result["result"]["action_cards"][0]
+        self.assertIn("locked out", card["next_step"].lower(),
+                      "Police sentence must appear: lockout detected from allowed_case_facts")
+        # Verify it was NOT triggered by the need text alone — repeat without the fact
+        result_no_fact = self._lockout_plan(needs, matches, actions)
+        card_no_fact = result_no_fact["result"]["action_cards"][0]
+        self.assertNotIn("locked out", card_no_fact["next_step"].lower(),
+                         "'nowhere to stay tonight' alone must NOT trigger lockout")
 
 
 # ===========================================================================
@@ -485,20 +546,21 @@ class TestLockoutDetection(unittest.TestCase):
 
 class TestPantryClosures(unittest.TestCase):
     """
-    Root cause: availability evidence rows with dates are never surfaced to the user.
-    Fix: for each card, read verified/conflicting checked_claims with field_path
-    'availability' that contain a date; skip past rows; add one uncertainty_note per row.
+    Fix: for each card, read individual EvidenceRecord rows with field_path "availability"
+    that contain a date.  Agent 5 merges them into one merged checked_claims item so the
+    dated rows only survive in evidence_records.
     """
 
-    def _get_notes(self, claims=None):
+    def _get_notes(self, ev_records=None):
         return _closure_rows_for_card(
-            claims or _RCFB_CLAIMS, _RCFB_PROG, REF_DATE)
+            ev_records if ev_records is not None else _RCFB_ARDEN_EV_RECORDS,
+            _RCFB_ARDEN_PROG, REF_DATE)
 
     def test_nov25_27_closure_shown(self):
         notes = self._get_notes()
         matching = [n for n in notes if "Nov 25" in n and "27" in n]
         self.assertTrue(matching, f"Nov 25-27 closure must be in notes; got: {notes}")
-        self.assertIn("thanksgiving", matching[0].lower())  # reason preserved (case-insensitive)
+        self.assertIn("thanksgiving", matching[0].lower())
         self.assertIn("checked Nov 12", matching[0])
 
     def test_dec24_jan1_closure_shown(self):
@@ -522,34 +584,58 @@ class TestPantryClosures(unittest.TestCase):
         self.assertIn("Sources differ", matching[0])
         self.assertIn("Call before you go", matching[0])
 
-    def test_nov24_extra_distribution(self):
-        """Nov 24 extra distribution → 'Extra holiday distribution: Tue Nov 24 ...'"""
+    def test_nov21_extra_distribution_arden(self):
+        """Arden Nov 21 (Sat) extra distribution → 'Extra holiday distribution: Sat Nov 21 ...'"""
         notes = self._get_notes()
-        matching = [n for n in notes if "Nov 24" in n]
-        self.assertTrue(matching, f"Nov 24 distribution must appear; got: {notes}")
+        matching = [n for n in notes if "Nov 21" in n]
+        self.assertTrue(matching, f"Nov 21 distribution must appear; got: {notes}")
         self.assertIn("Extra holiday distribution", matching[0])
+        self.assertIn("Sat", matching[0])
         self.assertIn("10:30am", matching[0])
         self.assertIn("checked Nov 12", matching[0])
 
     def test_no_date_row_skipped(self):
-        """'Open four days a week' has no date → skipped."""
-        no_date_claim = {
-            "program_id": _RCFB_PROG, "field_path": "availability",
-            "claim_value": "Open four days a week.", "verification_status": "verified",
-            "evidence_refs": [], "checked_at": "2026-11-12T10:30:00-08:00",
-            "effective_date": None, "issue": None,
+        """EvidenceRecord with no date → skipped."""
+        no_date_ev = {
+            "evidence_id": "ev_x", "program_id": _RCFB_ARDEN_PROG,
+            "field_path": "availability",
+            "claim_value": "Open four days a week.",
+            "source_url": "https://example.org", "checked_at": "2026-11-12T10:30:00-08:00",
+            "verification_status": "verified", "source_title": "x",
+            "source_authority_scope": "local_provider_operating_intake",
+            "effective_date": None, "notes": None,
         }
-        notes = _closure_rows_for_card([no_date_claim], _RCFB_PROG, REF_DATE)
+        notes = _closure_rows_for_card([no_date_ev], _RCFB_ARDEN_PROG, REF_DATE)
         self.assertEqual(notes, [], f"Row with no date must be skipped; got: {notes}")
 
+    def test_merged_claim_in_checked_claims_does_not_produce_notes(self):
+        """When only the merged claim (no dated rows) is in checked_claims, closure notes
+        come from evidence_records; passing only the merged claim as evidence_records
+        (it has no parseable date) must yield no notes."""
+        # Feed the merged claim as the only "evidence record" — it has no date.
+        no_date_ev = {
+            "evidence_id": "ev_merged", "program_id": _RCFB_ARDEN_PROG,
+            "field_path": "availability",
+            "claim_value": None,
+            "source_url": "https://example.org", "checked_at": "2026-11-12T10:30:00-08:00",
+            "verification_status": "conflicting", "source_title": "x",
+            "source_authority_scope": "local_provider_operating_intake",
+            "effective_date": None, "notes": None,
+        }
+        notes = _closure_rows_for_card([no_date_ev], _RCFB_ARDEN_PROG, REF_DATE)
+        self.assertEqual(notes, [], "Merged claim with no date must produce no notes")
+
     def test_closure_notes_in_card_via_agent8(self):
-        """Full Agent 8 integration: closure notes appear in card's uncertainty_notes."""
+        """Full Agent 8 integration: evidence_records drives closure notes (not checked_claims).
+        checked_claims holds only the merged item; evidence_records holds the 6 Arden rows."""
         needs = [_need("need_f", "food_assistance", "food_pantry")]
-        matches = [_match(_RCFB_PROG, ["need_f"], subcategory="food_pantry",
+        matches = [_match(_RCFB_ARDEN_PROG, ["need_f"], subcategory="food_pantry",
                            organization="River City Food Bank",
-                           program_name="Emergency Food Distribution (Midtown)")]
-        actions = [_action("act_01", "need_f", _RCFB_PROG)]
-        result = _build_plan(needs, matches, actions, checked_claims=_RCFB_CLAIMS)
+                           program_name="Emergency Food Distribution (Arden-Arcade)")]
+        actions = [_action("act_01", "need_f", _RCFB_ARDEN_PROG)]
+        result = _build_plan(needs, matches, actions,
+                             checked_claims=[_RCFB_ARDEN_MERGED_CLAIM],
+                             evidence_records=_RCFB_ARDEN_EV_RECORDS)
         cards = result["result"]["action_cards"]
         self.assertEqual(len(cards), 1)
         notes = cards[0]["uncertainty_notes"]
@@ -557,19 +643,19 @@ class TestPantryClosures(unittest.TestCase):
         self.assertTrue(any("Dec 24" in n for n in notes), f"Dec 24 closure missing; notes={notes}")
         self.assertFalse(any("Nov 11" in n for n in notes), f"Nov 11 must be skipped; notes={notes}")
         self.assertTrue(any("Sources differ" in n for n in notes), f"Nov 20 conflict missing; notes={notes}")
-        self.assertTrue(any("Nov 24" in n for n in notes), f"Nov 24 distribution missing; notes={notes}")
+        self.assertTrue(any("Nov 21" in n for n in notes), f"Nov 21 distribution missing; notes={notes}")
 
     def test_next_step_unchanged_by_closure_notes(self):
         """Closure notes must NOT modify next_step."""
         needs = [_need("need_f", "food_assistance", "food_pantry")]
-        matches = [_match(_RCFB_PROG, ["need_f"], subcategory="food_pantry")]
-        actions = [_action("act_01", "need_f", _RCFB_PROG)]
-        result = _build_plan(needs, matches, actions, checked_claims=_RCFB_CLAIMS)
+        matches = [_match(_RCFB_ARDEN_PROG, ["need_f"], subcategory="food_pantry")]
+        actions = [_action("act_01", "need_f", _RCFB_ARDEN_PROG)]
+        result = _build_plan(needs, matches, actions,
+                             checked_claims=[_RCFB_ARDEN_MERGED_CLAIM],
+                             evidence_records=_RCFB_ARDEN_EV_RECORDS)
         card = result["result"]["action_cards"][0]
-        # next_step must still contain the food_pantry template phrase (not contain closure language)
         self.assertIn("hours", card["next_step"].lower(),
-                      "next_step must keep the original template text (food_pantry: 'Check the posted hours…')")
-        # Closure and conflict notes must NOT appear in next_step
+                      "next_step must keep the original template text")
         self.assertNotIn("Closed", card["next_step"])
         self.assertNotIn("Sources differ", card["next_step"])
 
@@ -578,12 +664,36 @@ class TestPantryClosures(unittest.TestCase):
 # Fix 4 — contacts[] label normalization
 # ===========================================================================
 
+# Salvation Army pantry contact rows (from KB ev_sapantry_006 – ev_sapantry_009)
+_SA_PANTRY_PROG = "prog_food_salvationarmy_pantry_sac_001"
+_SA_PANTRY_CLAIMS = [
+    {"program_id": _SA_PANTRY_PROG, "field_path": "contact[0]",
+     "claim_value": "Location: 3213 Orange Grove Ave., North Highlands, CA 95660",
+     "verification_status": "verified", "evidence_refs": ["ev_sapantry_006"],
+     "checked_at": "2026-11-12T10:30:00-08:00", "issue": None},
+    {"program_id": _SA_PANTRY_PROG, "field_path": "contact[1]",
+     "claim_value": "Food Pantry Schedule: Tuesday, Wednesday, Thursday 9AM - 1PM",
+     "verification_status": "verified", "evidence_refs": ["ev_sapantry_007"],
+     "checked_at": "2026-11-12T10:30:00-08:00", "issue": None},
+    {"program_id": _SA_PANTRY_PROG, "field_path": "contact[2]",
+     "claim_value": "North Highlands Family Services: (916) 678-4010",
+     "verification_status": "verified", "evidence_refs": ["ev_sapantry_008"],
+     "checked_at": "2026-11-12T10:26:00-08:00", "issue": None},
+    {"program_id": _SA_PANTRY_PROG, "field_path": "contact[3]",
+     "claim_value": "Food for Seniors: 60 years old +, 4th Monday & Thursday, 9AM - 1PM",
+     "verification_status": "verified", "evidence_refs": ["ev_sapantry_009"],
+     "checked_at": "2026-11-12T10:26:00-08:00", "issue": None},
+]
+
+
 class TestContactLabels(unittest.TestCase):
     """
-    Root cause: all contact[] rows got label "Contact" regardless of content.
-    Fix: street address → "Address", opening-hours-only → "Hours", else "Contact".
+    Fix: street address / "Location:" prefix → "Address";
+         schedule text ("Schedule:", "4th Monday & Thursday, 9AM...") → "Hours";
+         phone / generic → "Contact".
     """
 
+    # --- River City style (address number, hours by day) ---
     def test_address_label(self):
         self.assertEqual(_contact_label("contact[0]", "1800 28th St. Sacramento, CA 95816"), "Address")
 
@@ -604,6 +714,51 @@ class TestContactLabels(unittest.TestCase):
     def test_application_method_stays_how_to_apply(self):
         self.assertEqual(_contact_label("application_method[0]", "Apply online at https://example.org"), "How to apply")
 
+    # --- Salvation Army style ---
+    def test_location_prefix_is_address(self):
+        """'Location: 3213 Orange Grove Ave.' → Address."""
+        self.assertEqual(
+            _contact_label("contact[0]",
+                           "Location: 3213 Orange Grove Ave., North Highlands, CA 95660"),
+            "Address")
+
+    def test_schedule_prefix_is_hours(self):
+        """'Food Pantry Schedule: Tuesday, Wednesday, Thursday 9AM - 1PM' → Hours."""
+        self.assertEqual(
+            _contact_label("contact[1]",
+                           "Food Pantry Schedule: Tuesday, Wednesday, Thursday 9AM - 1PM"),
+            "Hours")
+
+    def test_fourth_day_schedule_is_hours(self):
+        """'Food for Seniors: 60 years old +, 4th Monday & Thursday, 9AM - 1PM' → Hours."""
+        self.assertEqual(
+            _contact_label("contact[3]",
+                           "Food for Seniors: 60 years old +, 4th Monday & Thursday, 9AM - 1PM"),
+            "Hours")
+
+    def test_phone_with_name_stays_contact(self):
+        """'North Highlands Family Services: (916) 678-4010' → Contact (has phone)."""
+        self.assertEqual(
+            _contact_label("contact[2]",
+                           "North Highlands Family Services: (916) 678-4010"),
+            "Contact")
+
+    def test_salvation_army_build_contacts_labels(self):
+        """_build_contacts assigns Address / Hours / Contact for all 4 SA pantry rows."""
+        contacts = _build_contacts(_SA_PANTRY_CLAIMS, _SA_PANTRY_PROG)
+        # contact[0]: Location → Address
+        c0 = next(c for c in contacts if "Orange Grove" in c["value"])
+        self.assertEqual(c0["label"], "Address")
+        # contact[1]: Schedule → Hours
+        c1 = next(c for c in contacts if "Schedule" in c["value"])
+        self.assertEqual(c1["label"], "Hours")
+        # contact[2]: phone → Contact
+        c2 = next(c for c in contacts if "916" in c["value"])
+        self.assertEqual(c2["label"], "Contact")
+        # contact[3]: 4th Monday schedule → Hours
+        c3 = next(c for c in contacts if "4th Monday" in c["value"])
+        self.assertEqual(c3["label"], "Hours")
+
     def test_build_contacts_produces_address_and_hours_labels(self):
         """_build_contacts produces Address and Hours labels for RCFB-like claims."""
         claims = [
@@ -621,7 +776,6 @@ class TestContactLabels(unittest.TestCase):
              "checked_at": "2026-11-12T10:30:00-08:00", "issue": None},
         ]
         contacts = _build_contacts(claims, "PROG-X")
-        labels = {c["value"][:10]: c["label"] for c in contacts}
         # Address
         self.assertEqual(contacts[0]["label"], "Address")
         # Hours
@@ -692,13 +846,16 @@ class TestAgent10AcceptsLockoutAndClosure(unittest.TestCase):
     def test_agent10_passes_closure_plan_no_flags(self):
         """Closure notes in uncertainty_notes do not trigger any flag."""
         needs = [_need("need_f", "food_assistance", "food_pantry")]
-        matches = [_match(_RCFB_PROG, ["need_f"], subcategory="food_pantry")]
-        actions = [_action("act_01", "need_f", _RCFB_PROG)]
-        plan_result = _build_plan(needs, matches, actions, checked_claims=_RCFB_CLAIMS)
+        matches = [_match(_RCFB_ARDEN_PROG, ["need_f"], subcategory="food_pantry")]
+        actions = [_action("act_01", "need_f", _RCFB_ARDEN_PROG)]
+        plan_result = _build_plan(needs, matches, actions,
+                                  checked_claims=[_RCFB_ARDEN_MERGED_CLAIM],
+                                  evidence_records=_RCFB_ARDEN_EV_RECORDS)
         plan = plan_result["result"]
         result = self._validate(plan, needs, matches,
-                                checked_claims=_RCFB_CLAIMS,
-                                availability=[{"program_id": _RCFB_PROG,
+                                checked_claims=[_RCFB_ARDEN_MERGED_CLAIM],
+                                evidence_records=_RCFB_ARDEN_EV_RECORDS,
+                                availability=[{"program_id": _RCFB_ARDEN_PROG,
                                                "availability": "confirmed_open",
                                                "evidence_refs": []}])
         flags = result["result"]["flags"]
