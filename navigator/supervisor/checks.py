@@ -9,6 +9,9 @@ import re
 from navigator.supervisor import contract as C
 
 # ---------------------------------------------------------------- patterns
+# proposed_needs[i].need_id is a new Need defined by Agent 1 (CR-014, PROPOSED v1.2), not a reference.
+_NEW_NEED_DEF = re.compile(r"proposed_needs\[\d+\]\.need_id")
+
 SSN_RE = re.compile(r"\b\d{3}-\d{2}-\d{4}\b|\b\d{3} \d{2} \d{4}\b")
 CARD_RE = re.compile(r"\b(?:\d[ -]?){13,19}\b")
 ROUTING_RE = re.compile(r"(?<![\d-])\d{9}(?![\d-])")  # 9 digits alone; ZIP+4 has a dash
@@ -61,7 +64,7 @@ def mask_user_text(text):
 
 # ---------------------------------------------------------------- helpers
 def _walk(obj, path=""):
-    """Yield (path, key, value, parent_key) for every key in nested dicts/lists."""
+    """Yield (path, key, value) for every key in nested dicts and lists; list items add [i] to the path."""
     if isinstance(obj, dict):
         for k, v in obj.items():
             p = f"{path}.{k}" if path else k
@@ -129,13 +132,18 @@ def s1_result_fields(request, result):
         elif key in entry.get("lists", []) and not isinstance(res[key], list):
             out.append(issue("SCHEMA_INVALID", "critical",
                              f"result.{key} must be a list", key))
-    # 2. Required item keys within each list
+    # 1b. Optional lists: when present must be a list; absent is fine.
+    for key in entry.get("optional_lists", []):
+        if key in res and not isinstance(res[key], list):
+            out.append(issue("SCHEMA_INVALID", "critical",
+                             f"result.{key} must be a list", key))
+    # 2. Required item keys within each required or optional list
     for list_key, item_keys in entry.items():
-        if list_key in ("result", "lists"):
+        if list_key in ("result", "lists", "optional_lists"):
             continue
         items = res.get(list_key)
         if not isinstance(items, list):
-            continue   # wrong container type already reported above; skip items
+            continue   # absent (optional) or wrong type already reported; skip items
         for i, item in enumerate(items):
             ref_prefix = f"{list_key}[{i}]"
             if not isinstance(item, dict):
@@ -191,6 +199,8 @@ def s5_references(result, known):
     """known = {"need_id": set(), "program_id": set(), "evidence_id": set()}.
 
     Only the kinds supplied are checked. program_id may be null (contract 4.6, 4.8).
+    proposed_needs[*].need_id are new definitions made by Agent 1 (not references),
+    so they are not checked against the known set.
     """
     out = []
     ref_keys = {
@@ -203,6 +213,8 @@ def s5_references(result, known):
         kind = ref_keys.get(key)
         if kind is None or kind not in known:
             continue
+        if key == "need_id" and _NEW_NEED_DEF.fullmatch(path):
+            continue   # a new need defined by Agent 1 (CR-014, PROPOSED v1.2), not a reference
         values = value if isinstance(value, list) else [value]
         for v in values:
             if v is None:

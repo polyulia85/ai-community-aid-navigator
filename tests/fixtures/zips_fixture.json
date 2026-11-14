@@ -1,0 +1,8 @@
+{
+  "county": "Sacramento County",
+  "source_url": "https://example.com/test-fixture",
+  "verification_status": "verified",
+  "checked_at": "2026-11-11T00:00:00Z",
+  "notes": "Test fixture with a subset of real Sacramento County ZIPs.",
+  "zips": ["95660", "95823"]
+}
