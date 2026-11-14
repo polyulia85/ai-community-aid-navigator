@@ -286,7 +286,35 @@ class TestAgent2(unittest.TestCase):
             "eviction_notice_type", asked_keys,
             "eviction_notice_type should not be re-asked when already in case_facts",
         )
-
+        
+    def test_all_clarification_requests_use_allowed_necessity_level(self):
+        allowed = {"required_for_decision", "helpful"}
+        stories = [
+            "I have problems with housing and food. I need help.",
+            "I lost my job and need help with rent.",
+            "My landlord threatened to lock us out if we don't pay rent.",
+        ]
+        for story in stories:
+            a1 = handle_agent_1({
+                "request_id": "r1", "run_id": "run1", "case_id": "c1",
+                "case_version": 1, "schema_version": "1.0", "role_id": "agent_1",
+                "task_type": "understand_story",
+                "payload": {"story_text": story, "ref_date": "2026-11-01"},
+            })
+            a2 = handle_agent_2({
+                "request_id": "r2", "run_id": "run1", "case_id": "c1",
+                "case_version": 1, "schema_version": "1.0", "role_id": "agent_2",
+                "task_type": "clarify_case",
+                "payload": {
+                    "needs": a1["result"]["proposed_needs"],
+                    "case_facts": a1["result"]["factual_claims"],
+                    "already_asked": [],
+                    "candidate_requirements": [],
+                    "ambiguity_flags": a1["result"]["ambiguity_flags"],
+                },
+            })
+            for req in a2["clarification_requests"]:
+                self.assertIn(req["necessity_level"], allowed)
 
 if __name__ == "__main__":
     unittest.main()
