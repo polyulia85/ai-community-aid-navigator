@@ -4,6 +4,8 @@ Entry point for the Supervisor (Slav's integration instructions):  handle(reques
 Rule IDs follow Slav's Agent_7_10_IO_Contracts_Proposal (Q1-Q10 for Agent 7, V1-V13 for Agent 10).
 Python standard library only.
 """
+import json
+import os
 import re
 from datetime import datetime, timezone
 
@@ -160,6 +162,48 @@ def _extract_hours(text):
     return str(text)[m.start():].strip()
 
 
+# Street address pattern: a number followed by a street name component, or "Location:" prefix.
+_STREET_ADDR_RE = re.compile(
+    r"^\s*Location\s*:"                    # "Location: 3213 Orange Grove Ave."
+    r"|^\s*\(?.{0,60}\)\s*\d+\s+\w"       # "(Location Name) 123 Street"
+    r"|^\s*\d+\s+\w.{0,30}\b(st|ave|blvd|dr|rd|way|lane|ln|court|ct|street|avenue|boulevard|drive|road)\b"
+    r"|\b(p\.?o\.?\s*box|po box)\b",
+    re.I)
+
+# Hours/schedule pattern: value describes a schedule or opening hours.
+# Covers:
+#   - "Tuesday & Thursday: 10:30am - 1:30pm"  (starts with day name)
+#   - "Food Pantry Schedule: Tuesday, Wednesday, Thursday 9AM - 1PM"  (contains "Schedule:")
+#   - "Food for Seniors: 60 years old +, 4th Monday & Thursday, 9AM - 1PM"  (contains schedule keywords)
+_HOURS_ONLY_RE = re.compile(
+    r"^(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)"
+    r"[\w&, /\-:\.]*\d{1,2}(:\d{2})?\s*(am|pm|a\.m\.|p\.m\.)"
+    r"|Schedule\s*:"
+    r"|\b\d+(st|nd|rd|th)\s+(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)",
+    re.I)
+_HOURS_ACTION_VERBS_RE = re.compile(r"\b(call|press|contact|visit|apply|text)\b", re.I)
+
+
+def _contact_label(fp, raw_val):
+    """Return the correct label for a contacts[] item.
+
+    - application_method* → "How to apply" (unchanged)
+    - contact* containing a street address or "Location:" prefix → "Address"
+    - contact* describing a schedule or opening hours → "Hours"
+    - everything else → "Contact"
+    """
+    if fp.startswith("application_method"):
+        return "How to apply"
+    v = str(raw_val).strip()
+    if _STREET_ADDR_RE.search(v):
+        return "Address"
+    if (_HOURS_ONLY_RE.search(v)
+            and not re.search(r"\(?\d{3}\)?[\s.\-]\d{3}[\s.\-]\d{4}", v)
+            and not _HOURS_ACTION_VERBS_RE.search(v)):
+        return "Hours"
+    return "Contact"
+
+
 def _build_contacts(claims, program_id, evidence_records=None):
     """
     Build contacts[] for an Agent 8 card (v0.7+).
@@ -170,6 +214,8 @@ def _build_contacts(claims, program_id, evidence_records=None):
     When evidence_records is provided, a contacts item is only included if at
     least one of its evidence_refs exists in evidence_records for the same program_id.
     Returns a list of dicts: {label, value, hours, checked_at, evidence_refs}.
+    Labels: "How to apply" for application_method*, "Address" for street addresses,
+    "Hours" for opening-hours-only values, "Contact" for everything else (Fix 4).
     """
     # build a set of evidence_ids scoped to this program (A8-04)
     if evidence_records is not None:
@@ -206,9 +252,9 @@ def _build_contacts(claims, program_id, evidence_records=None):
         # A8-04: at least one evidence_ref must be in the program's evidence records
         if valid_ev is not None and not (set(refs) & valid_ev):
             continue
-        label = "How to apply" if fp.startswith("application_method") else "Contact"
-        # For URL application methods, normalise value to "Apply online: <clean url>"
         raw_val = str(val).strip()
+        label = _contact_label(fp, raw_val)
+        # For URL application methods, normalise value to "Apply online: <clean url>"
         if label == "How to apply":
             url_m = _URL_RE.search(raw_val)
             if url_m:
@@ -794,6 +840,283 @@ def agent_6(request):
 
 # ================================================================ Agent 8: plan builder
 
+# Fix 2: lockout detection keywords in needs description/original_quote
+_LOCKOUT_NEED_KEYWORDS = ("locked out", "changed the locks", "locked me out")
+
+# Fix 2: sentinel returned by _load_emergency_directory for tests (can be replaced with fixture)
+_EMERGENCY_DIR_LOADER = None  # callable() -> dict; set by tests to override
+
+
+def _load_emergency_directory():
+    """Load navigator/kb/emergency/emergency_directory.json read-only.
+    Tests can replace _EMERGENCY_DIR_LOADER with a fixture loader.
+    """
+    if _EMERGENCY_DIR_LOADER is not None:
+        return _EMERGENCY_DIR_LOADER()
+    path = os.path.join(
+        os.path.dirname(__file__), "..", "..", "kb", "emergency", "emergency_directory.json")
+    with open(os.path.normpath(path), encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _police_contacts_from_directory(directory):
+    """Return contacts[] items for subcategory local_police_non_emergency (Fix 2b).
+
+    Rules:
+    - Only records with verification_status == "verified" (program-level).
+    - Include every verified record (do not pick one by ZIP).
+    - label: "Police non-emergency (<geography[0]>)"
+    - value: "<organization>: <phone>" where phone is the first verified contact row.
+    - checked_at: from that contact row's checked_at[:10].
+    - evidence_refs: from that contact row's evidence_refs.
+    - hours: only when the availability row is verified (today only the Sheriff, 24/7);
+      otherwise hours = None.
+    """
+    items = []
+    # Build a quick lookup of evidence records by evidence_id for availability lookup.
+    ev_by_id = {e["evidence_id"]: e for e in directory.get("evidence_records", [])}
+    for rec in directory.get("program_records", []):
+        if rec.get("subcategory") != "local_police_non_emergency":
+            continue
+        if rec.get("verification_status") != "verified":
+            continue
+        # Find first verified contact row.
+        contact_row = next(
+            (c for c in rec.get("contact", []) if c.get("verification_status") == "verified"),
+            None)
+        if not contact_row:
+            continue
+        phone = str(contact_row.get("value", "")).strip()
+        checked_at = str(contact_row.get("checked_at") or "")[:10]
+        refs = list(contact_row.get("evidence_refs") or [])
+        geo = (rec.get("geography") or ["unknown"])[0]
+        org = rec.get("organization", "")
+        label = f"Police non-emergency ({geo})"
+        value = f"{org}: {phone}"
+        # hours: only when the availability EvidenceRecord is verified.
+        hours = None
+        for ev_id in rec.get("sources", []):
+            ev = ev_by_id.get(ev_id)
+            if ev and ev.get("field_path") == "availability" and ev.get("verification_status") == "verified":
+                hours = str(ev.get("claim_value", "")).strip() or None
+                break
+        items.append({
+            "label": label,
+            "value": value,
+            "hours": hours,
+            "checked_at": checked_at,
+            "evidence_refs": refs,
+        })
+    return items
+
+
+def _is_lockout(request, p):
+    """Return True when the case is a lockout situation (Fix 2).
+
+    Detection sources (any one is sufficient):
+    1. eviction_notice_type fact (allowed_case_facts or payload case_facts) contains "lockout".
+    2. Any need's description or original_quote contains lockout language.
+    """
+    facts = _facts(request, p)
+    notice_type = str((facts.get("eviction_notice_type") or {}).get("value") or "").lower()
+    if "lockout" in notice_type:
+        return True
+    for n in p.get("needs", []):
+        for field in ("description", "original_quote"):
+            txt = str(n.get(field) or "").lower()
+            if any(kw in txt for kw in _LOCKOUT_NEED_KEYWORDS):
+                return True
+    return False
+
+
+# Simple month-name pattern for closure text parsing (Fix 3).
+_MONTHS_SHORT = {
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+    "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+# Matches "November 24" / "Nov 24" with optional year ", 2026"
+_MONTH_DAY_RE = re.compile(
+    r"\b(?P<mon>[A-Za-z]{3,9})\.?\s+(?P<day>\d{1,2})(?:,\s*(?P<year>\d{4}))?", re.I)
+
+
+def _parse_month(s):
+    return _MONTHS_SHORT.get(s[:3].lower()) if s else None
+
+
+def _extract_closure_dates(raw, ref_year):
+    """Extract up to two dates from a closure text line.
+
+    Returns (start_date, end_date) as date objects, or (None, None) if no date found.
+    start_date == end_date for single-date rows.
+    """
+    from datetime import date as _date
+    matches = list(_MONTH_DAY_RE.finditer(raw))
+    if not matches:
+        return None, None
+    # First date.
+    m1 = matches[0]
+    mon1 = _parse_month(m1.group("mon"))
+    if not mon1:
+        return None, None
+    day1 = int(m1.group("day"))
+    year1_s = m1.group("year")
+    year1 = int(year1_s) if year1_s else ref_year
+    try:
+        start = _date(year1, mon1, day1)
+    except (ValueError, TypeError):
+        return None, None
+
+    # Look for a second date after a hyphen, "through", or "to".
+    # Scan remaining text after m1.
+    rest = raw[m1.end():]
+    # Check for same-month range like "-27" immediately after the day.
+    same_month_m = re.match(r"\s*[-\u2013]\s*(\d{1,2})\b", rest)
+    if same_month_m:
+        try:
+            end = _date(year1, mon1, int(same_month_m.group(1)))
+            return start, end
+        except (ValueError, TypeError):
+            pass
+    # Check for a second full "Month Day[, Year]" in remaining matches.
+    if len(matches) >= 2:
+        m2 = matches[1]
+        mon2 = _parse_month(m2.group("mon"))
+        if mon2:
+            day2 = int(m2.group("day"))
+            year2_s = m2.group("year")
+            year2 = int(year2_s) if year2_s else ref_year
+            try:
+                end = _date(year2, mon2, day2)
+                return start, end
+            except (ValueError, TypeError):
+                pass
+    return start, start
+
+
+def _extract_closure_reason(raw):
+    """Extract a reason label from a closure text.
+
+    For "November 25-27 - Thanksgiving Holiday (closed)" → "Thanksgiving holiday"
+    For "Thursday, December 24 through Friday, January 1, 2027 (holiday closure)" → "holiday closure"
+    For "November 11 - Veterans Day (closed)" → "Veterans Day"
+    Returns a lowercase reason string or None.
+    """
+    # Check for text in parens that is NOT "closed" or "open".
+    paren_m = re.search(r"\(([^)]+)\)", raw)
+    if paren_m:
+        inner = paren_m.group(1).strip()
+        if inner.lower() not in ("closed", "open"):
+            return inner.lower()
+    # Check for descriptive text between " - " and "(closed)" or end of string.
+    dash_m = re.search(r"\s*[-\u2013]\s*([A-Za-z][^(\n]+?)(?:\s*\(|$)", raw)
+    if dash_m:
+        candidate = dash_m.group(1).strip()
+        # Exclude date components (month names, day names, numbers).
+        if not re.match(r"^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|"
+                        r"mon|tue|wed|thu|fri|sat|sun|\d)", candidate, re.I):
+            return candidate.lower()
+    return None
+
+
+def _closure_rows_for_card(evidence_records, program_id, ref_date_str):
+    """Return uncertainty_note strings for availability evidence rows that mention a date.
+
+    Reads from evidence_records (not checked_claims): Agent 5 merges a program's
+    availability into one merged checked_claims item, so the individual dated rows
+    only survive in the evidence_records list.  Each EvidenceRecord with
+    field_path "availability" is treated as one candidate row.
+
+    - Skip if verification_status not in ("verified", "conflicting").
+    - Parse dates from claim_value (or effective_date). Use year from text, else ref_date's year.
+    - Skip rows whose date range ended before ref_date (past).
+    - Skip rows with no date.
+    - Build a note per row:
+        verified: "Closed Nov 25-27 (Thanksgiving holiday) (checked Nov 12)."
+                  "Closed Dec 24 - Jan 1 (holiday closure) (checked Nov 12)."
+                  "Extra holiday distribution: Sat Nov 21, 10:30am - 1:30pm (checked Nov 12)."
+        conflicting: "Sources differ on whether this site is open on Nov 20. Call before you go."
+
+    Returns a list of strings (one per row).
+    """
+    if not ref_date_str:
+        return []
+    try:
+        ref = datetime.strptime(ref_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return []
+
+    from datetime import date as _date
+
+    notes = []
+    for c in evidence_records:
+        if c.get("program_id") != program_id:
+            continue
+        if not str(c.get("field_path", "")).startswith("availability"):
+            continue
+        status = c.get("verification_status")
+        if status not in ("verified", "conflicting"):
+            continue
+        raw = str(c.get("claim_value") or "")
+
+        # Determine start date.
+        eff = str(c.get("effective_date") or "")
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", eff):
+            try:
+                start_dt = datetime.strptime(eff, "%Y-%m-%d").date()
+            except (ValueError, TypeError):
+                continue
+            # Determine end date from raw text.
+            _, end_dt_text = _extract_closure_dates(raw, ref.year)
+            end_dt = end_dt_text if end_dt_text and end_dt_text >= start_dt else start_dt
+        else:
+            start_dt, end_dt = _extract_closure_dates(raw, ref.year)
+            if start_dt is None:
+                continue
+            if end_dt is None:
+                end_dt = start_dt
+
+        # Skip rows that ended before ref_date (past closure).
+        if end_dt < ref:
+            continue
+
+        # Format the checked_at date.
+        checked_raw = str(c.get("checked_at") or "")[:10]
+        try:
+            checked_dt = datetime.strptime(checked_raw, "%Y-%m-%d").date()
+            checked_str = f"checked {checked_dt:%b} {checked_dt.day}"
+        except (ValueError, TypeError):
+            checked_str = "checked unknown"
+
+        if status == "conflicting":
+            notes.append(
+                f"Sources differ on whether this site is open on {start_dt:%b} {start_dt.day}. Call before you go.")
+            continue
+
+        raw_lower = raw.lower()
+        is_extra = "holiday distribution" in raw_lower or "distribution:" in raw_lower
+
+        if is_extra:
+            # "Extra holiday distribution: Tue Nov 24, 10:30am - 1:30pm (checked Nov 12)."
+            time_m = re.search(r"\d{1,2}:\d{2}(?:am|pm)\s*-\s*\d{1,2}:\d{2}(?:am|pm)", raw, re.I)
+            time_str = f", {time_m.group(0)}" if time_m else ""
+            dow = start_dt.strftime("%a")
+            notes.append(
+                f"Extra holiday distribution: {dow} {start_dt:%b} {start_dt.day}{time_str} ({checked_str}).")
+        else:
+            # "Closed Nov 25-27 (Thanksgiving holiday) (checked Nov 12)."
+            reason = _extract_closure_reason(raw)
+            reason_str = f" ({reason})" if reason else ""
+            if end_dt != start_dt:
+                if end_dt.month != start_dt.month:
+                    range_str = f"{start_dt:%b} {start_dt.day} - {end_dt:%b} {end_dt.day}"
+                else:
+                    range_str = f"{start_dt:%b} {start_dt.day}-{end_dt.day}"
+            else:
+                range_str = f"{start_dt:%b} {start_dt.day}"
+            notes.append(f"Closed {range_str}{reason_str} ({checked_str}).")
+    return notes
+
+
 def agent_8(request):
     """Turn ordered actions into Action Cards. No new claims (B8 rules)."""
     p = request["payload"]
@@ -804,6 +1127,8 @@ def agent_8(request):
     id_map = {a["action_id"]: f"card_{i:02d}" for i, a in enumerate(acts, 1)}
     # build a set of (program_id, avail) to know which programs are open (for D/A8-03)
     avail_map = _availability(p)
+    ref_date_str = p.get("ref_date") or ""
+    lockout = _is_lockout(request, p)
 
     # A6-01: multiple actions for the same program_id (one per need_id, from agent_6)
     # must be merged into a single card.  Group by (program_id, is_confirm) so that
@@ -924,9 +1249,75 @@ def agent_8(request):
         result = {"plan_version": str(p.get("plan_version", "plan_v1")), "action_cards": cards,
                   "potential_options": [], "coverage_gaps": [], "repaired_card_ids": sorted(flagged)}
         return _envelope(request, "completed", result, evidence_refs=sorted({r for c in cards for r in c["source_refs"]}))
+    # Fix 3: add pantry closure notes from evidence_records (not checked_claims).
+    # Agent 5 merges all availability rows into one merged checked_claims item;
+    # the individual dated rows survive only in evidence_records.
+    ev_records_all = p.get("evidence_records") or []
+    if ref_date_str:
+        for c in cards:
+            pid = c.get("program_id")
+            if not pid:
+                continue
+            closure_notes = _closure_rows_for_card(ev_records_all, pid, ref_date_str)
+            if closure_notes:
+                existing = list(c.get("uncertainty_notes") or [])
+                existing.extend(n for n in closure_notes if n not in existing)
+                c["uncertainty_notes"] = existing
+
+    # Fix 2: lockout — append police sentence and contacts to the best housing card.
+    if lockout:
+        try:
+            dir_data = _load_emergency_directory()
+            police_contacts = _police_contacts_from_directory(dir_data)
+        except Exception:
+            police_contacts = []
+        police_sentence = "If you are already locked out, you can also contact the local police non-emergency line."
+        # Find the target card: housing_legal_aid first; else first late-stage housing card.
+        _LOCKOUT_HOUSING_SUBS = {"housing_legal_aid", "emergency_shelter", "motel_voucher", "eviction_prevention"}
+        target_card = None
+        for c in cards:
+            pid = c.get("program_id")
+            m = matches.get(pid) if pid else None
+            if not m:
+                continue
+            sub = _subcat(m, needs)
+            if sub == "housing_legal_aid":
+                target_card = c
+                break
+        if target_card is None:
+            for c in cards:
+                pid = c.get("program_id")
+                m = matches.get(pid) if pid else None
+                if not m:
+                    continue
+                sub = _subcat(m, needs)
+                if sub in _LOCKOUT_HOUSING_SUBS:
+                    target_card = c
+                    break
+        if target_card is not None:
+            # Append the sentence to next_step (no number, plain sentence).
+            ns = target_card.get("next_step", "")
+            if police_sentence not in ns:
+                target_card["next_step"] = (ns.rstrip() + " " + police_sentence).lstrip()
+            # Append police contacts.
+            existing_contacts = list(target_card.get("contacts") or [])
+            existing_labels = {item["label"] for item in existing_contacts}
+            for pc in police_contacts:
+                if pc["label"] not in existing_labels:
+                    existing_contacts.append(pc)
+            target_card["contacts"] = existing_contacts
+
     covered = {n for c in cards for n in c["related_need_ids"]}
-    gaps = [{"need_id": n, "note": "We have not found a verified program for this need yet. We will not suggest anything we cannot support."}
-            for n in needs if n not in covered]
+    # Fix 2d: when no housing legal-help program was matched, the coverage-gap note is plain.
+    def _gap_note(need_id):
+        n = needs[need_id]
+        if n.get("category") == "housing_assistance" and n.get("subcategory") == "housing_legal_aid":
+            note = "No legal-help program was found yet."
+            if lockout:
+                note += " " + "If you are already locked out, you can also contact the local police non-emergency line."
+            return note
+        return "We have not found a verified program for this need yet. We will not suggest anything we cannot support."
+    gaps = [{"need_id": n, "note": _gap_note(n)} for n in needs if n not in covered]
     result = {"plan_version": str(p.get("plan_version", "plan_v1")), "action_cards": cards, "potential_options": [], "coverage_gaps": gaps}
     return _envelope(request, "completed", result, evidence_refs=sorted({r for c in cards for r in c["source_refs"]}))
 
@@ -1038,13 +1429,19 @@ def agent_7(request):
         elif age > window:
             add("Q7", "warning", pid, f"Evidence is {age} day(s) old, older than the {window}-day window", "recheck_source", fp)
     covered = {n for m in matches for n in m["need_ids"]}
-    # A7-01: fire Q8 whenever the stage_result has a "matches" key (even when it is empty),
-    # because the stage was expected to produce matches.  Do NOT fire when the key is absent
-    # (e.g. an external-discovery-only stage that has no matches at all).
+    # Fix 1 (Q8 false warning): Q8 fires only when stage_result has BOTH "matches" AND
+    # "coverage_gaps" keys.  At the matching and verification stages (before Agent 8
+    # creates coverage_gaps), stage_result has "matches" but no "coverage_gaps", so a
+    # need with no match is expected and Q8 must stay silent.  Agent 10 V12 already checks
+    # the final plan for unmet needs.  When coverage_gaps IS present, a need in neither
+    # matches nor coverage_gaps is a genuine omission worth flagging.
     has_matches_key = "matches" in sr
+    has_gaps_key = "coverage_gaps" in sr
+    gap_need_ids = {g["need_id"] for g in sr.get("coverage_gaps", [])}
     for n in p.get("needs", []):
-        if has_matches_key and n["need_id"] not in covered:
-            add("Q8", "warning", None, f"Need {n['need_id']} has no candidate or coverage gap", "report_coverage_gap", need=n["need_id"])
+        nid = n["need_id"]
+        if has_matches_key and has_gaps_key and nid not in covered and nid not in gap_need_ids:
+            add("Q8", "warning", None, f"Need {nid} has no match and is absent from coverage_gaps", "report_coverage_gap", need=nid)
     real = [f for f in findings if f["severity"] != "info"]  # info findings (evidence age) do not change the assessment
     result = {"stage": p["stage"], "stage_assessment": "issues_found" if real else "clear", "findings": findings}
     issues = [_issue(f["rule_id"], f["severity"], f["description"], f["program_id"]) for f in findings]

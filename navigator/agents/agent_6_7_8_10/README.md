@@ -1,4 +1,4 @@
-# Agents 6, 7, 8, 10: Action Plan and Validation (mock component v0.14)
+# Agents 6, 7, 8, 10: Action Plan and Validation (mock component v0.16)
 Owner: Hisham | Contracts: SHARED_CONTRACTS_v1.1 + Slav's Agent 7/10 notes | Status: local mock, not yet IBM integrated
 
 ## What it does
@@ -101,13 +101,23 @@ Each appended item is followed by `"(checked Mon D)."` using the portable date h
 | --- | --- | --- |
 | **1** Date in eviction_notice_type not surfaced | When Agent 2 records `eviction_notice_type` as free text including a date (e.g. "Writ of possession, sheriff lockout Nov 11"), that date was ignored. | New `_parse_date_from_text(text, ref_date_str)` helper extracts the first date token (month-name + day, M/D, or ISO). If the date falls before `ref_date` it advances by one year. When a housing-category action has no other `user_date`, the parsed date is set as `user_target_date` (never `official_deadline`). The rationale appends "The date you gave is …" once. The action is added to `_action_rent_date` so the date is excluded from the cross-need sort key (cannot reorder housing before food). |
 
+## PR #14 fixes (v0.16 — Slav Nov 12)
+
+| # | Root cause | Fix |
+| --- | --- | --- |
+| **Fix 1** Q8 false warning | Q8 fired at the retrieval/matching/verification stages (before Agent 8 creates `coverage_gaps`). A need with no match at that stage is expected; Agent 10 V12 already checks the final plan. | Q8 fires only when `stage_result` contains **both** `"matches"` and `"coverage_gaps"` keys. A need absent from both fires Q8; a need absent only from matches (no gaps key) stays silent. |
+| **Fix 2** Already locked out | No detection of a lockout situation; no police non-emergency guidance given. | `_is_lockout()` checks `eviction_notice_type` fact ("lockout") OR any need description/original_quote ("locked out", "changed the locks", "locked me out"). When True, Agent 8 appends one plain sentence to the housing_legal_aid card (or first late-stage housing card): "If you are already locked out, you can also contact the local police non-emergency line." Police contacts are loaded read-only from `navigator/kb/emergency/emergency_directory.json` (subcategory `local_police_non_emergency`). Every verified record is included (no ZIP selection). Label: "Police non-emergency (\<geography[0]\>)". Hours only when the availability EvidenceRecord is verified (today only the Sheriff, 24/7). When no housing program is matched, the coverage-gap note says "No legal-help program was found yet." (no search promise) plus the police sentence. `_EMERGENCY_DIR_LOADER` can be replaced with a fixture callable in tests. |
+| **Fix 3** Pantry closures | Availability evidence rows with dates were never surfaced to the user. | For each card, `_closure_rows_for_card()` reads verified/conflicting `checked_claims[]` with `field_path` starting with `"availability"` for that program. Rows with no parseable date are skipped; rows whose range ended before `ref_date` are skipped. One `uncertainty_note` per row: `"Closed Nov 25-27 (thanksgiving holiday) (checked Nov 12)."` / `"Closed Dec 24 - Jan 1 (holiday closure) (checked Nov 12)."` / `"Extra holiday distribution: Tue Nov 24, 10:30am - 1:30pm (checked Nov 12)."` / conflicting: `"Sources differ on whether this site is open on Nov 20. Call before you go."` `next_step` is not changed. Uses `payload["ref_date"]`, never system date. |
+| **Fix 4** contacts[] labels | All `contact[]` rows got label `"Contact"` regardless of content. | `_contact_label()` returns `"Address"` for street address values, `"Hours"` for opening-hours-only day+time values (must start with a day name), `"Contact"` otherwise. `"How to apply"` for `application_method*` is unchanged. Phone `next_step` lookup still works (it uses a phone-RE pattern, not the label). |
+
 ## Files
 | File | Purpose |
 | --- | --- |
 | agent_6_7_8_10.py | The component |
 | tests/agent_6_7_8_10/run_tests.py | Runs 69 integration checks (writes navigator/samples/agent_6_7_8_10/ only with --save) |
 | tests/agent_6_7_8_10/test_pr11_regression.py | 9 KB-based regression tests from PR #11 |
-| tests/agent_6_7_8_10/test_pr2_regression.py | Regression tests for PR #2 audit items + §15.2 follow-up (A6-01 to A6-04, A7-01 to A7-03, A10-02, C-OD2, and §15.2 rules 1–6) |
+| tests/agent_6_7_8_10/test_pr2_regression.py | Regression tests for PR #2 audit items + §15.2 follow-up (A6-01 to A6-04, A7-01 to A7-03, A10-02, C-OD2, and §15.2 rules 1–6) — updated for Fix 1 (Q8 behavior) |
+| tests/agent_6_7_8_10/test_slav_nov12.py | 30 new tests for Fixes 1–4 (Nov 12 2026, all fixtures, ref_date 2026-11-13, no live KB) |
 | tests/agent_6_7_8_10/fixtures/ | Slav's test files (Agent 6 Sacramento input, Agent 10 mixed plan) |
 | tests/agent_6_7_8_10/mock_input_v0.2.json | Our own mock data for the same case |
 | navigator/samples/agent_6_7_8_10/ | Example AgentResult JSON for every agent, including full Action Plans |
@@ -117,7 +127,7 @@ Each appended item is followed by `"(checked Mon D)."` using the portable date h
 1. `python3 tests/agent_6_7_8_10/run_tests.py`
 2. Expected last line: `69 of 69 checks passed`
 3. `python3 -I -m unittest discover -s tests -t .`
-4. Expected: 157 tests, 1 pre-existing `test_builders` failure (KB availability field, waiting on update)
+4. Expected: all tests pass (364 as of v0.16)
 
 Tested on macOS, Python 3.14.3.  Standard Python 3 only — no extra packages.
 

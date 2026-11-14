@@ -390,13 +390,15 @@ class TestA604UnsupportedUrgency(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# A7-01: Empty matches → every need flagged as uncovered
+# A7-01: Q8 fires only when stage_result has BOTH matches and coverage_gaps
+#        (Fix 1 — Nov 12 2026 regression fix)
 # ---------------------------------------------------------------------------
 
 class TestA701EmptyMatches(unittest.TestCase):
-    """With matches: [], every need must produce a Q8 finding."""
+    """Q8 fires only when stage_result contains BOTH 'matches' AND 'coverage_gaps'."""
 
-    def test_empty_matches_flags_all_needs_as_uncovered(self):
+    def test_empty_matches_no_coverage_gaps_no_q8(self):
+        """At matching/verification stage no coverage_gaps key → Q8 must stay silent."""
         needs = [
             _need("need_001"),
             _need("need_002"),
@@ -405,9 +407,24 @@ class TestA701EmptyMatches(unittest.TestCase):
         stage_result = {"matches": [], "checked_claims": []}
         findings = _run7(stage_result, needs)
         q8_needs = {f["need_id"] for f in findings if f["rule_id"] == "Q8"}
+        self.assertEqual(q8_needs, set(),
+            "Q8 must NOT fire at matching stage (no coverage_gaps key in stage_result)")
+
+    def test_empty_matches_with_coverage_gaps_key_fires_q8(self):
+        """When stage_result has coverage_gaps key and need is in neither → Q8 fires."""
+        needs = [
+            _need("need_001"),
+            _need("need_002"),
+        ]
+        stage_result = {
+            "matches": [],
+            "checked_claims": [],
+            "coverage_gaps": [],  # key present, but need not in it
+        }
+        findings = _run7(stage_result, needs)
+        q8_needs = {f["need_id"] for f in findings if f["rule_id"] == "Q8"}
         self.assertIn("need_001", q8_needs)
         self.assertIn("need_002", q8_needs)
-        self.assertIn("need_003", q8_needs)
 
 
 # ---------------------------------------------------------------------------
