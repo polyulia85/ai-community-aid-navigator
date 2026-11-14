@@ -3,6 +3,7 @@ import copy
 import datetime
 import json
 import os
+import tempfile
 import unittest
 
 from navigator.supervisor import builders as B
@@ -208,7 +209,6 @@ class TestZipCounty(unittest.TestCase):
 
     def test_unverified_list_not_used_zip_list_unavailable(self):
         """verification_status != 'verified' -> empty dict + ZIP_LIST_UNAVAILABLE."""
-        import json, tempfile, os
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json",
                                          delete=False, encoding="utf-8") as f:
             json.dump({"county": "Sacramento County",
@@ -300,7 +300,9 @@ class TestAgent1AnswerRequest(unittest.TestCase):
 
 
 class TestMergeAnswerFacts(unittest.TestCase):
-    """merge_answer_facts: keeps asked fields, drops others, replaces existing."""
+    """merge_answer_facts: asked fields replaced; new fields beyond question added as proposed;
+    equal value beyond question skipped silently; differing value beyond question keeps old with
+    ANSWER_FACT_CONFLICT; invalid items dropped with ANSWER_FACT_INVALID."""
 
     def _claim(self, field, value, fact_id="f1"):
         return {"fact_id": fact_id, "field": field, "value": value,
@@ -389,6 +391,63 @@ class TestMergeAnswerFacts(unittest.TestCase):
         st = new_state()
         B.merge_answer_facts(st, self._result([self._claim("zip_code", "95823")]), ["zip_code"])
         self.assertEqual(st.case_facts[0]["confirmation_status"], "proposed")
+
+    def test_equal_value_beyond_question_silent(self):
+        """A claim outside pending whose value equals the existing fact → silent skip, no issue."""
+        st = new_state()
+        st.case_facts = [self._claim("household_size", 4, "f0")]
+        issues = B.merge_answer_facts(st, self._result([
+            self._claim("zip_code", "95823"),
+            self._claim("household_size", 4),   # same value as existing
+        ]), ["zip_code"])
+        vals = [f["value"] for f in st.case_facts if f["field"] == "household_size"]
+        self.assertEqual(vals, [4])
+        self.assertEqual(issues, [])
+
+    def test_claim_not_a_dict_dropped_with_invalid(self):
+        """A factual_claims item that is not a dict → ANSWER_FACT_INVALID (warning), case unchanged."""
+        st = new_state()
+        issues = B.merge_answer_facts(st, self._result(["not-a-dict"]), ["zip_code"])
+        self.assertEqual(len(st.case_facts), 0)
+        inv = [i for i in issues if i["code"] == "ANSWER_FACT_INVALID"]
+        self.assertEqual(len(inv), 1)
+        self.assertEqual(inv[0]["severity"], "warning")
+        self.assertIsNone(inv[0]["related_ref"])
+
+    def test_claim_field_null_dropped_with_invalid(self):
+        """A factual_claims item with field=null → ANSWER_FACT_INVALID (warning), case unchanged."""
+        st = new_state()
+        issues = B.merge_answer_facts(st, self._result([{"field": None, "value": "x",
+                                                          "fact_id": "f1",
+                                                          "confirmation_status": "proposed",
+                                                          "source": "user_statement",
+                                                          "time_context": None}]), ["zip_code"])
+        self.assertEqual(len(st.case_facts), 0)
+        inv = [i for i in issues if i["code"] == "ANSWER_FACT_INVALID"]
+        self.assertEqual(len(inv), 1)
+        self.assertIsNone(inv[0]["related_ref"])
+
+    def test_factual_claims_null_treated_as_empty(self):
+        """factual_claims=null → loop skipped, no issues, case unchanged."""
+        st = new_state()
+        st.case_facts = [self._claim("zip_code", "95823", "f0")]
+        issues = B.merge_answer_facts(
+            st, {"result": {"factual_claims": None}}, ["zip_code"])
+        self.assertEqual(len(st.case_facts), 1)
+        self.assertEqual(issues, [])
+
+    def test_factual_claims_not_a_list_invalid(self):
+        """factual_claims present but not a list (e.g. a dict) → ANSWER_FACT_INVALID, case unchanged."""
+        st = new_state()
+        st.case_facts = [self._claim("zip_code", "95823", "f0")]
+        issues = B.merge_answer_facts(
+            st, {"result": {"factual_claims": {"field": "zip_code", "value": "99999"}}},
+            ["zip_code"])
+        self.assertEqual(len(st.case_facts), 1)
+        self.assertEqual(st.case_facts[0]["value"], "95823")   # unchanged
+        inv = [i for i in issues if i["code"] == "ANSWER_FACT_INVALID"]
+        self.assertEqual(len(inv), 1)
+        self.assertIsNone(inv[0]["related_ref"])
 
 
 class TestMergeAnswerNeeds(unittest.TestCase):

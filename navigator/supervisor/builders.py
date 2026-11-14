@@ -178,22 +178,52 @@ def agent1_answer_request(state, answer_text, pending_fact_keys, ref_date):
 def merge_answer_facts(state, result, pending_fact_keys):
     """Apply factual_claims from a parse_clarification_answer result to case state.
 
+    If 'factual_claims' is null, the loop is skipped (treated as empty).
+    If 'factual_claims' is present but not a list, one ANSWER_FACT_INVALID (warning,
+    related_ref None) is added and nothing is changed.
+    A claim that is not a dict or whose 'field' is not a non-empty string is dropped
+    with ANSWER_FACT_INVALID (warning, related_ref None).
     Claims for a field in pending_fact_keys replace any existing fact with that field.
     Claims for another field (beyond the question):
       - if no such fact exists: add it as 'proposed' with ANSWER_FACT_OUTSIDE_QUESTION (info);
         the fact counts as known, so Agent 2 will not ask for it again.
-      - if a fact for that field already exists: keep the old value and add
-        ANSWER_FACT_CONFLICT (warning). No user values in either message.
+      - if a fact for that field already exists and the new value equals the existing value:
+        skip silently (no issue). No repeated questions, no spurious conflict.
+      - if a fact for that field already exists and the values differ: keep the old value
+        and add ANSWER_FACT_CONFLICT (warning). No user values in either message.
     confirmation_status stays 'proposed' until the user confirms.
     Returns issues.
     """
     issues = []
     pending_set = set(pending_fact_keys)
     existing_fields = {f.get("field") for f in state.case_facts}
-    for claim in result.get("result", {}).get("factual_claims", []):
+    raw_claims = result.get("result", {}).get("factual_claims")
+    if raw_claims is None:
+        raw_claims = []
+    elif not isinstance(raw_claims, list):
+        issues.append({"code": "ANSWER_FACT_INVALID", "severity": "warning",
+                       "message": "factual_claims is not a list; ignored",
+                       "related_ref": None})
+        return issues
+    for claim in raw_claims:
+        if not isinstance(claim, dict):
+            issues.append({"code": "ANSWER_FACT_INVALID", "severity": "warning",
+                           "message": "factual_claims item is not an object; dropped",
+                           "related_ref": None})
+            continue
         field = claim.get("field")
+        if not isinstance(field, str) or not field:
+            issues.append({"code": "ANSWER_FACT_INVALID", "severity": "warning",
+                           "message": "factual_claims item has no valid field name; dropped",
+                           "related_ref": None})
+            continue
         if field not in pending_set:
             if field in existing_fields:
+                # Same value as existing → silent skip; different value → conflict
+                existing_val = next(
+                    (f.get("value") for f in state.case_facts if f.get("field") == field), None)
+                if claim.get("value") == existing_val:
+                    continue   # equal value, no conflict, no issue
                 issues.append({"code": "ANSWER_FACT_CONFLICT", "severity": "warning",
                                "message": f"Claim for field {field!r} conflicts with an existing fact; existing value kept",
                                "related_ref": field})
