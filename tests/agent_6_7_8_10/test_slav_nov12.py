@@ -431,7 +431,8 @@ class TestLockoutDetection(unittest.TestCase):
         facts = [{"fact_id": "f1", "field": "eviction_notice_type",
                   "value": "lockout", "confirmation_status": "confirmed",
                   "source": "user_statement", "time_context": None}]
-        result = self._lockout_plan(needs, matches, actions, allowed_case_facts=facts)
+        result = self._lockout_plan(needs, matches, actions, allowed_case_facts=facts,
+                                    evidence_records=_POLICE_DIR_FIXTURE["evidence_records"])
         card = result["result"]["action_cards"][0]
         police_contacts = [c for c in card.get("contacts", [])
                            if "police non-emergency" in c["label"].lower()]
@@ -453,7 +454,8 @@ class TestLockoutDetection(unittest.TestCase):
         facts = [{"fact_id": "f1", "field": "eviction_notice_type",
                   "value": "lockout", "confirmation_status": "confirmed",
                   "source": "user_statement", "time_context": None}]
-        result = self._lockout_plan(needs, matches, actions, allowed_case_facts=facts)
+        result = self._lockout_plan(needs, matches, actions, allowed_case_facts=facts,
+                                    evidence_records=_POLICE_DIR_FIXTURE["evidence_records"])
         card = result["result"]["action_cards"][0]
         sheriff = next((c for c in card.get("contacts", [])
                         if "Sacramento County" in c["label"]), None)
@@ -469,12 +471,36 @@ class TestLockoutDetection(unittest.TestCase):
         facts = [{"fact_id": "f1", "field": "eviction_notice_type",
                   "value": "lockout", "confirmation_status": "confirmed",
                   "source": "user_statement", "time_context": None}]
-        result = self._lockout_plan(needs, matches, actions, allowed_case_facts=facts)
+        result = self._lockout_plan(needs, matches, actions, allowed_case_facts=facts,
+                                    evidence_records=_POLICE_DIR_FIXTURE["evidence_records"])
         card = result["result"]["action_cards"][0]
         sacpd = next((c for c in card.get("contacts", [])
                       if "City of Sacramento" in c["label"]), None)
         self.assertIsNotNone(sacpd, "SACPD contact must be present")
         self.assertIsNone(sacpd["hours"], "SACPD hours must be None (availability not verified)")
+
+    def test_lockout_police_evidence_missing_sentence_only(self):
+        """Lockout + verified police records in directory, but their evidence_ids are NOT in
+        the request's evidence_records → police contacts are dropped; only the sentence remains."""
+        needs = [_need("need_h", "housing_assistance", "housing_legal_aid")]
+        matches = [_match("PROG-LEGAL", ["need_h"], subcategory="housing_legal_aid")]
+        actions = [_action("act_01", "need_h", "PROG-LEGAL")]
+        facts = [{"fact_id": "f1", "field": "eviction_notice_type",
+                  "value": "lockout", "confirmation_status": "confirmed",
+                  "source": "user_statement", "time_context": None}]
+        # evidence_records does NOT contain the police evidence_ids
+        result = self._lockout_plan(needs, matches, actions, allowed_case_facts=facts,
+                                    evidence_records=[])
+        card = result["result"]["action_cards"][0]
+        # Sentence must still be there
+        self.assertIn("locked out", card["next_step"].lower(),
+                      "Police sentence must still appear when evidence is missing")
+        self.assertIn("police non-emergency", card["next_step"].lower())
+        # No police contacts — all were dropped because their evidence_refs are not in ev_records_all
+        police_contacts = [c for c in card.get("contacts", [])
+                           if "police non-emergency" in c["label"].lower()]
+        self.assertEqual(police_contacts, [],
+                         "Police contacts must be absent when their evidence is not in evidence_records")
 
     def test_lockout_no_legal_aid_uses_first_housing_card(self):
         """No housing_legal_aid match → police sentence goes to first late-stage housing card."""

@@ -1271,6 +1271,15 @@ def agent_8(request):
             police_contacts = _police_contacts_from_directory(dir_data)
         except Exception:
             police_contacts = []
+        # S5: keep a police contact only when it has evidence_refs and every one of
+        # them is an evidence_id in the request's evidence_records (ev_records_all).
+        # Otherwise drop the contact — supervisor check S5 rejects unknown evidence_refs.
+        ev_all_ids = {e["evidence_id"] for e in ev_records_all if "evidence_id" in e}
+        police_contacts = [
+            pc for pc in police_contacts
+            if pc.get("evidence_refs")
+            and all(r in ev_all_ids for r in pc["evidence_refs"])
+        ]
         police_sentence = "If you are already locked out, you can also contact the local police non-emergency line."
         # Find the target card: housing_legal_aid first; else first late-stage housing card.
         _LOCKOUT_HOUSING_SUBS = {"housing_legal_aid", "emergency_shelter", "motel_voucher", "eviction_prevention"}
