@@ -6,6 +6,7 @@ Programs and evidence are real IDs from the frozen Supervisor test KB
 """
 import datetime
 import os
+import re
 import time
 
 # Path to the frozen KB fixture.  All Supervisor tests must use this, not the live KB.
@@ -219,3 +220,244 @@ def agent_7(req):
 def very_slow_agent(req):
     time.sleep(30)
     return agent_3(req)
+
+
+# ---------------------------------------------------------------- dialog fake agents
+
+def agent_1_dialog(req):
+    """Dialog fake Agent 1.
+
+    understand_story: returns housing + food needs, one ambiguity flag, no facts.
+    parse_clarification_answer:
+      - a 5-digit number → zip_code
+      - "0" or a number with "month" → household_gross_monthly_income (value 0 or the number)
+      - "hours" in text → triggering_circumstances = "reduced_hours"
+      - "doctor" in text → also proposed_needs with one medical_health_coverage need
+      - otherwise: no claims
+    Follows the contract shapes exactly.
+    """
+    task = req.get("task_type")
+
+    if task == "understand_story":
+        return _env(req, {
+            "narrative_summary": "You have problems with housing and food.",
+            "triggering_events": [],
+            "proposed_needs": [
+                {"need_id": "need_001", "category": "housing_assistance", "subcategory": None,
+                 "description": "Problems with housing", "original_quote": req["payload"].get("story_text", ""),
+                 "confirmation_status": "proposed", "user_reported": True,
+                 "urgency": "normal", "urgency_reason": None, "user_priority": None},
+                {"need_id": "need_002", "category": "food_assistance", "subcategory": None,
+                 "description": "Problems with food", "original_quote": req["payload"].get("story_text", ""),
+                 "confirmation_status": "proposed", "user_reported": True,
+                 "urgency": "normal", "urgency_reason": None, "user_priority": None},
+            ],
+            "factual_claims": [],
+            "ambiguity_flags": [
+                {"field": "triggering_circumstances",
+                 "quote": req["payload"].get("story_text", ""),
+                 "note": "unspecified_hardship_cause"}
+            ],
+            "safety_or_official_deadline_flags": [],
+        })
+
+    # parse_clarification_answer
+    answer_text = req["payload"].get("answer_text", "")
+    pending    = req["payload"].get("pending_fact_keys", [])
+    claims = []
+    proposed_needs = []
+
+    # 5-digit ZIP
+    if re.search(r"\b\d{5}\b", answer_text) and "zip_code" in pending:
+        m = re.search(r"\b(\d{5})\b", answer_text)
+        claims.append({"fact_id": "fa_zip", "field": "zip_code", "value": m.group(1),
+                       "confirmation_status": "proposed", "source": "user_statement",
+                       "time_context": None})
+
+    # "0" or number + "month" → income
+    income_key = "household_gross_monthly_income"
+    if income_key in pending:
+        if answer_text.strip() == "0":
+            claims.append({"fact_id": "fa_inc", "field": income_key, "value": 0,
+                           "confirmation_status": "proposed", "source": "user_statement",
+                           "time_context": None})
+        else:
+            m2 = re.search(r"\b(\d[\d,]*)\b", answer_text)
+            if m2 and "month" in answer_text.lower():
+                val = int(m2.group(1).replace(",", ""))
+                claims.append({"fact_id": "fa_inc", "field": income_key, "value": val,
+                               "confirmation_status": "proposed", "source": "user_statement",
+                               "time_context": None})
+
+    # "hours" → triggering_circumstances
+    tc_key = "triggering_circumstances"
+    if tc_key in pending and "hours" in answer_text.lower():
+        claims.append({"fact_id": "fa_tc", "field": tc_key, "value": "reduced_hours",
+                       "confirmation_status": "proposed", "source": "user_statement",
+                       "time_context": None})
+
+    # "doctor" → propose medical_health_coverage need (new id not in existing_needs)
+    if "doctor" in answer_text.lower():
+        existing_ids = {n["need_id"] for n in req["payload"].get("existing_needs", [])}
+        new_id = "need_003"
+        while new_id in existing_ids:
+            new_id = f"need_{int(new_id.split('_')[1]) + 1:03d}"
+        proposed_needs.append(
+            {"need_id": new_id, "category": "medical_health_coverage", "subcategory": None,
+             "description": "Medical care need", "original_quote": answer_text,
+             "confirmation_status": "proposed", "user_reported": True,
+             "urgency": "normal", "urgency_reason": None, "user_priority": None})
+
+    result = {"factual_claims": claims}
+    if proposed_needs:
+        result["proposed_needs"] = proposed_needs
+    return _env(req, result)
+
+
+def agent_2_dialog(req):
+    """Dialog fake Agent 2.
+
+    Asks triggering_circumstances while the ambiguity flag is passed and it is not a fact/asked.
+    Then asks zip_code and household_gross_monthly_income (can_skip false) if missing and not asked.
+    Then nothing.
+    """
+    facts = {f["field"] for f in req["payload"].get("case_facts", [])}
+    asked = set(req["payload"].get("already_asked", []))
+    flags = req["payload"].get("ambiguity_flags", [])
+
+    crs = []
+
+    # Ask triggering_circumstances if flagged and not known
+    tc_flagged = any(f.get("field") == "triggering_circumstances" for f in flags)
+    if tc_flagged and "triggering_circumstances" not in facts and "triggering_circumstances" not in asked:
+        crs.append({
+            "fact_key": "triggering_circumstances",
+            "question_intent": "What caused the difficulty",
+            "user_facing_question": ("Could you tell me a little more about what happened "
+                                     "that led to these difficulties?"),
+            "reason": "The cause decides which programs fit.",
+            "applicable_program_ids": [],
+            "verified_rule_ref": None,
+            "necessity_level": "helpful",
+            "can_skip": True,
+        })
+
+    # Ask zip_code if missing and not asked
+    if "zip_code" not in facts and "zip_code" not in asked:
+        crs.append({
+            "fact_key": "zip_code",
+            "question_intent": "Where the person lives",
+            "user_facing_question": "What is your ZIP code?",
+            "reason": "Programs depend on where you live.",
+            "applicable_program_ids": [],
+            "verified_rule_ref": None,
+            "necessity_level": "required_for_decision",
+            "can_skip": True,
+        })
+
+    # Ask household_gross_monthly_income if missing and not asked (can_skip false)
+    if ("household_gross_monthly_income" not in facts
+            and "household_gross_monthly_income" not in asked):
+        crs.append({
+            "fact_key": "household_gross_monthly_income",
+            "question_intent": "Income for eligibility",
+            "user_facing_question": "What is your approximate gross monthly household income?",
+            "reason": "Income limits decide CalFresh and rent help.",
+            "applicable_program_ids": [],
+            "verified_rule_ref": None,
+            "necessity_level": "required_for_decision",
+            "can_skip": False,
+        })
+
+    return _env(req, {"need_updates": [], "optional_food_check": False},
+                status="completed") | {"clarification_requests": crs}
+
+
+def agent_2_dialog_no_questions(req):
+    """Dialog fake Agent 2 that never asks any questions (geography guard test)."""
+    return _env(req, {"need_updates": [], "optional_food_check": False},
+                status="completed") | {"clarification_requests": []}
+
+
+def agent_2_dialog_repeats_asked(req):
+    """Dialog fake Agent 2 that always asks triggering_circumstances again (drop + summary test)."""
+    crs = [{
+        "fact_key": "triggering_circumstances",
+        "question_intent": "repeat",
+        "user_facing_question": "What happened again?",
+        "reason": "testing drop",
+        "applicable_program_ids": [],
+        "verified_rule_ref": None,
+        "necessity_level": "helpful",
+        "can_skip": True,
+    }]
+    return _env(req, {"need_updates": [], "optional_food_check": False},
+                status="completed") | {"clarification_requests": crs}
+
+
+def agent_2_dialog_always_new(req):
+    """Dialog fake Agent 2 that always asks a new key (loop guard test)."""
+    asked = set(req["payload"].get("already_asked", []))
+    # Pick a new key not yet asked
+    for i in range(1, 100):
+        key = f"new_key_{i:02d}"
+        if key not in asked:
+            break
+    crs = [{
+        "fact_key": key,
+        "question_intent": "loop guard test",
+        "user_facing_question": f"Question about {key}?",
+        "reason": "testing loop guard",
+        "applicable_program_ids": [],
+        "verified_rule_ref": None,
+        "necessity_level": "helpful",
+        "can_skip": True,
+    }]
+    return _env(req, {"need_updates": [], "optional_food_check": False},
+                status="completed") | {"clarification_requests": crs}
+
+
+def agent_1_dialog_with_safety(req):
+    """Agent 1 that returns a safety flag when answer contains 'hurt' (parse_clarification_answer).
+
+    For understand_story: behaves like agent_1_dialog.
+    """
+    if req.get("task_type") == "understand_story":
+        return agent_1_dialog(req)
+    # parse_clarification_answer
+    r = agent_1_dialog(req)
+    answer_text = req["payload"].get("answer_text", "")
+    if "hurt" in answer_text.lower():
+        r["result"]["safety_or_official_deadline_flags"] = [
+            {"type": "safety", "quote": "[REDACTED]",
+             "note": "Threat of physical harm reported"}]
+    return r
+
+
+def agent_8_dialog_with_gap(req):
+    """Agent 8 that returns one card for need_001 and a coverage gap for need_002."""
+    base = agent_8(req)
+    # Remove any card for need_002
+    base["result"]["action_cards"] = [
+        c for c in base["result"]["action_cards"]
+        if "need_002" not in c.get("related_need_ids", [])]
+    base["result"]["coverage_gaps"] = [
+        {"need_id": "need_002",
+         "note": "We have not found a verified program for this need yet."}]
+    return base
+
+
+def agent_3_dialog(req):
+    """Dialog fake Agent 3: like agent_3, but matches only the needs it receives (as the real Agent 3)."""
+    ids = {n["need_id"] for n in req["payload"]["needs"]}
+    r = agent_3(req)
+    r["result"]["candidate_programs"] = [
+        c for c in r["result"]["candidate_programs"] if set(c["matched_need_ids"]) <= ids]
+    return r
+
+
+def agent_1_dialog_fails_on_answer(req):
+    """Agent 1 that answers understand_story normally but raises on parse_clarification_answer."""
+    if req.get("task_type") == "understand_story":
+        return agent_1_dialog(req)
+    raise ValueError("Agent 1 internal error on answer")
