@@ -15,6 +15,7 @@ import os
 import re
 
 from navigator.supervisor import builders as B
+from navigator.supervisor.intake_requirements import candidate_requirements
 from navigator.supervisor import checks
 from navigator.supervisor import run as R
 
@@ -52,7 +53,17 @@ FACT_LABELS = {
     "children_ages":                    "Ages of your children",
     "employment_status":                "Work situation",
     "rent_amount_monthly":              "Monthly rent",
+    "mortgage_due_date": "Mortgage payment due date",
+    "mortgage_payment_overdue": "Mortgage payment overdue",
+    "has_written_mortgage_notice": "Written mortgage notice received",
     "rent_due_date":                    "Rent due date",
+    "has_safe_place_tonight":           "Safe place to stay tonight",
+    "has_rental_agreement":             "Has a written rental agreement",
+    "is_college_student":              "College or university student",
+    "student_employability_program":   "Participates in an employability program",
+    "needs_housing_help":               "Needs help with housing",
+    "food_needed_by_tomorrow":          "Food needed today or tomorrow",
+    "needs_food_help":                  "Needs help getting food",
     "cash_on_hand_approx":              "Money available now",
     "has_written_eviction_notice":      "Written eviction notice received",
     "household_gross_monthly_income":   "Monthly household income (before taxes)",
@@ -64,6 +75,7 @@ FACT_LABELS = {
     "has_court_writ_or_judgment":       "Court judgment or writ",
     "specific_move_out_date":           "Move-out date named by the landlord",
     "imminent_removal_in_progress":     "Landlord is trying to remove you now",
+    "rent_shortfall_amount":            "Amount short for rent",
     "rent_arrears_amount":              "Rent owed",
 }
 
@@ -82,12 +94,12 @@ CATEGORY_LABELS = {
 # Money fact fields: displayed as $1,800
 _MONEY_FIELDS = {
     "rent_amount_monthly", "cash_on_hand_approx",
-    "household_gross_monthly_income", "rent_arrears_amount",
+    "household_gross_monthly_income", "rent_arrears_amount", "rent_shortfall_amount",
 }
 
 # Date fact fields: displayed as "Nov 30, 2026"
 _DATE_FIELDS = {
-    "rent_due_date", "eviction_notice_date",
+    "rent_due_date", "mortgage_due_date", "eviction_notice_date",
     "specific_move_out_date",
 }
 
@@ -95,6 +107,13 @@ _DATE_FIELDS = {
 _BOOL_FIELDS = {
     "has_written_eviction_notice", "has_court_writ_or_judgment",
     "imminent_removal_in_progress",
+    "has_safe_place_tonight",
+    "has_rental_agreement", "mortgage_payment_overdue", "has_written_mortgage_notice",
+    "is_college_student",
+    "student_employability_program",
+    "needs_food_help",
+    "food_needed_by_tomorrow",
+    "needs_housing_help",
 }
 
 # Valid category values (§3.4)
@@ -118,6 +137,8 @@ def _display_value(field, value):
         return None
     if field in _MONEY_FIELDS:
         try:
+            if field == "rent_shortfall_amount" and value % 1:
+                return f"${value:,.2f}"
             return f"${int(value):,}"
         except (TypeError, ValueError):
             return str(value)
@@ -362,6 +383,8 @@ def _make_questions(clarification_requests, turn, already_asked_set,
             "fact_key":         fk,
             "text":             cr.get("user_facing_question", ""),
             "can_skip":         cr.get("can_skip", True),
+            "verified_rule_ref": cr.get("verified_rule_ref"),
+            "applicable_program_ids": cr.get("applicable_program_ids", []),
             "necessity_level":  cr.get("necessity_level", "helpful"),
             "reason":           cr.get("reason", ""),
         })
@@ -391,7 +414,15 @@ _GEO_LIMITATION = ("We could not look for local programs without your ZIP code, 
 
 def _run_agent2(run, ambiguity_flags):
     """Soft Agent 2 call. Applies need_updates. Returns (clarification_requests, issues)."""
-    r2 = run.call(B.agent2_request(run.state, ambiguity_flags=ambiguity_flags or None))
+    requirements = []
+    if (run.state.needs and run.state.fact("zip_code") and "agent_3" in run.agents):
+        request, _ = B.agent3_request(run.state, run.zip_to_county)
+        preview = run.call(request)
+        if preview:
+            requirements = candidate_requirements(
+                run.state, preview["result"]["candidate_programs"], run.evidence)
+    r2 = run.call(B.agent2_request(run.state, candidate_requirements=requirements,
+                                   ambiguity_flags=ambiguity_flags or None))
     if r2 is None:
         return [], [{"code": "AGENT_FAILED", "severity": "warning",
                      "message": "Agent 2 did not return a valid result; continuing without clarification",
@@ -873,10 +904,11 @@ def start(story_text, ref_date=None, locale="en-US",
 
 # ---------------------------------------------------------------- public: answer
 
-def answer(case, answers, agents=None, kb_path=None, zips_path=None, isolate=False):
+def answer(case, answers, agents=None, kb_path=None, zips_path=None, isolate=False, *, keep_pending=False):
     """Process one turn of answers.
 
     answers: list of {question_id, answer_text} or {question_id, skipped: true}.
+    With keep_pending, unanswered questions stay in the current turn.
     Returns needs_clarification, needs_confirmation, or failed. Never raises.
     """
     try:
@@ -921,6 +953,8 @@ def answer(case, answers, agents=None, kb_path=None, zips_path=None, isolate=Fal
 
         # Process each question
         for qid, pq in pq_by_id.items():
+            if keep_pending and qid not in answers_by_id:
+                continue
             fact_key = pq["fact_key"]
             ans = answers_by_id.get(qid, {})
             if ans.get("skipped"):
@@ -966,6 +1000,14 @@ def answer(case, answers, agents=None, kb_path=None, zips_path=None, isolate=Fal
 
         # Bump case_version
         st.case_version += 1
+        remaining = [q for q in pending_questions if q["question_id"] not in answers_by_id]
+        if keep_pending and remaining:
+            case_out = _make_case(run, "clarifying", old_turn, ambiguity_flags, safety_flags,
+                                  narrative_summary, remaining, limitations, skipped_keys, unread_keys=unread_keys)
+            safety_notice = _safety_notice(safety_flags)
+            if safety_notice is not None:
+                run.supervisor_issues += _emergency_contacts()[1]
+            return _clarification_response(run, remaining, case_out, old_turn, limitations, safety_notice)
         new_turn = old_turn + 1
 
         # Loop guard
@@ -1098,6 +1140,16 @@ def confirm(case, corrections=None, rejected_need_ids=None, added_needs=None,
                     "time_context": None,
                 })
 
+        if "food_needed_by_tomorrow" in corrections:
+            urgent_food = corrections["food_needed_by_tomorrow"]
+            for need in confirmed_needs:
+                if need["category"] == "food_assistance":
+                    need["urgency"] = "immediate" if urgent_food else "high"
+                    need["urgency_reason"] = (
+                        "The household reports needing food today or tomorrow" if urgent_food
+                        else "Food assistance is needed beyond tomorrow"
+                    )
+
         # Confirm non-disputed needs
         for n in st.needs:
             if n.get("confirmation_status") != "disputed":
@@ -1165,6 +1217,7 @@ def confirm(case, corrections=None, rejected_need_ids=None, added_needs=None,
             "summary":          None,
             "plan":             plan,
             "plan_by_need":     pbn,
+            "card_details":     plan_report["card_details"],
             "final_validation": final_validation,
             "rejected_needs":   rejected,
             "safety_notice":    _safety_notice(safety_flags),

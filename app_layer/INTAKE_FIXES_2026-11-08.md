@@ -1,0 +1,1 @@
+Intake corrections: negative eviction statements no longer imply positive notices; unknown need answers do not become fake needs; summary need edits normalize/deduplicate and reject unsupported labels; removed no-op city check. Deterministic intake remains a prototype, not LLM Supervisor. Verified: 228 tests, 52 subtests; node --check intake_v9.js. Browser end-to-end unverified.

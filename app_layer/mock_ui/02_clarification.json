@@ -1,0 +1,34 @@
+{
+  "ui_contract_version": "0.1-draft",
+  "case_id": "case_demo_001",
+  "case_version": 1,
+  "event_id": "evt_002",
+  "phase": "conversation",
+  "messages": [
+    {
+      "id": "m1",
+      "role": "user",
+      "text": "I lost my job and I am worried about rent and food."
+    },
+    {
+      "id": "m2",
+      "role": "navigator",
+      "text": "I can help you organize next steps. Have you received an eviction notice, or is rent due soon?"
+    },
+    {
+      "id": "m3",
+      "role": "user",
+      "text": "Rent is due in five days. I have not received an eviction notice."
+    },
+    {
+      "id": "m4",
+      "role": "navigator",
+      "text": "Thank you. Are you currently in Sacramento County?"
+    }
+  ],
+  "situation_summary": null,
+  "processing": null,
+  "action_plan": null,
+  "case_progress": [],
+  "errors": []
+}

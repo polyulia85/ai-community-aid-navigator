@@ -20,6 +20,7 @@ import uuid
 from dataclasses import dataclass, field
 
 from navigator.supervisor import builders as B
+from navigator.supervisor.card_details import for_released_cards
 from navigator.supervisor import checks
 from navigator.supervisor import contract as C
 
@@ -478,7 +479,10 @@ class Run:
                 "coverage_gaps": current_plan["coverage_gaps"],
                 "withheld_card_ids": withheld,
                 "withheld_cards": withheld_cards}
-        return self.report("completed", plan)
+        report = self.report("completed", plan)
+        report["card_details"] = for_released_cards(
+            cards, pkg["checked_claims"], self.programs, self.evidence, st.needs)
+        return report
 
     def report(self, outcome, plan=None):
         # Build final_validation from last accepted Agent 10 result (FIX 6).

@@ -1,5 +1,17 @@
 # Status
 
+## Integrated local demo
+
+Open [START_HERE.md](START_HERE.md) and run `python3 -m app_layer.server --port 18765` from the directory containing `agents.json`. The browser uses the live local Supervisor for Conversation, Situation Summary, Action Plan and My Case. Files in `app_layer/mock_ui/` are older test fixtures. The live page does not load them.
+
+The plan shows the first action and its reason when a released card has `order_group=first`. Card details come from supported entries in the Sacramento knowledge base. The full program guide shows source links and distinguishes the user's target date from a published program deadline where each is available.
+
+This build looks up programs in the local Sacramento knowledge base. The email flow simulates delivery. Account registration, server-side case recovery, live source rechecking, semantic retrieval and watsonx.ai are outside this local build. See [INTEGRATION_REPORT.md](INTEGRATION_REPORT.md) for the verified flows and [HANDOFF_FOR_SLAV.md](HANDOFF_FOR_SLAV.md) for the integration handoff.
+
+## Historical component snapshot from October 27, 2026
+
+The notes below describe an earlier team checkpoint.
+
 Last updated: October 27, 2026. Everything below is a local Python prototype. It is **not** yet integrated with IBM watsonx Orchestrate. A local prototype does not count as completed IBM integration.
 
 | Component | Owner | Version | State | Notes |
@@ -12,7 +24,7 @@ Last updated: October 27, 2026. Everything below is a local Python prototype. It
 | Knowledge Base (Sacramento) | Silver | v1.0 schema | 4 programs (Nov 2 update staged) | CalFresh, EDD Unemployment Insurance, Saint John's Housing Assistance (temporarily closed until Nov 2), Coordinated Access via 2-1-1 press 8 |
 | Agent 9, UI, accounts, database | — | — | Not built | Contracts section 8 |
 
-## Last integration run
+### Integration run at that checkpoint
 
 October 27, 2026, Supervisor v0.2.2 with Agents 1–2 v3.1, 3–5 v1.3 and 6–10 v0.5, on the shared synthetic case (contracts section 6): all 12 steps accepted, Agent 10 PASS, 5 Action Cards with program names, in three runs (current KB; KB after the Nov 2 update; demo story with rent due Dec 1). The deliberately broken result is rejected as designed.
 

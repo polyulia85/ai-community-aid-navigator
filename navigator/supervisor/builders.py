@@ -382,6 +382,9 @@ def geography(state, zip_to_county):
 def agent3_request(state, zip_to_county):
     needs = [{k: n.get(k) for k in ("need_id", "category", "description", "urgency")}
              for n in state.needs]
+    for item, need in zip(needs, state.needs):
+        if need.get("subcategory") == "mortgage_assistance":
+            item["subcategory"] = need["subcategory"]
     geo, issues = geography(state, zip_to_county)
     req = make_request(state, "agent_3", "retrieve_candidates",
                        {"needs": needs, "geography": geo, "retrieval_constraints": []})
@@ -472,6 +475,7 @@ def planning_package(state, programs, evidence, agent3_result, agent4_result, ag
 
     # timing: user dates from case facts, official deadlines only from the KB, never invented
     rent_date = state.fact("rent_due_date")
+    mortgage_date = state.fact("mortgage_due_date")
     timing = []
     for c in cands:
         p = programs.get(c["program_id"], {})
@@ -482,7 +486,10 @@ def planning_package(state, programs, evidence, agent3_result, agent4_result, ag
             timing.append({
                 "need_id": nid, "program_id": c["program_id"],
                 "official_deadline": deadlines[0]["value"] if len(deadlines) == 1 else None,
-                "user_target_date": rent_date if need.get("category") == "housing_assistance" else None,
+                "user_target_date": (
+                    mortgage_date if need.get("subcategory") == "mortgage_assistance"
+                    else rent_date if need.get("category") == "housing_assistance" else None
+                ),
                 "estimated_processing_time": proc.get("value") if isinstance(proc, dict) else None,
             })
 
@@ -502,6 +509,8 @@ def agent6_request(state, package, upstream, *, ref_date):
     """ref_date: datetime.date or ISO string, same value as in the Agent 1 payload (FIX 16)."""
     payload = dict(package, ref_date=_ref_date_iso(ref_date, "agent6_request"))
     return make_request(state, "agent_6", "prioritize_actions", payload,
+                        allowed_case_facts=[f for f in state.case_facts if f["field"] in (
+                            "mortgage_payment_overdue", "has_written_mortgage_notice")],
                         upstream_result_refs=upstream)
 
 

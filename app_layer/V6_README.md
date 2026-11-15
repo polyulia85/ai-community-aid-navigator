@@ -1,0 +1,1 @@
+Conversation v6 is a browser-only deterministic test, NOT Agents 1–2. It confirms keyword-detected needs and asks four fixed questions. No user input is sent to the backend, saved, or used for program matching. Action Plan starts empty. The bridge button runs a separate synthetic diagnostic. Run: python3.11 app_layer/server.py from project root. Do not enter real personal data.

@@ -21,6 +21,7 @@ Contract invariants enforced:
   triggering_events / employment_status root-cause tokens from previous turns.
 """
 from datetime import datetime, timezone
+import re
 from typing import Any, Dict, List, Set
 
 _THREAT_CLARIFICATION_ITEMS = [
@@ -126,12 +127,19 @@ def handle_agent_2(request_dict: Dict[str, Any]) -> Dict[str, Any]:
         already_asked_keys.add("triggering_events")
         already_asked_keys.add("employment_status")
 
+    no_shelter = any(n.get("subcategory") == "emergency_shelter" for n in needs)
+    if no_shelter and "has_safe_place_tonight" not in known_keys | already_asked_keys:
+        clarification_requests.append(_context_question(
+            "has_safe_place_tonight", "Do you have a safe place to stay tonight?",
+            "Determine whether the person needs shelter tonight."))
+        seen_keys.add("has_safe_place_tonight")
+
     # Step 1 — Circumstance-First Gate
     unspecified_hardship = "unspecified_hardship_cause" in ambiguity_flag_notes
     circumstances_already_asked = "triggering_circumstances" in already_asked_keys
     circumstances_in_facts = "triggering_circumstances" in known_keys
 
-    if unspecified_hardship and not circumstances_already_asked and not circumstances_in_facts:
+    if unspecified_hardship and not clarification_requests and not circumstances_already_asked and not circumstances_in_facts:
         clarification_requests.append({
             "fact_key": "triggering_circumstances",
             "question_intent": "Identify root cause and circumstances of hardship",
@@ -365,17 +373,75 @@ def handle_agent_2(request_dict: Dict[str, Any]) -> Dict[str, Any]:
         })
         seen_keys.add("household_size")
 
-    # 6. Conditional Food Check (§19.1)
-    has_food_need = any(isinstance(n, dict) and n.get("category") == "food_assistance" for n in needs)
-    has_income_need_flag = any(n.get("category") == "income_assistance" for n in needs if isinstance(n, dict))
-    has_income_loss_fact = any(
-        any(k in str(f.get("value", "")) for k in ["laid_off", "unemployed", "fired", "reduced_hours"])
-        for f in case_facts if isinstance(f, dict)
+    # Ask about affected essentials after the first income round. A positive
+    # answer can add a need and trigger program-specific questions.
+    categories = {n.get("category") for n in needs if isinstance(n, dict)}
+    income_disrupted = ("income_assistance" in categories or known_facts.get("employment_status")
+                        in {"laid_off", "unemployed", "fired", "reduced_hours"})
+    housing_without_income = no_shelter and known_facts.get("household_gross_monthly_income") == 0
+    optional_food_check = (income_disrupted or housing_without_income) and "food_assistance" not in categories
+    has_housing_question = any(
+        q["fact_key"] in {"has_written_eviction_notice", "eviction_notice_type", "has_rental_agreement"}
+        for q in clarification_requests
     )
-    optional_food_check = (has_income_need_flag or has_income_loss_fact) and not has_food_need
+    if has_income_fact or "household_gross_monthly_income" in already_asked_keys:
+        for should_ask, key, question, reason in (
+            (optional_food_check, "needs_food_help", "Do you need help getting food in the next few days?",
+             "Check whether the plan should include food resources."),
+            (income_disrupted and "housing_assistance" not in categories and not has_housing_question,
+             "needs_housing_help",
+             "Are you worried you won't be able to pay for housing or keep a place to stay?",
+             "Check whether the loss of income puts housing at risk."),
+        ):
+            if should_ask and key not in known_keys | already_asked_keys | seen_keys and len(clarification_requests) < 2:
+                clarification_requests.append(_context_question(key, question, reason))
+
+    if any(n.get("subcategory") == "mortgage_assistance" for n in needs):
+        for key, question in (
+            ("mortgage_due_date", "When is or was your mortgage payment due?"),
+            ("mortgage_payment_overdue", "Is the mortgage payment already overdue?"),
+            ("has_written_mortgage_notice", "Have you received a written notice about missed payments or foreclosure from your mortgage servicer?"),
+        ):
+            if key not in known_keys | already_asked_keys | seen_keys and len(clarification_requests) < 2:
+                clarification_requests.append(_context_question(
+                    key, question, "Determine how soon mortgage assistance is needed."))
+
+    rent_context = not no_shelter and any(
+        n.get("category") == "housing_assistance" and n.get("subcategory") != "mortgage_assistance" and (
+            known_facts.get("has_rental_agreement") is True
+            or any(key in known_keys for key in ("rent_amount_monthly", "rent_due_date", "rent_arrears_amount",
+                                                 "rent_shortfall_amount"))
+            or re.search(r"\brent(?:al)?\b", " ".join(n.get(key) or "" for key in ("description", "original_quote")), re.I)
+        )
+        for n in needs
+    )
+    if rent_context:
+        for key, question, reason in (
+            ("rent_shortfall_amount", "How much money are you short for rent?",
+             "Record the amount still needed to cover rent."),
+            ("rent_due_date", "What date is your rent due?",
+             "Determine when the household needs help covering rent."),
+        ):
+            if key not in known_keys | already_asked_keys | seen_keys and len(clarification_requests) < 2:
+                clarification_requests.append(_context_question(key, question, reason))
+
+    food_timing_key = "food_needed_by_tomorrow"
+    if (len(clarification_requests) < 2
+            and food_timing_key not in known_keys | already_asked_keys | seen_keys
+            and any(n.get("category") == "food_assistance" and n.get("user_reported") is True
+                    and n.get("urgency") != "immediate" for n in needs)):
+        clarification_requests.append(_context_question(
+            food_timing_key, "Will anyone in your household run out of food today or tomorrow?",
+            "Separate immediate food distribution from longer-term food assistance."))
 
     # 7. Need Updates: emit ONLY when urgency actually changes
     need_updates: List[Dict[str, Any]] = []
+    if known_facts.get(food_timing_key) is True:
+        need_updates.extend({
+            "need_id": need["need_id"], "urgency": "immediate",
+            "urgency_reason": "The household reports needing food today or tomorrow",
+        } for need in needs
+          if need.get("category") == "food_assistance" and need.get("urgency") != "immediate")
     late_stage_housing = (
         known_facts.get("has_court_writ_or_judgment") is True
         or known_facts.get("imminent_removal_in_progress") is True
@@ -423,9 +489,37 @@ def handle_agent_2(request_dict: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _context_question(key, text, reason):
+    return {"fact_key": key, "user_facing_question": text, "question_intent": reason,
+            "reason": reason, "applicable_program_ids": [], "verified_rule_ref": None,
+            "necessity_level": "helpful", "can_skip": True}
+
+
+_PROGRAM_QUESTIONS = {
+    "household_size": ("How many people buy and prepare food together in your household, including you?",
+                       "Household size is used to compare CalFresh income limits."),
+    "cash_on_hand_approx": ("About how much money can your household use now from cash, checking or savings?",
+                            "Available funds can affect expedited CalFresh screening."),
+    "has_rental_agreement": ("Do you have a written rental or lease agreement for the housing you need help with?",
+                             "This rental assistance program lists a valid rental agreement."),
+    "student_employability_program": ("Are you enrolled in a college program that helps students prepare for employment?",
+                                     "Some college employability programs can affect CalFresh student screening."),
+}
+
+
 def _build_question(
     fact_key: str, req: Dict[str, Any]
 ) -> tuple:
+    if fact_key in _PROGRAM_QUESTIONS:
+        text, reason = _PROGRAM_QUESTIONS[fact_key]
+        return text, reason, reason, req.get("can_skip", True)
+    if fact_key == "household_gross_monthly_income" and req.get("program_id"):
+        return (
+            "What is your approximate gross monthly household income, before taxes?",
+            "Determine current monthly household income",
+            "Current household income helps screen this program.",
+            req.get("can_skip", True),
+        )
     if fact_key == "has_written_eviction_notice":
         return (
             "Have you received a formal written notice from your landlord? "

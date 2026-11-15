@@ -363,7 +363,10 @@ def _next_step_contacts(contacts):
     return snippets
 
 
-def _subcat(match, needs):
+def _subcat(match, needs, need_id=None):
+    need = needs.get(need_id or match["need_ids"][0], {})
+    if need.get("subcategory") == "mortgage_assistance":
+        return "mortgage_assistance"
     if match.get("subcategory"):
         return match["subcategory"]
     n = needs.get(match["need_ids"][0], {})
@@ -376,6 +379,9 @@ TEMPLATES = {
     "food_pantry":           ("Visit a local food pantry", "offers free food in your area", "Check the posted hours and visit during an open time.", "A pantry is usually the fastest way to get food."),
     "calfresh_benefits":     ("Check food benefits", "provides ongoing help buying food", "Contact the provider or apply through the official site. They decide eligibility based on your household.", "Benefits take time to process, so starting now helps."),
     "unemployment_insurance":("Apply for unemployment benefits", "can replace part of lost wages after a layoff", "Start the online application. Have your last employer's details and last day worked ready.", "Income replacement supports your other needs, and payments take time to start, so file early."),
+    "mortgage_assistance": ("Ask about mortgage payment help", "lists assistance with mortgage payments",
+                            "Contact the provider to check whether mortgage payment assistance is currently available and what to prepare.",
+                            "Check whether the program can help with your mortgage payment."),
     "rental_assistance":     ("Ask about rent help", "offers help with rent in Sacramento", "Contact the provider to confirm requirements and whether assistance is currently available.", "Contacting this program early gives the most time to arrange help."),
     "eviction_prevention":   ("Ask about help to stay in your home", "helps tenants at risk of losing their housing", "Contact the provider to ask what help is available and what documents to bring, such as any notice from your landlord.", "Getting this contact early gives you the most options."),
     "emergency_shelter":     ("Ask about emergency housing", "connects people to emergency shelter and housing help", "Contact the provider to ask about current openings and how to get connected.", "Ask about current openings; availability changes and is not guaranteed."),
@@ -664,7 +670,6 @@ def agent_6(request):
     for m in p["matches"]:
         if m["match_status"] == "confirmed_mismatch":
             continue  # never recommended
-        sub = _subcat(m, needs)
         dl = _deadline_info(m["program_id"], claims)
         timing = _timing(p, m["program_id"])
         proc_time = timing.get("estimated_processing_time")
@@ -672,9 +677,16 @@ def agent_6(request):
         # A6-01: one action per need_id when the match covers multiple needs.
         for need_id in m["need_ids"]:
             need = needs[need_id]
+            sub = _subcat(m, needs, need_id)
             # PR #13 fix 7: urgency wording only when urgency is "immediate".
             base_why = TEMPLATES.get(sub, DEFAULT)[3]
             group = {"immediate": "first", "high": "parallel", "unknown": "parallel"}.get(need["urgency"], "later")
+            if sub == "mortgage_assistance" and any(
+                facts.get(key, {}).get("value") is True
+                for key in ("mortgage_payment_overdue", "has_written_mortgage_notice")
+            ):
+                group = "first"
+                base_why = "You reported a missed mortgage payment or a written notice."
             # §15.2 rule 5: user_priority must NOT change order_group or urgency.
             # user_preference is kept separate from action ordering.
             user_date = timing.get("user_target_date")
@@ -684,7 +696,7 @@ def agent_6(request):
             _from_rent_date = False
             _from_notice_date = False
             if (not user_date and need["category"] == "housing_assistance"
-                    and "rent_due_date" in facts):
+                    and sub != "mortgage_assistance" and "rent_due_date" in facts):
                 user_date = facts["rent_due_date"]["value"]
                 _from_rent_date = True
             # TD 20.5 H3: if eviction_notice_type contains a date (e.g. "sheriff lockout Nov 11"),
@@ -726,6 +738,13 @@ def agent_6(request):
                 dependency = [confirm["action_id"]]
             notes = _uncertainty(m, p)
             refs = list(m["evidence_refs"])
+            if sub == "mortgage_assistance":
+                refs.extend(
+                    item["evidence_id"] for item in p.get("evidence_records", [])
+                    if item["program_id"] == m["program_id"] and item.get("field_path") == "program_name"
+                    and item.get("verification_status") == "verified"
+                    and "mortgage payments" in str(item.get("claim_value", "")).lower()
+                )
             if _availability(p).get(m["program_id"]) == "temporarily_closed":
                 group = "later"  # never presented as current help (contract 4.6)
                 reopen, ev = _reopen_date(p, m["program_id"])
@@ -827,6 +846,37 @@ def agent_6(request):
                 a["uncertainty_notes"] = list(a.get("uncertainty_notes") or []) + [
                     "Help from this program is not guaranteed. Contact them directly to confirm current availability."
                 ]
+    # Start with a pantry when food is immediately needed and the knowledge
+    # base supports an available option. Preserve separately justified deadlines.
+    verified_availability = {
+        record["program_id"] for record in p.get("evidence_records", [])
+        if record.get("field_path", "").startswith("availability")
+        and record.get("verification_status") == "verified"
+    }
+    for need_id, need in needs.items():
+        if need["category"] != "food_assistance" or need["urgency"] != "immediate":
+            continue
+        food_start = next((
+            action for action in actions
+            if action["need_id"] == need_id
+            and action["order_group"] == "first"
+            and _action_sub.get(action["action_id"]) == "food_pantry"
+            and avail.get(action["program_id"]) == "confirmed_open"
+            and action["program_id"] in verified_availability
+            and not action["dependency_ids"]
+        ), None)
+        if not food_start:
+            continue
+        food_start["rationale"] = (
+            "Your household reported an immediate need for food. Check the pantry’s hours and "
+            "distribution details first while you work on longer-term assistance."
+        )
+        for action in actions:
+            if (action is not food_start and action["need_id"] == need_id
+                    and action["order_group"] == "first" and not action["official_deadline"]
+                    and not action["dependency_ids"]
+                    and not action["rationale"].startswith(("Official sources disagree", "The published deadline"))):
+                action["order_group"] = "parallel"
     actions.sort(key=lambda a: _sort_key_6(a, housing_first, _action_sub, _action_rent_date))
     group_counters = {}
     for a in actions:
@@ -1159,7 +1209,7 @@ def agent_8(request):
             title, reason = "Confirm the application deadline", "The program's published deadline is not clear."
             next_step = "Call or check with the provider which deadline applies."
         elif m:
-            title, offers, next_step, _ = TEMPLATES.get(_subcat(m, needs), DEFAULT)
+            title, offers, next_step, _ = TEMPLATES.get(_subcat(m, needs, a["need_id"]), DEFAULT)
             label = _program_label(m)
             if label:
                 title = f"{title}: {label}"

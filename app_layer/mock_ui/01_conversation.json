@@ -1,0 +1,24 @@
+{
+  "ui_contract_version": "0.1-draft",
+  "case_id": "case_demo_001",
+  "case_version": 1,
+  "event_id": "evt_001",
+  "phase": "conversation",
+  "messages": [
+    {
+      "id": "m1",
+      "role": "user",
+      "text": "I lost my job and I am worried about rent and food."
+    },
+    {
+      "id": "m2",
+      "role": "navigator",
+      "text": "I can help you organize next steps. Have you received an eviction notice, or is rent due soon?"
+    }
+  ],
+  "situation_summary": null,
+  "processing": null,
+  "action_plan": null,
+  "case_progress": [],
+  "errors": []
+}

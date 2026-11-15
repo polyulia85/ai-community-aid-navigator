@@ -1,0 +1,108 @@
+{
+  "ui_contract_version": "0.1-draft",
+  "case_id": "case_demo_001",
+  "case_version": 2,
+  "event_id": "evt_006",
+  "phase": "my_case",
+  "messages": [
+    {
+      "id": "m1",
+      "role": "user",
+      "text": "I lost my job and I am worried about rent and food."
+    },
+    {
+      "id": "m2",
+      "role": "navigator",
+      "text": "I can help you organize next steps. Have you received an eviction notice, or is rent due soon?"
+    },
+    {
+      "id": "m3",
+      "role": "user",
+      "text": "Rent is due in five days. I have not received an eviction notice."
+    },
+    {
+      "id": "m4",
+      "role": "navigator",
+      "text": "Thank you. Are you currently in Sacramento County?"
+    }
+  ],
+  "situation_summary": {
+    "revision": 1,
+    "ready_for_review": true,
+    "confirmed": true,
+    "editable": true,
+    "needs": [
+      {
+        "need_id": "need_rent",
+        "category": "housing_assistance",
+        "description": "Help paying rent",
+        "urgency": "high"
+      },
+      {
+        "need_id": "need_food",
+        "category": "food_assistance",
+        "description": "Help obtaining food",
+        "urgency": "high"
+      }
+    ],
+    "facts": [
+      {
+        "key": "hardship_cause",
+        "value": "job_loss",
+        "source": "user_statement"
+      },
+      {
+        "key": "rent_due_in_days",
+        "value": 5,
+        "source": "user_statement"
+      },
+      {
+        "key": "eviction_notice",
+        "value": false,
+        "source": "user_statement"
+      }
+    ],
+    "unknowns": [
+      "county_not_confirmed"
+    ]
+  },
+  "processing": {
+    "status": "completed"
+  },
+  "action_plan": {
+    "plan_version": 1,
+    "cards": [
+      {
+        "card_id": "card_001",
+        "related_need_ids": [
+          "need_rent"
+        ],
+        "action_title": "Prepare rent assistance application information",
+        "next_step": "Gather your lease and current rent amount before contacting a verified provider.",
+        "order_group": "first",
+        "progress_status": "in_progress",
+        "official_deadline": null,
+        "user_target_date": null,
+        "source_refs": [],
+        "uncertainty_notes": [
+          "Demonstration card; no provider or eligibility verified."
+        ]
+      }
+    ],
+    "potential_options": [],
+    "coverage_gaps": [
+      {
+        "need_id": "need_food",
+        "reason": "No verified food program included in this mock."
+      }
+    ]
+  },
+  "case_progress": [
+    {
+      "card_id": "card_001",
+      "progress_status": "in_progress",
+      "updated_by": "user"
+    }
+  ],
+  "errors": []
+}

@@ -45,7 +45,13 @@ def handle(request, kb_path=None):
     errs = _validate(p)
     if errs:
         return envelope(request, "agent_3", "failed", {}, [issue("INPUT_INVALID", "critical", "; ".join(errs))])
-    programs, _ = load_kb(kb_path)
+    programs, evidence = load_kb(kb_path)
+    mortgage_programs = {
+        item["program_id"] for item in evidence
+        if item.get("verification_status") == "verified"
+        and item.get("field_path") == "program_name"
+        and "mortgage payments" in str(item.get("claim_value", "")).lower()
+    }
     raw_geo = p["geography"]
     counties, issues = to_counties(raw_geo)
     max_n = p.get("max_candidates") or DEFAULT_MAX
@@ -76,6 +82,8 @@ def handle(request, kb_path=None):
             hits = [pr for pr in programs if pr["category"] == need["category"] and STATEWIDE in pr["geography"]]
         else:
             hits = [pr for pr in programs if pr["category"] == need["category"] and area_covers(pr["geography"], counties)]
+        if sub == "mortgage_assistance":
+            hits = [pr for pr in hits if pr["program_id"] in mortgage_programs]
         # Subcategory is a preference, not a filter: exact subcategory first, then the rest of the category.
         hits.sort(key=lambda pr: (0 if sub and pr.get("subcategory") == sub else 1, pr["program_id"]))
         if not hits and not statewide_only:
