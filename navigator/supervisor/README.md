@@ -24,7 +24,7 @@ Owner: Slav (Supervisor / Orchestrator and integration). Contract: `docs/contrac
 | `run.py` | the runner, `_execute_body()` / `_plan_body()` / `_input_error()`, `merge_repaired_plan()` helper, and `agents.json` loader (clear one-line errors, exit code 2) |
 | `dialog.py` | dialog mode: `start()`, `answer()`, `confirm()`, the Situation Summary, `plan_by_need`, the safety notice with verified 9-1-1 and 988 contacts, and the command line (`main()`) |
 | `http_api.py` | local HTTP API over the three dialog calls (standard library `http.server`) |
-| `../../tests/` | 250 Supervisor tests (the full suite runs 485): checks, builders, full cycle on fake agents, broken and hung agents, privacy, repair rounds, ref_date, S1 per-role fields, final_validation, ZIP list, dialog mode, command line, HTTP API |
+| `../../tests/` | 292 Supervisor tests (the full suite runs 572): checks, builders, full cycle on fake agents, broken and hung agents, privacy, repair rounds, ref_date, S1 per-role fields, final_validation, ZIP list, dialog mode, command line, HTTP API |
 | `../../tests/fixtures/kb_supervisor_fixture.json` | Frozen KB copy for Supervisor tests (Nov 6, 2026). Tests use this, not the live KB. |
 | `../../tests/fixtures/zips_fixture.json`, `emergency_fixture.json` | Frozen ZIP list and emergency directory for tests. |
 
