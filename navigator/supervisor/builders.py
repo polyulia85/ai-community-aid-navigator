@@ -511,7 +511,10 @@ def agent8_request(state, package, agent6_req, agent6_result, *, ref_date):
                                         "program_availability", "evidence_records", "agent7_findings")}
     payload["proposed_actions"] = agent6_result["result"]["proposed_actions"]
     payload["ref_date"] = _ref_date_iso(ref_date, "agent8_request")
+    # The confirmed case facts, as for Agent 10, so a card can follow what the person said
+    # (e.g. a lockout). PROPOSED for contracts v1.2 (4.8 "In" does not list them yet).
     return make_request(state, "agent_8", "build_plan", payload,
+                        allowed_case_facts=state.case_facts,
                         upstream_result_refs=[agent6_req["request_id"]])
 
 
