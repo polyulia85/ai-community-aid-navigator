@@ -1,12 +1,13 @@
 # Supervisor dialog mode — call and response forms (for the App Layer)
 
-Version 0.2.5 (Nov 14, 2026) · built on v0.2.4 · owner: Slav
+Version 0.2.6 (Nov 14, 2026) · built on v0.2.5 · owner: Slav
+v0.2.6 (Supervisor v0.2.6): no field was added, renamed or removed; `dialog_version` stays `"0.2"`. The Supervisor checks the types of the agents' single values and the references in their clarification requests more strictly (an agent result with a wrong type is rejected as `SCHEMA_INVALID`; the team's agents passed every check in all dialog scenarios); one new developer code, `PLAN_FLAG_NOT_REPAIRED` (§4.4); the command line gives exit code 2 and one line, never a traceback, for a file that is not UTF-8. 572 tests.
 v0.2.5: when the person skipped the ZIP, a need with no card names the cause first in `gap_notes`: "We could not look for local programs for this need without your ZIP code." (§4.3). `unknown[].why` has a third value, `not_understood` (§4.2): the person answered, but no value could be read. The HTTP server takes `quiet` in `make_server` (tests only). No field was renamed or removed. 485 tests.
 v0.2.4: `locale` now works in all three ways of calling `start` (the HTTP API and the command line passed it on to nobody before) and is checked: anything other than a language tag such as `en-US` gives `failed` `LOCALE_INVALID` (§4.1, §4.4). `--allow-origin` takes an origin such as `http://localhost:3000` (§2). No response field changed; `dialog_version` stays `"0.2"`. 475 tests.
 v0.2.3: matches the code as built (Supervisor v0.2.5, branch `slav/supervisor-v0.2.5`, 467 tests). Added: the command line (§2), HTTP 405 and the `BAD_REQUEST` body (§2), the type rules for corrections and the code `FACT_VALUE_INVALID` (§4.3), the verified 9-1-1 and 988 contacts in `safety_notice` and the code `SAFETY_CONTACT_UNVERIFIED` (§5), `skipped_keys`, `limitations` and full questions in the `case` (§6). No response field was renamed or removed; `dialog_version` stays `"0.2"`.
 v0.2.2: the county comes from the verified county ZIP list in the KB (option `--zips` / `zips_path`); three more developer codes (`COUNTY_FROM_ZIP_LIST`, `ZIP_LIST_UNAVAILABLE`, `ANSWER_FACT_INVALID`). No field of any call or response changed; `dialog_version` stays `"0.2"`.
 v0.2.1: a need with no card and no gap now gets a plain explanation for the user (Julia: no need disappears from the plan without an explanation); facts the person states beyond the question are kept, not dropped.
-Status: built and tested (Supervisor v0.2.5). Field values in the examples are illustrative; real examples from a run with the team's agents will be added in `docs/examples/dialog/`.
+Status: built and tested (Supervisor v0.2.6). Field values in the examples are illustrative; real examples from a run with the team's agents will be added in `docs/examples/dialog/`.
 
 What changed since v0.1 (Julia's answers, Nov 11):
 - The App Layer is a browser app with a Python backend → an **HTTP API** (§2). The backend may also import the three functions directly.
@@ -238,7 +239,7 @@ or `{"question_id": "q2-1", "skipped": true}`.
 | `CASE_INVALID`, `WRONG_STAGE` | the case is broken, or e.g. `confirm` before the questions are done | a developer bug: send the last case to the right call |
 | `SUPERVISOR_INPUT_ERROR`, `AGENT_FAILED`, `TIMEOUT`, `SCHEMA_INVALID` | something failed inside | `user_message`; let the user retry |
 | `GEOGRAPHY_MISSING` (warning) | the ZIP was skipped | the `limitations` sentence |
-| `QUESTION_DROPPED`, `QUESTION_LOOP_GUARD`, `ANSWER_FACT_OUTSIDE_QUESTION`, `ANSWER_FACT_CONFLICT`, `ANSWER_FACT_INVALID`, `ANSWER_NEED_DUPLICATE`, `ANSWER_NEED_INVALID`, `ANSWER_NEEDS_INVALID`, `NEED_NOT_IN_PLAN`, `PII_MASKED`, `COUNTY_UNKNOWN`, `COUNTY_FROM_ZIP_LIST`, `ZIP_LIST_UNAVAILABLE`, `FACT_LABEL_MISSING`, `SAFETY_CONTACT_UNVERIFIED`, `MOCK_COMPONENT`, and the agent check codes of a stopped plan (e.g. `UNKNOWN_REFERENCE`) | information for developers | nothing |
+| `QUESTION_DROPPED`, `QUESTION_LOOP_GUARD`, `ANSWER_FACT_OUTSIDE_QUESTION`, `ANSWER_FACT_CONFLICT`, `ANSWER_FACT_INVALID`, `ANSWER_NEED_DUPLICATE`, `ANSWER_NEED_INVALID`, `ANSWER_NEEDS_INVALID`, `NEED_NOT_IN_PLAN`, `PLAN_FLAG_NOT_REPAIRED`, `PII_MASKED`, `COUNTY_UNKNOWN`, `COUNTY_FROM_ZIP_LIST`, `ZIP_LIST_UNAVAILABLE`, `FACT_LABEL_MISSING`, `SAFETY_CONTACT_UNVERIFIED`, `MOCK_COMPONENT`, and the agent check codes of a stopped plan (e.g. `UNKNOWN_REFERENCE`) | information for developers | nothing |
 
 `STALE_CASE` (an older case sent back) needs a store and is not detected in the MVP.
 

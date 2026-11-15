@@ -959,8 +959,7 @@ def answer(case, answers, agents=None, kb_path=None, zips_path=None, isolate=Fal
 
         # ZIP skipped → add geography limitation
         zip_known = any(f.get("field") == "zip_code" for f in st.case_facts)
-        geography_missing = not zip_known and "zip_code" in st.already_asked
-        if geography_missing:
+        if not zip_known and "zip_code" in st.already_asked:
             if _GEO_LIMITATION not in limitations:
                 limitations.append(_GEO_LIMITATION)
 
@@ -1294,7 +1293,7 @@ def main(argv=None):
         try:
             with open(a.story_file, encoding="utf-8-sig") as f:
                 story_text = f.read()
-        except OSError as exc:
+        except (OSError, ValueError) as exc:    # ValueError: the file is not UTF-8
             return _err(f"Cannot read story file: {exc}")
         ref_date = None
         if a.ref_date:
@@ -1315,12 +1314,12 @@ def main(argv=None):
         try:
             with open(a.case_in, encoding="utf-8-sig") as f:
                 prev = json.load(f)
-        except (OSError, json.JSONDecodeError) as exc:
+        except (OSError, ValueError) as exc:    # ValueError: not JSON, or not UTF-8
             return _err(f"Cannot read case-in file: {exc}")
         try:
             with open(a.answers_file, encoding="utf-8-sig") as f:
                 answers = json.load(f)
-        except (OSError, json.JSONDecodeError) as exc:
+        except (OSError, ValueError) as exc:
             return _err(f"Cannot read answers file: {exc}")
         if not isinstance(prev, dict):
             return _err("case-in file must hold a JSON object (a previous response)")
@@ -1334,7 +1333,7 @@ def main(argv=None):
         try:
             with open(a.case_in, encoding="utf-8-sig") as f:
                 prev = json.load(f)
-        except (OSError, json.JSONDecodeError) as exc:
+        except (OSError, ValueError) as exc:
             return _err(f"Cannot read case-in file: {exc}")
         if not isinstance(prev, dict):
             return _err("case-in file must hold a JSON object (a previous response)")
@@ -1344,14 +1343,14 @@ def main(argv=None):
             try:
                 with open(a.corrections_file, encoding="utf-8-sig") as f:
                     corrections = json.load(f)
-            except (OSError, json.JSONDecodeError) as exc:
+            except (OSError, ValueError) as exc:
                 return _err(f"Cannot read corrections file: {exc}")
         added_needs = None
         if a.added_file:
             try:
                 with open(a.added_file, encoding="utf-8-sig") as f:
                     added_needs = json.load(f)
-            except (OSError, json.JSONDecodeError) as exc:
+            except (OSError, ValueError) as exc:
                 return _err(f"Cannot read added-needs file: {exc}")
         resp = confirm(case, corrections=corrections,
                        rejected_need_ids=a.rejected,

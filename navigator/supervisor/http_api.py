@@ -264,15 +264,25 @@ def main(argv=None):
             print(f"Cannot load agents: {exc}")
             return 2
 
-    server = make_server(
-        host=a.host,
-        port=a.port,
-        agents=agents,
-        kb_path=a.kb,
-        zips_path=a.zips,
-        isolate=not a.no_isolate,
-        allow_origin=a.allow_origin,
-    )
+    kb_path = a.kb if a.kb is not None else R.DEFAULT_KB
+    try:
+        R.B.load_kb(kb_path)                # fail at start, not on the first request
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"Cannot load the knowledge base {kb_path}: {type(exc).__name__}: {exc}")
+        return 2
+    try:
+        server = make_server(
+            host=a.host,
+            port=a.port,
+            agents=agents,
+            kb_path=a.kb,
+            zips_path=a.zips,
+            isolate=not a.no_isolate,
+            allow_origin=a.allow_origin,
+        )
+    except OSError as exc:                  # e.g. the port is already in use
+        print(f"Cannot listen on {a.host}:{a.port}: {exc}")
+        return 2
     host, port = server.server_address
     print(f"Listening on http://{host}:{port}/")
     try:

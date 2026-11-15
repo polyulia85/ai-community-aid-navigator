@@ -82,7 +82,11 @@ class CaseState:
 
 def make_request(state, role_id, task_type, payload, task_scope="all_needs",
                  allowed_case_facts=None, upstream_result_refs=None):
-    assert task_type in C.TASK_TYPES[role_id], f"{task_type} is not a task of {role_id}"
+    # ValueError, not assert: python -O removes asserts
+    if role_id not in C.TASK_TYPES:
+        raise ValueError(f"{role_id!r} is not a known role")
+    if task_type not in C.TASK_TYPES[role_id]:
+        raise ValueError(f"{task_type} is not a task of {role_id}")
     return {
         "request_id": state.next_request_id(),
         "run_id": state.run_id,
@@ -132,6 +136,13 @@ def confirm_agent1(state, agent1_result, corrections=None):
         if f["field"] in corrections:
             f["value"] = corrections[f["field"]]
         facts.append(f)
+    # A correction for a fact Agent 1 did not extract is added as a confirmed fact (as in the dialog mode)
+    extracted = {f["field"] for f in facts}
+    for field, value in corrections.items():
+        if field not in extracted:
+            facts.append({"fact_id": f"cf-{field}", "field": field, "value": value,
+                          "confirmation_status": "confirmed", "source": "user_confirmed",
+                          "time_context": None})
     state.case_facts = facts
     state.bump_version()
 

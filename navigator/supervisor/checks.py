@@ -86,6 +86,45 @@ def _strings(obj):
             yield from _strings(v)
 
 
+def _values_at(obj, segments, here=""):
+    """Yield (path, value) for a type path split on dots, e.g. ["action_cards[]", "card_id"]."""
+    if not segments:
+        yield here, obj
+        return
+    seg, rest = segments[0], segments[1:]
+    many = seg.endswith("[]")
+    key = seg[:-2] if many else seg
+    if not isinstance(obj, dict) or key not in obj:
+        return                      # absent: presence is checked elsewhere
+    path = f"{here}.{key}" if here else key
+    if not many:
+        yield from _values_at(obj[key], rest, path)
+    elif isinstance(obj[key], list):
+        for i, item in enumerate(obj[key]):
+            yield from _values_at(item, rest, f"{path}[{i}]")
+
+
+_TYPE_TESTS = {
+    "str": lambda v: isinstance(v, str),
+    "int": lambda v: isinstance(v, int) and not isinstance(v, bool),
+    "bool": lambda v: isinstance(v, bool),
+    "list": lambda v: isinstance(v, list),
+    "null": lambda v: v is None,
+}
+
+
+def _check_types(obj, types, prefix=""):
+    """S1: SCHEMA_INVALID (critical) for each value whose type is not allowed. No values in messages."""
+    out = []
+    for type_path, spec in types.items():
+        for path, value in _values_at(obj, type_path.split(".")):
+            if not any(_TYPE_TESTS[t](value) for t in spec.split("|")):
+                out.append(issue("SCHEMA_INVALID", "critical",
+                                 f"{prefix}{path} must be {spec.replace('|', ' or ')}",
+                                 f"{prefix}{path}"))
+    return out
+
+
 # ---------------------------------------------------------------- S1
 def s1_schema(result):
     if not isinstance(result, dict):
@@ -95,9 +134,19 @@ def s1_schema(result):
     types = {"result": dict, "issues": list, "clarification_requests": list,
              "evidence_refs": list, "is_mock": bool, "case_version": int}
     for f, t in types.items():
-        if f in result and not isinstance(result[f], t):
+        # true/false is an int in Python; case_version must be a real integer
+        if f in result and (not isinstance(result[f], t)
+                            or (t is int and isinstance(result[f], bool))):
             out.append(issue("SCHEMA_INVALID", "critical",
                              f"Field {f} must be {t.__name__}", f))
+    crs = result.get("clarification_requests")
+    if isinstance(crs, list):
+        for i, cr in enumerate(crs):
+            if not isinstance(cr, dict):
+                out.append(issue("SCHEMA_INVALID", "critical",
+                                 f"clarification_requests[{i}] must be an object",
+                                 f"clarification_requests[{i}]"))
+        out += _check_types(result, C.CLARIFICATION_TYPES)
     if result.get("schema_version") not in (None, C.SCHEMA_VERSION):
         out.append(issue("SCHEMA_VERSION", "warning",
                          f"schema_version is {result.get('schema_version')!r}, expected {C.SCHEMA_VERSION!r}",
@@ -155,6 +204,8 @@ def s1_result_fields(request, result):
                     out.append(issue("SCHEMA_INVALID", "critical",
                                      f"{ref_prefix}.{k} is missing",
                                      f"{ref_prefix}.{k}"))
+    # 3. Types of single values (v0.2.6): IDs, enum values, true/false, numbers, texts
+    out += _check_types(res, C.RESULT_TYPES.get(role, {}).get(task, {}), "result.")
     return out
 
 
@@ -195,12 +246,29 @@ def s4_enums(result):
 
 
 # ---------------------------------------------------------------- S5
+def _reference_issues(path, value, kind, known):
+    """One reference value or a list of them: each must be a known string (null is allowed)."""
+    out = []
+    for v in (value if isinstance(value, list) else [value]):
+        if v is None:
+            continue
+        if not isinstance(v, str):
+            out.append(issue("UNKNOWN_REFERENCE", "critical",
+                             f"{path} must hold {kind} strings", path))
+        elif v not in known[kind]:
+            out.append(issue("UNKNOWN_REFERENCE", "critical",
+                             f"{path} refers to unknown {kind} {v!r}", path))
+    return out
+
+
 def s5_references(result, known):
     """known = {"need_id": set(), "program_id": set(), "evidence_id": set()}.
 
     Only the kinds supplied are checked. program_id may be null (contract 4.6, 4.8).
     proposed_needs[*].need_id are new definitions made by Agent 1 (not references),
     so they are not checked against the known set.
+    Clarification requests in the envelope are checked too (v0.2.6): applicable_program_ids
+    must be known programs and verified_rule_ref a known evidence record.
     """
     out = []
     ref_keys = {
@@ -215,13 +283,14 @@ def s5_references(result, known):
             continue
         if key == "need_id" and _NEW_NEED_DEF.fullmatch(path):
             continue   # a new need defined by Agent 1 (CR-014, PROPOSED v1.2), not a reference
-        values = value if isinstance(value, list) else [value]
-        for v in values:
-            if v is None:
-                continue
-            if v not in known[kind]:
-                out.append(issue("UNKNOWN_REFERENCE", "critical",
-                                 f"{path} refers to unknown {kind} {v!r}", path))
+        out += _reference_issues(path, value, kind, known)
+    crs = result.get("clarification_requests")
+    for i, cr in enumerate(crs if isinstance(crs, list) else []):
+        if not isinstance(cr, dict):
+            continue   # reported by S1
+        for key, kind in (("applicable_program_ids", "program_id"), ("verified_rule_ref", "evidence_id")):
+            if key in cr and kind in known:
+                out += _reference_issues(f"clarification_requests[{i}].{key}", cr[key], kind, known)
     return out
 
 

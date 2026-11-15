@@ -238,6 +238,20 @@ def _today():
 _INPUT_EXC = (KeyError, TypeError, ValueError, AttributeError, IndexError)
 
 
+def needs_not_in_plan(needs, plan):
+    """NEED_NOT_IN_PLAN (warning) for each need with no released card and no coverage gap.
+
+    Used by the one-shot run; the dialog mode reports the same in plan_by_need.
+    """
+    covered = {n for c in plan.get("action_cards", []) for n in c.get("related_need_ids", [])}
+    covered |= {g.get("need_id") for g in plan.get("coverage_gaps", [])}
+    return [checks.issue("NEED_NOT_IN_PLAN", "warning",
+                         f"Need {n['need_id']!r} ({n.get('category')}) has no released card and no coverage gap",
+                         n["need_id"])
+            for n in needs
+            if n.get("confirmation_status") != "disputed" and n["need_id"] not in covered]
+
+
 # ---------------------------------------------------------------- one checked call
 class Run:
     def __init__(self, agents, kb_path, ids=None, isolate=False, ref_date=None, zips_path=None):
@@ -375,7 +389,11 @@ class Run:
                         "CLARIFICATION_PENDING", "info",
                         f"{len(r2['clarification_requests'])} question(s) for the user; demo continues without an answer"))
 
-        return self._plan_body()
+        rep = self._plan_body()
+        if rep.get("plan"):
+            self.supervisor_issues += needs_not_in_plan(st.needs, rep["plan"])
+            rep["supervisor_issues"] = self.supervisor_issues
+        return rep
 
     def _plan_body(self):
         """Agents 3-10 and repair rounds. Called from _execute_body and from dialog.confirm."""
@@ -436,7 +454,11 @@ class Run:
             self._last_r10 = r10          # remember last accepted Agent 10 result
             self._last_r10_round = repair_round
             self._stage = "agent_10"   # reading flags from r10
-            flags = [f for f in r10["result"].get("flags", []) if f.get("blocks_release")]
+            # A blocking flag with card_id null is about the whole plan: there is no card to
+            # repair or withhold (contract 5.3: one flag never suppresses unrelated cards).
+            # It stays in final_validation and is reported below as PLAN_FLAG_NOT_REPAIRED.
+            flags = [f for f in r10["result"].get("flags", [])
+                     if f.get("blocks_release") and f.get("card_id") is not None]
             if not flags:
                 break
             if repair_round == MAX_REPAIR_ROUNDS:
@@ -472,6 +494,12 @@ class Run:
                     "rule_ids": [f["rule_id"] for f in blocking],
                     "reasons":  [f["reason"]  for f in blocking],
                 })
+        for f in self._last_r10["result"].get("flags", []):
+            if f.get("blocks_release") and f.get("card_id") is None:
+                self.supervisor_issues.append(checks.issue(
+                    "PLAN_FLAG_NOT_REPAIRED", "warning",
+                    f"Agent 10 blocking flag {f.get('rule_id')} is about the whole plan, not one card; "
+                    "the cards were released and the flag is in final_validation", f.get("flag_id")))
 
         plan = {"plan_version": current_plan["plan_version"], "action_cards": cards,
                 "potential_options": current_plan["potential_options"],
@@ -572,22 +600,45 @@ def main(argv=None):
     if a.demo_broken:
         agents["agent_1"] = AgentRef("navigator.supervisor.run", "broken_agent_1")
     if a.story_file:
-        with open(a.story_file, encoding="utf-8") as f:
-            story = f.read()
+        try:
+            with open(a.story_file, encoding="utf-8-sig") as f:
+                story = f.read()
+        except (OSError, ValueError) as e:      # ValueError covers a file that is not UTF-8
+            print(f"Cannot read story file: {e}")
+            return 2
     else:
         with open(os.path.join(SAMPLES, "01_agent1_request.json"), encoding="utf-8") as f:
             story = json.load(f)["payload"]["story_text"]
     corrections = {}
     for c in a.correct:
-        k, v = c.split("=", 1)
-        corrections[k] = json.loads(v) if v.replace(".", "", 1).isdigit() else v
+        k, sep, v = c.partition("=")
+        k = k.strip()
+        if not sep or not k:
+            print(f"--correct {c!r} must look like field=value, e.g. cash_on_hand_approx=300")
+            return 2
+        if v in ("true", "false"):
+            corrections[k] = v == "true"
+        elif k != "zip_code" and v.isdigit() and (v == "0" or not v.startswith("0")):
+            corrections[k] = int(v)            # zip_code stays text (contract 3.2)
+        elif k != "zip_code" and v.count(".") == 1 and v.replace(".", "").isdigit():
+            corrections[k] = float(v)
+        else:
+            corrections[k] = v
 
     # Demo uses the IDs of sample 01, so only the two planted faults of sample 03 show
     ids = ("case-demo-001", "run-0001", "corr-0001") if a.demo_broken else None
-    rep = Run(agents, a.kb, ids, isolate=not a.no_isolate, ref_date=ref_date,
-              zips_path=a.zips).execute(story, corrections)
-    with open(a.out, "w", encoding="utf-8") as f:
-        json.dump(rep, f, indent=2, ensure_ascii=False)
+    try:
+        runner = Run(agents, a.kb, ids, isolate=not a.no_isolate, ref_date=ref_date, zips_path=a.zips)
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        print(f"Cannot load the knowledge base {a.kb}: {type(e).__name__}: {e}")
+        return 2
+    rep = runner.execute(story, corrections)
+    try:
+        with open(a.out, "w", encoding="utf-8") as f:
+            json.dump(rep, f, indent=2, ensure_ascii=False)
+    except OSError as e:
+        print(f"Cannot write the report: {e}")
+        return 2
     print_summary(rep)
     print(f"\nFull report: {a.out}")
     return 0 if rep["outcome"] == "completed" else 1

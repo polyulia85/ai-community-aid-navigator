@@ -44,7 +44,7 @@ class TestRequests(unittest.TestCase):
         self.assertEqual(issues[0]["code"], "PII_MASKED")
 
     def test_wrong_task_type_is_refused(self):
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             B.make_request(new_state(), "agent_4", "verify_resources", {})
 
 

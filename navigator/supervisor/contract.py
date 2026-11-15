@@ -196,3 +196,133 @@ RESULT_REQUIRED = {
         },
     },
 }
+
+# Types of single values (S1, Supervisor v0.2.6). A path is "key" (a value in result{}),
+# "list[].key" (a key of each item) or "list[]" (each item of a list of single values).
+# "str|null" allows null (contract: "or null"). Checked only when the key is present;
+# presence is checked by RESULT_REQUIRED. "int" never accepts true/false.
+# Fields of type "any" in the contract (CaseFact.value, claim_value, proposed_value) are not listed.
+# Allowed here, to be written into v1.2: null in checked_at and issue (Agent 5 returns it) and in
+# official_link (Agent 10 rule V11 flags a missing link as a warning; rejecting it would hide that).
+_S, _SN, _L = "str", "str|null", "list"
+
+
+def _need_types(key):
+    return {f"{key}[].need_id": _S, f"{key}[].category": _S, f"{key}[].subcategory": _SN,
+            f"{key}[].description": _S, f"{key}[].original_quote": _SN,
+            f"{key}[].confirmation_status": _S, f"{key}[].user_reported": "bool",
+            f"{key}[].urgency": _S, f"{key}[].urgency_reason": _SN,
+            f"{key}[].user_priority": "int|null"}
+
+
+def _fact_types(key):
+    return {f"{key}[].fact_id": _S, f"{key}[].field": _S, f"{key}[].confirmation_status": _S,
+            f"{key}[].source": _S, f"{key}[].time_context": _SN}
+
+
+_FLAG_TYPES = {"safety_or_official_deadline_flags[].type": _S,
+               "safety_or_official_deadline_flags[].quote": _S,
+               "safety_or_official_deadline_flags[].note": _S}
+
+RESULT_TYPES = {
+    "agent_1": {
+        "understand_story": {
+            "narrative_summary": _S, "triggering_events[]": _S,
+            **_need_types("proposed_needs"), **_fact_types("factual_claims"),
+            "ambiguity_flags[].field": _S, "ambiguity_flags[].quote": _S, "ambiguity_flags[].note": _S,
+            **_FLAG_TYPES,
+        },
+        "parse_clarification_answer": {
+            **_fact_types("factual_claims"), **_need_types("proposed_needs"),
+        },
+    },
+    "agent_2": {
+        "clarify_case": {
+            "need_updates[].need_id": _S, "need_updates[].urgency": _S,
+            "need_updates[].urgency_reason": _SN, "optional_food_check": "bool",
+        },
+    },
+    "agent_3": {
+        "retrieve_candidates": {
+            "candidate_programs[].program_id": _S, "candidate_programs[].matched_need_ids": _L,
+            "candidate_programs[].retrieval_reason": _S, "candidate_programs[].source_refs": _L,
+            "candidate_programs[].missing_fields": _L, "retrieval_notes[]": _S,
+        },
+    },
+    "agent_4": {
+        "match_resources": {
+            "matches[].program_id": _S, "matches[].need_ids": _L, "matches[].match_status": _S,
+            "matches[].matched_criteria": _L, "matches[].missing_case_facts": _L,
+            "matches[].mismatch_criteria": _L, "matches[].evidence_refs": _L,
+            "matches[].explanation": _S,
+        },
+    },
+    "agent_5": {
+        "verify_resources": {
+            "checked_claims[].program_id": _S, "checked_claims[].field_path": _S,
+            "checked_claims[].verification_status": _S, "checked_claims[].evidence_refs": _L,
+            "checked_claims[].checked_at": _SN, "checked_claims[].issue": _SN,
+            "update_proposals[].program_id": _S, "update_proposals[].field_path": _S,
+            "update_proposals[].evidence_refs": _L, "update_proposals[].reason": _S,
+            "unresolved_questions[]": _S,
+        },
+    },
+    "agent_6": {
+        "prioritize_actions": {
+            "proposed_actions[].action_id": _S, "proposed_actions[].need_id": _SN,
+            "proposed_actions[].program_id": _SN, "proposed_actions[].suggested_priority": "int|null",
+            "proposed_actions[].order_group": _S, "proposed_actions[].rationale": _S,
+            "proposed_actions[].dependency_ids": _L, "proposed_actions[].official_deadline": _SN,
+            "proposed_actions[].user_target_date": _SN,
+            "proposed_actions[].estimated_processing_time": _SN,
+            "proposed_actions[].evidence_refs": _L, "proposed_actions[].uncertainty_notes": _L,
+            "proposed_actions[].user_override_allowed": "bool",
+        },
+    },
+    "agent_7": {
+        "review_stage": {
+            "stage_assessment": _S,
+            "findings[].finding_id": _S, "findings[].rule_id": _S, "findings[].severity": _S,
+            "findings[].program_id": _SN, "findings[].need_id": _SN, "findings[].field_path": _SN,
+            "findings[].evidence_refs": _L, "findings[].description": _S,
+            "findings[].recommended_action": _S,
+        },
+    },
+    "agent_8": {
+        "build_plan": {
+            "plan_version": _S,
+            "action_cards[].card_id": _S, "action_cards[].source_action_ids": _L,
+            "action_cards[].related_need_ids": _L, "action_cards[].program_id": _SN,
+            "action_cards[].action_title": _S, "action_cards[].reason": _S,
+            "action_cards[].next_step": _S, "action_cards[].priority_reason": _S,
+            "action_cards[].order_group": _S, "action_cards[].dependency_card_ids": _L,
+            "action_cards[].source_refs": _L, "action_cards[].uncertainty_notes": _L,
+            "action_cards[].uncertainty_notes[]": _S,
+            "action_cards[].official_deadline": _SN, "action_cards[].user_target_date": _SN,
+            "action_cards[].processing_estimate": _SN, "action_cards[].progress_status": _S,
+            "potential_options[].program_id": _S, "potential_options[].program_name": _S,
+            "potential_options[].why_it_may_matter": _S, "potential_options[].what_needs_checking": _L,
+            "potential_options[].official_link": _SN,
+            "coverage_gaps[].need_id": _S, "coverage_gaps[].note": _S,
+        },
+    },
+    "agent_10": {
+        "validate_plan": {
+            "verdict": _S, "repair_round": "int", "passed_card_ids[]": _S,
+            # card_id null = a flag about the whole plan (Agent 10 V11, V12); PROPOSED for v1.2
+            "flags[].flag_id": _S, "flags[].card_id": _SN, "flags[].rule_id": _S,
+            "flags[].severity": _S, "flags[].claim_text": _S, "flags[].reason": _S,
+            "flags[].evidence_refs": _L, "flags[].required_correction": _S,
+            "flags[].blocks_release": "bool",
+        },
+    },
+}
+
+# ClarificationRequest (contract 3.3) in the envelope of every result
+CLARIFICATION_TYPES = {
+    "clarification_requests[].fact_key": _S, "clarification_requests[].question_intent": _S,
+    "clarification_requests[].user_facing_question": _S, "clarification_requests[].reason": _S,
+    "clarification_requests[].applicable_program_ids": _L,
+    "clarification_requests[].verified_rule_ref": _SN,
+    "clarification_requests[].necessity_level": _S, "clarification_requests[].can_skip": "bool",
+}
