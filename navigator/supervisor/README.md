@@ -24,14 +24,14 @@ Owner: Slav (Supervisor / Orchestrator and integration). Contract: `docs/contrac
 | `run.py` | the runner, `_execute_body()` / `_plan_body()` / `_input_error()`, `merge_repaired_plan()` helper, and `agents.json` loader (clear one-line errors, exit code 2) |
 | `dialog.py` | dialog mode: `start()`, `answer()`, `confirm()`, the Situation Summary, `plan_by_need`, the safety notice with verified 9-1-1 and 988 contacts, and the command line (`main()`) |
 | `http_api.py` | local HTTP API over the three dialog calls (standard library `http.server`) |
-| `../../tests/` | 292 Supervisor tests (the full suite runs 572): checks, builders, full cycle on fake agents, broken and hung agents, privacy, repair rounds, ref_date, S1 per-role fields, final_validation, ZIP list, dialog mode, command line, HTTP API |
+| `../../tests/` | 307 Supervisor-level tests (the full suite runs 659): checks, builders, full cycle on fake agents, broken and hung agents, privacy, repair rounds, ref_date, S1 per-role fields, final_validation, ZIP list, dialog mode, command line, HTTP API |
 | `../../tests/fixtures/kb_supervisor_fixture.json` | Frozen KB copy for Supervisor tests (Nov 6, 2026). Tests use this, not the live KB. |
 | `../../tests/fixtures/zips_fixture.json`, `emergency_fixture.json` | Frozen ZIP list and emergency directory for tests. |
 
 ## How to run (from the repository root)
 
 ```
-python -I -m unittest discover -s tests -t .                               # all tests (572)
+python -I -m unittest discover -s tests -t .                               # all tests (659)
 python -m navigator.supervisor.run --agents tests/agents_fake.json --kb tests/fixtures/kb_supervisor_fixture.json               # full cycle on fake agents
 python -m navigator.supervisor.run --agents tests/agents_fake.json --kb tests/fixtures/kb_supervisor_fixture.json --demo-broken   # the Supervisor rejects sample 03
 python -m navigator.supervisor.run --agents agents.json                    # the team's components
@@ -179,7 +179,7 @@ All three take `--agents`, `--kb`, `--zips` and `--no-isolate`; `start` also tak
 
 - The one-shot run (`python -m navigator.supervisor.run`) is a test tool: it does not stop for questions (it notes `CLARIFICATION_PENDING` and goes on) and has no safety notice. The App Layer uses the dialog mode.
 - The `case` is not signed, and an older case sent back is not detected (`STALE_CASE` needs a store); Case State (SQLite, My Case) is not connected, the case lives in the user's session; owner: Slav and Silver, after the MVP.
-- A safety threat stated only in an answer (not in the story) does not raise the safety notice yet: Agent 1 does not return safety flags when it reads an answer; the Supervisor already accepts them. Owner: Yogesh.
+- A safety threat in the story or in an answer raises the safety notice only when Agent 1 recognizes the words (Agent 1 reads with rules; a threat phrased in words it does not know is missed). Owner: Yogesh.
 - New needs found in answers (`proposed_needs` in `parse_clarification_answer`, CR-014), forwarding Agent 1's ambiguity flags to Agent 2, `ref_date` for Agents 1, 6, 8 and 10 and the repair-round merge rule are PROPOSED for contracts v1.2 and not yet in the official shared contract.
 - `card_id` null in an Agent 10 flag (a flag about the whole plan), null in Agent 5 `checked_at` and `issue` (the team's Agent 5 returns it), and null in a potential option's `official_link` (Agent 10 rule V11 flags it as a warning), are accepted by the Supervisor and PROPOSED for contracts v1.2; the frozen contract does not allow null there yet.
 - S1 does not check text formats (ISO dates, `zip_code` as 5 digits) or contract fields of type "any"; owner: Slav, after the MVP.
