@@ -3,7 +3,7 @@
 **Audit date:** 2026-11-03  
 **Auditor:** Bob (IBM SkillsBuild AI Experiential Learning Lab — independent, read-only)  
 **Type:** Full architecture, contract, and code audit with live test execution  
-**Workspace:** `/Users/polyu/Downloads/ai-community-aid-navigator-main`  
+**Workspace:** `<local clone>/ai-community-aid-navigator-main`  
 
 ---
 
@@ -13,7 +13,7 @@
 
 | Item | Value |
 |---|---|
-| Repository path | `/Users/polyu/Downloads/ai-community-aid-navigator-main` |
+| Repository path | `<local clone>/ai-community-aid-navigator-main` |
 | Git repository | **No `.git/` directory found** — this is a ZIP snapshot; no branch, commit hash, or uncommitted-change status can be reported |
 | Snapshot source | Local extracted archive |
 | README contract baseline | "Shared JSON Contracts v1.0 (Frozen Baseline)" |
