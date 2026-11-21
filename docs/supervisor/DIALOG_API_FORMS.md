@@ -259,7 +259,7 @@ or `{"question_id": "q2-1", "skipped": true}`.
 }
 ```
 Contacts come from `navigator/kb/emergency/emergency_directory.json` (Silver, PR #16): only the 9-1-1 record and the 988 record, 9-1-1 first, and only contact lines whose evidence is verified (the 988 record also has verified lines in Spanish and for veterans; they are included). Local police non-emergency records in the same directory never appear in this notice. If the directory cannot be read or has no verified line, the notice comes without contacts and `issues` carries `SAFETY_CONTACT_UNVERIFIED`. The notice is also kept in a `failed` response.
-- Known limit: a threat stated only in an answer, not in the story, does not raise the notice yet (Agent 1 does not return safety flags when it reads an answer; the Supervisor accepts them once it does).
+- Known limit: a threat in the story or in an answer raises the notice only when Agent 1 recognizes the words (Agent 1 reads with rules; a threat phrased in words it does not know is missed).
 
 ## 6. The `case` object (reference only — pass it back unchanged)
 ```json
