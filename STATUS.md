@@ -6,7 +6,7 @@ Open [START_HERE.md](START_HERE.md) and run `python3 -m app_layer.server --port 
 
 The plan shows the first action and its reason when a released card has `order_group=first`. Card details come from supported entries in the Sacramento knowledge base. The full program guide shows source links and distinguishes the user's target date from a published program deadline where each is available.
 
-This build looks up programs in the local Sacramento knowledge base. The email flow simulates delivery. Account registration, server-side case recovery, live source rechecking, semantic retrieval and watsonx.ai are outside this local build. See [INTEGRATION_REPORT.md](INTEGRATION_REPORT.md) for the verified flows and [HANDOFF_FOR_SLAV.md](HANDOFF_FOR_SLAV.md) for the integration handoff.
+This build looks up programs in the local Sacramento knowledge base. The email flow simulates delivery. Account registration, server-side case recovery, live source rechecking and semantic retrieval are outside this local build. Agent 1 can read the user's story with IBM Granite on watsonx.ai when `WATSONX_APIKEY` and `WATSONX_PROJECT_ID` are set; otherwise it uses its rules (#31). See [INTEGRATION_REPORT.md](INTEGRATION_REPORT.md) for the verified flows and [HANDOFF_FOR_SLAV.md](HANDOFF_FOR_SLAV.md) for the integration handoff.
 
 ## Historical component snapshot from October 27, 2026
 

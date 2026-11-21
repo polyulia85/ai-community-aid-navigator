@@ -5,7 +5,7 @@
 A team project developed through the **IBM SkillsBuild AI Experiential Learning Lab — Fall 2026**.
 
 **Domain:** Government, Social Services & Community Welfare  
-**Technology Stack:** IBM Granite, IBM watsonx (Orchestrate / Discovery), IBM Bob, Python, Open-Source RAG Frameworks  
+**Technology Stack:** IBM Bob (development environment), IBM Granite on watsonx.ai (Agent 1 can read the user's story with Granite, with deterministic rules as a fallback), Python standard library, local Sacramento knowledge base.  
 **Pilot Target:** Sacramento County, California 
 **Contract Baseline:** Shared JSON Contracts v1.0 (Frozen Baseline)
 
@@ -33,40 +33,73 @@ The initial pilot focuses on **Sacramento, California**, with priority given to 
 
 > **Operational Boundary:** Users apply to assistance programs independently. The navigator does **not** directly submit applications or guarantee eligibility or financial assistance.
 
-## Development status
+## Status
 
-Under active development.
+Working local prototype. The web app (`app_layer/`) runs on the real Python Supervisor and agents:
 
-This repository is being prepared as the team's shared home for source code, technical documentation, agent contracts, resource data, and tests.
+* Conversation → Situation Summary → Action Plan → My Case, with progress saved in the browser tab (it survives a page reload).
+* Agents 1–8 and 10 are integrated. Agent 9 (Personal Navigation) is deferred by design (Shared JSON Contracts, section 8).
+* Agents work with deterministic rules. Agent 1 can also read the user's story with IBM Granite on watsonx.ai when credentials are set (see *Run the app*); without them it uses the rules.
+* Programs come from the local Sacramento knowledge base (see *Knowledge base* below). If a user reports threats or violence, the app shows a safety notice with 9-1-1 and 988.
+* Not in this build: account registration, server-side case storage, live re-checking of sources, and real email delivery (the email flow is simulated).
+* IBM Bob task exports for each team member are in [`bob_sessions/`](bob_sessions/).
 
-An integrated MVP, setup instructions, and demonstration materials will be added as they become available. Implemented features, mocks, and integration limitations will be documented explicitly.
+More detail: [STATUS.md](STATUS.md) and [INTEGRATION_REPORT.md](INTEGRATION_REPORT.md) (in Russian).
 
-## Quick Start & Demonstration
+## Run the app
 
-Clone the repository and run the master test and benchmark suite:
+Requires Python 3.11 or newer. No extra packages are needed.
 
-### Clone the repository
-git clone: https://github.com/polyulia85/ai-community-aid-navigator.git
+```sh
+git clone https://github.com/polyulia85/ai-community-aid-navigator.git
+cd ai-community-aid-navigator
+python -m app_layer.server
+```
 
-### Set up virtual environment
-python -m venv venv
+Open http://127.0.0.1:8765/ in your browser. If port 8765 is busy, run `python -m app_layer.server --port 18765` and open http://127.0.0.1:18765/. (On macOS and Linux, use `python3` if `python` is not available.)
 
-### Run the knowledge base builder
-python3 navigator/kb/tools/build_kb.py
-python3 navigator/kb/tools/validate_kb.py
+Use fictional data only. A test story for **Conversation**:
 
-### Run all tests
-python3 -m unittest discover tests -v
+> I live in Sacramento ZIP code 95823 with my two children. I lost my job. I need food this week and help paying $1,450 rent.
 
-## Team
+Answers to the follow-up questions: monthly income `$900`; household size `3`; `Yes` to the lease question and `No` to the written-notice question; shortfall `400`; rent due `2026-12-01`; `Yes` to "will food run out today or tomorrow"; money available now `20`. Then review the **Situation Summary**, click **Confirm Information**, and open the **Action Plan** and **My Case**.
 
-- Iuliia Poliakova — Project Lead
+Optional — IBM Granite for Agent 1: set the environment variables `WATSONX_APIKEY` and `WATSONX_PROJECT_ID` before starting the server (details in [`navigator/agents/agent_1_2/`](navigator/agents/agent_1_2/)). Without them, Agent 1 uses its rules.
 
-- Sviatoslav Pechenevskyi — System Architecture & Integration
+A Russian-language version of these instructions is in [START_HERE.md](START_HERE.md).
 
-- Yogesh Kushwaha — Crisis Understanding & User Navigation
+## Run the tests
 
-- Silver Sanchez Cardenas — Resource Retrieval, Matching & Verification
+From the repository root:
+
+```sh
+python -I -m unittest discover -s tests -t .
+```
+
+Expected result: `Ran 659 tests ... OK`.
+
+Rebuild and validate the knowledge base:
+
+```sh
+python navigator/kb/tools/build_kb.py
+python navigator/kb/tools/validate_kb.py
+```
+
+## Demo video
+
+The 3-minute demo video link will be added here after upload.
+
+## Team and roles
+
+- Iuliia Poliakova — Project Lead (concept, architecture, web app and its integration with the agents)
+
+- Sviatoslav Pechenevskyi — System Architecture & Integration (Python Supervisor, Shared JSON Contracts)
+
+- Yogesh Kushwaha — Crisis Understanding & User Navigation (Agents 1 and 2)
+
+- Silver Sanchez Cardenas — Resource Retrieval, Matching & Verification (Agents 3–5, Sacramento knowledge base)
+
+- M. Hisham Abbasi — Prioritization, Action Planning & Quality Validation (Agents 6, 7, 8 and 10)
 
 ## Knowledge base
 
@@ -89,12 +122,6 @@ python3 -m unittest discover tests -v
 Sources and terms of use: `navigator/kb/SOURCES.md` (32 source links, 15 sites, 13 owners as of Nov 12, 2026).
 
 KB is rebuilt by running `python3 navigator/kb/tools/build_kb.py` from the repo root. Validation: `python3 navigator/kb/tools/validate_kb.py`.
-
-- M. Hisham Abbasi — Prioritization, Action Planning & Quality Validation
-
-## Demo and documentation
-
-Demo, documentation, and setup links will be added after the corresponding materials are uploaded and verified.
 
 ## Privacy
 
