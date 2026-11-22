@@ -87,7 +87,7 @@ python navigator/kb/tools/validate_kb.py
 
 ## Demo video
 
-The 3-minute demo video link will be added here after upload.
+Watch the 3-minute demo on YouTube: [AI Community Aid Navigator | IBM SkillsBuild Project Demo](https://www.youtube.com/watch?v=ClAavXxaMys)
 
 ## Team and roles
 
